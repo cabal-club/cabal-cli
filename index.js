@@ -1,6 +1,6 @@
 var hyperdb = require("hyperdb")
 var discovery = require("discovery-swarm")
-var swarmDefaults = require("datland-swarm-defaults")
+var swarmDefaults = require("dat-swarm-defaults")
 var readInput = require("./input.js")
 var minimist = require("minimist")
 
