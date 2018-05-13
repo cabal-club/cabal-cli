@@ -59,6 +59,11 @@ function readInput(db, nick) {
         } else if (cmd === "change") { 
             currentChannel = arg
             monitor(`/channels/${currentChannel}`)
+            console.log("\033[2J") // hack: clear screen
+            var channel = `channels/${currentChannel}`
+            interface.getMessages(channel, 25).then((msg) => {
+                msg.map(screen.writeMessage)
+            })
         } else if (cmd === "read") { 
             var channel = `channels/${currentChannel}`
             interface.getMessages(channel, 20).then((messages) => {
