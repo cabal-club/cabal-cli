@@ -17,7 +17,7 @@ function readInput(db, nick) {
     var screen = Screen()
     var watcher
 
-    monitor(`/channels/${currentChannel}`)
+    loadChannel(currentChannel)
 
     function monitor(channel) {
         // if we monitor a new channel, destroy the old watcher first
@@ -59,12 +59,8 @@ function readInput(db, nick) {
             }))
         } else if (cmd === "change") {
             currentChannel = arg
-            monitor(`/channels/${currentChannel}`)
+            loadChannel(currentChannel)
             console.log("\033[2J") // hack: clear screen
-            var channel = `channels/${currentChannel}`
-            interface.getMessages(channel, 25).then((msg) => {
-                msg.map(screen.writeMessage)
-            })
         } else if (cmd === "read") {
             var channel = `channels/${currentChannel}`
             interface.getMessages(channel, 20).then((messages) => {
@@ -79,6 +75,14 @@ function readInput(db, nick) {
             interface.writeMessage(channel, nick, line)
 		}
     })
+
+    function loadChannel(name) {
+        var channel = `channels/${name}`
+        monitor(channel)
+        interface.getMessages(channel, 25).then((msg) => {
+            msg.map(screen.writeMessage)
+        })
+    }
 }
 
 module.exports = readInput
