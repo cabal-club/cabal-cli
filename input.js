@@ -46,11 +46,12 @@ function readInput(db, nick) {
                 channels.map(screen.writeLine)
             })
         } else if (cmd === "chat") {
-			if (arg.trim() !== '') {
-				var channel = `channels/${currentChannel}`
-				interface.writeMessage(channel, nick, arg.trim())
+			arg = arg.trim()
+			if (arg !== '') {
+				writeMessage(arg)
 			}
         } else if (cmd === "nick") {
+			if (arg == '') return
             nick = arg
         } else if (cmd === "get") { db.get(arg, util.log)
         } else if (cmd === "all") {
@@ -60,6 +61,9 @@ function readInput(db, nick) {
                 next()
             }))
         } else if (cmd === "change") {
+			arg = arg.trim()
+			if (arg == '') arg = 'default'
+
             currentChannel = arg
             loadChannel(currentChannel)
             clearscreen()
@@ -73,12 +77,17 @@ function readInput(db, nick) {
         } else if (cmd === "db") { console.log("db key is\n\t", db.key.toString("hex"))
 		} else if (cmd === "registered") { db.authorized(Buffer.from(arg, "hex"), util.log)
 		} else {
-			if (line.trim() !== '') {
-				var channel = `channels/${currentChannel}`
-				interface.writeMessage(channel, nick, line.trim())
+			line = line.trim()
+			if (line !== '') {
+				writeMessage(line)
 			}
 		}
     })
+
+	function writeMessage(msg) {
+		var channel = `channels/${currentChannel}`
+		interface.writeMessage(channel, nick, msg)
+	}
 
     function loadChannel(name) {
         var channel = `channels/${name}`
