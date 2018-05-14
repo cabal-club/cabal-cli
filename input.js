@@ -51,6 +51,7 @@ function readInput(db, nick) {
 				writeMessage(arg)
 			}
         } else if (cmd === "nick") {
+			if (arg == '') return
             nick = arg
         } else if (cmd === "get") { db.get(arg, util.log)
         } else if (cmd === "all") {
@@ -60,6 +61,9 @@ function readInput(db, nick) {
                 next()
             }))
         } else if (cmd === "change") {
+			arg = arg.trim()
+			if (arg == '') arg = 'default'
+
             currentChannel = arg
             loadChannel(currentChannel)
             clearscreen()
