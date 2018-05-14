@@ -85,6 +85,9 @@ function setupSwarm(db) {
             var remotePeerKey = Buffer.from(obj.key, "hex")
         }
         catch (err) { console.error(err); return }
+        peer.on("close", function() {
+            console.log(`${obj.nick || "conspirator"} left`)
+        })
 
         db.authorized(remotePeerKey, function (err, auth) {
             // console.log(remotePeerKey.toString("hex"), "authorized? " + auth)
