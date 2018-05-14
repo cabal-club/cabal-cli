@@ -92,6 +92,7 @@ function readInput(db, nick) {
     function loadChannel(name) {
         var channel = `channels/${name}`
         monitor(channel)
+		console.log(`\nON CHANNEL: ${currentChannel}\n`)
         interface.getMessages(channel, 25).then((msg) => {
             msg.map(screen.writeMessage)
         })
@@ -99,6 +100,7 @@ function readInput(db, nick) {
 
 	function clearscreen() {
 		console.log("\033[2J") // hack: clear screen
+		console.log(`ON CHANNEL: ${currentChannel}\n`)
 	}
 }
 
