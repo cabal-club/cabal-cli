@@ -7,21 +7,13 @@ var minimist = require("minimist")
 var args = minimist(process.argv.slice(2))
 
 if (!args.db) {
-	if (args.key) {
-		args.db = 'archives/' + args.key
-	} else {
-		console.error("error: need --db flag!\nexamples:\n\tnode index.js --db <your-new-db-file>\n\tnode index.js --db my.db")
-		return
-	}
+    if (args.key) {
+        args.db = 'archives/' + args.key
+    } else {
+        console.error("error: need --db flag!\nexamples:\n\tnode index.js --db <your-new-db-file>\n\tnode index.js --db my.db")
+        return
+    }
 }
-
-// TODO:
-// * watch substack talk on streams
-// * go through stream tutorial
-// * implement chat command
-//   * /chat/default/latest
-//   * /chat/default/<vectorTime>
-// * remove reduce when chat works
 
 var disableAutoAuth = args.noautoauth ? true : false
 var nick = args.nick || "conspirator"
@@ -58,7 +50,7 @@ function setupSwarm(db) {
     var swarm = discovery(swarmDefaults({
         id: dbstr,
         stream: function(peer) {
-            return db.replicate({ // TODO: figure out what this truly does
+            return db.replicate({
                 live: true,
                 userData: JSON.stringify({key: db.local.key, nick: nick})
             })
@@ -90,11 +82,9 @@ function setupSwarm(db) {
         })
 
         db.authorized(remotePeerKey, function (err, auth) {
-            // console.log(remotePeerKey.toString("hex"), "authorized? " + auth)
             if (err) return console.log(err)
             if (!auth) db.authorize(remotePeerKey, function (err) {
                 if (err) return console.log(err)
-                // console.log(remotePeerKey.toString("hex"), "was just authorized!")
                 console.log(`${obj.nick || "conspirator"} joined`)
             })
         })
