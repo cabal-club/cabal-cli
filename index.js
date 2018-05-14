@@ -87,11 +87,12 @@ function setupSwarm(db) {
         catch (err) { console.error(err); return }
 
         db.authorized(remotePeerKey, function (err, auth) {
-            console.log(remotePeerKey.toString("hex"), "authorized? " + auth)
+            // console.log(remotePeerKey.toString("hex"), "authorized? " + auth)
             if (err) return console.log(err)
             if (!auth) db.authorize(remotePeerKey, function (err) {
                 if (err) return console.log(err)
-                console.log(remotePeerKey.toString("hex"), "was just authorized!")
+                // console.log(remotePeerKey.toString("hex"), "was just authorized!")
+                console.log(`${obj.nick || "conspirator"} joined`)
             })
         })
     })
