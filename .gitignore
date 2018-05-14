@@ -9,7 +9,7 @@ config.conf
 config.js
 *.txt
 *.pdf
-
+archives
 
 #################
 ## Eclipse

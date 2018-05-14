@@ -7,8 +7,12 @@ var minimist = require("minimist")
 var args = minimist(process.argv.slice(2))
 
 if (!args.db) {
-    console.error("error: need --db flag!\nexamples:\n\tnode index.js --db <your-new-db-file>\n\tnode index.js --db my.db")
-    return
+	if (args.key) {
+		args.db = 'archives/' + args.key
+	} else {
+		console.error("error: need --db flag!\nexamples:\n\tnode index.js --db <your-new-db-file>\n\tnode index.js --db my.db")
+		return
+	}
 }
 
 // TODO:
@@ -34,7 +38,7 @@ var json = {
 }
 
 // check if args.key was provided in the cli using --key
-var db = args.key ? 
+var db = args.key ?
     // join an existing hyperdb where args.key comes from providing index.js with --key <key>
     hyperdb(args.db, args.key, { valueEncoding: json, reduce: (a, b) => a }) :
     // or create a new original hyperdb, by not specifying a key
@@ -57,19 +61,19 @@ function setupSwarm(db) {
             return db.replicate({ // TODO: figure out what this truly does
                 live: true,
                 userData: JSON.stringify({key: db.local.key, nick: nick})
-            }) 
+            })
         }
     }))
     console.log("looking for peers using swarm id\n\t", dbstr)
 
     swarm.join(dbstr)
 
-    // emitted when a new peer joins 
+    // emitted when a new peer joins
     swarm.on("connection", (peer) => {
         if (disableAutoAuth) {
             return
         }
-        // initiate auto-authorization: 
+        // initiate auto-authorization:
         // use the local key from the peer, stored in their userData, to authenticate them automatically
         // (thanks substack && JimmyBoh https://github.com/karissa/hyperdiscovery/pull/12#pullrequestreview-95597621 )
         if (!peer.remoteUserData) {
