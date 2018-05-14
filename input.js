@@ -23,7 +23,7 @@ function readInput(db, nick) {
         // if we monitor a new channel, destroy the old watcher first
         if (watcher) watcher.destroy()
         watcher = db.watch(channel, () => {
-            console.log("\033[2J") // hack: clear screen
+            clearscreen()
             interface.getMessages(channel, 25).then((msg) => {
                 msg.map(screen.writeMessage)
             })
@@ -62,7 +62,7 @@ function readInput(db, nick) {
         } else if (cmd === "change") {
             currentChannel = arg
             loadChannel(currentChannel)
-            console.log("\033[2J") // hack: clear screen
+            clearscreen()
         } else if (cmd === "read") {
             var channel = `channels/${currentChannel}`
             interface.getMessages(channel, 20).then((messages) => {
@@ -87,6 +87,10 @@ function readInput(db, nick) {
             msg.map(screen.writeMessage)
         })
     }
+
+	function clearscreen() {
+		console.log("\033[2J") // hack: clear screen
+	}
 }
 
 module.exports = readInput
