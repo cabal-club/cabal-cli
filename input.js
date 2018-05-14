@@ -46,8 +46,10 @@ function readInput(db, nick) {
                 channels.map(screen.writeLine)
             })
         } else if (cmd === "chat") {
-            var channel = `channels/${currentChannel}`
-            interface.writeMessage(channel, nick, arg)
+			if (arg.trim() !== '') {
+				var channel = `channels/${currentChannel}`
+				interface.writeMessage(channel, nick, arg.trim())
+			}
         } else if (cmd === "nick") {
             nick = arg
         } else if (cmd === "get") { db.get(arg, util.log)
@@ -71,8 +73,10 @@ function readInput(db, nick) {
         } else if (cmd === "db") { console.log("db key is\n\t", db.key.toString("hex"))
 		} else if (cmd === "registered") { db.authorized(Buffer.from(arg, "hex"), util.log)
 		} else {
-			var channel = `channels/${currentChannel}`
-            interface.writeMessage(channel, nick, line)
+			if (line.trim() !== '') {
+				var channel = `channels/${currentChannel}`
+				interface.writeMessage(channel, nick, line.trim())
+			}
 		}
     })
 
