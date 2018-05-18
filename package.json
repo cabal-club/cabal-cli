@@ -9,12 +9,13 @@
     "discovery-swarm": "^5.1.1",
     "hyperdb": "git+https://github.com/mafintosh/hyperdb.git",
     "minimist": "^1.2.0",
+    "neat-log": "^2.4.0",
     "strftime": "^0.10.0",
     "through2": "^2.0.3"
   },
   "devDependencies": {},
   "scripts": {
-	    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
