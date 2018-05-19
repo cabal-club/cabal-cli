@@ -42,7 +42,8 @@ Commander.prototype.process = function (line) {
     self.channel = arg
     self.view.changeChannel(arg)
   } else if (cmd === 'messages') {
-    self.view.printMessages()
+    // debug command
+    console.log(self.view.state.messages)
   } else if (cmd === 'auth') {
     self.cabal.db.authorize(Buffer.from(arg, 'hex'), util.log)
   } else if (cmd === 'local') {

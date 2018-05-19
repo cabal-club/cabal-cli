@@ -10,9 +10,7 @@ var chalk = require('chalk')
 //   type: chat/info
 //
 // * rewrite usage of state.messages,
-//   looking at substack's approach in the og chatmesh
-//
-// * implement mentions using regex + chalk.bg<Colour>
+//   look at substack's approach in the og chatmesh
 
 function NeatScreen (cabal) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(cabal)
@@ -29,11 +27,8 @@ function NeatScreen (cabal) {
       return start + chalk.underline(cursor) + end
     }}
   )
-  this.input = this.neat.input
   this.neat.input.on('update', () => this.neat.render())
-  this.neat.input.on('enter', (line) => {
-    this.commander.process(line)
-  })
+  this.neat.input.on('enter', (line) => this.commander.process(line))
 
   this.neat.use(function (state, bus) {
     self.state = state
@@ -64,9 +59,6 @@ NeatScreen.prototype.writeLine = function (line) {
   this.state.messages.push(line)
   this.bus.emit('render')
 }
-NeatScreen.prototype.printMessages = function () {
-  console.log(this.state.messages)
-}
 
 NeatScreen.prototype.monitor = function (channel) {
   var self = this
@@ -93,7 +85,8 @@ NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   // clear the old messages array
   self.state.messages = []
-  self.cabal.getMessages(self.state.channel, self.MAX_MESSAGES, (err, messages) => {
+  self.state.channel = channel
+  self.cabal.getMessages(channel, self.MAX_MESSAGES, (err, messages) => {
     if (err) return
     messages.map((arr) => {
       arr.forEach((m) => self.state.messages.push(self.formatMessage(m)))
@@ -107,7 +100,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
   var hilight = false
   var user = self.cabal.username
   if (msg.value) { msg = msg.value }
-  if (msg.content.indexOf(user) > -1 &&  msg.author !== user) { hilight = true }
+  if (msg.content.indexOf(user) > -1 && msg.author !== user) { hilight = true }
 
   var text = `${chalk.gray(formatTime(msg.time))} ${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')} ${msg.content}`
   return hilight ? chalk.bgRed(chalk.black(text)) : text

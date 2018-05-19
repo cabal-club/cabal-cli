@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "p2p forum software",
   "main": "index.js",
+  "bin": {
+      "cabal": "cli.js"
+  },
   "dependencies": {
     "chalk": "^2.4.1",
     "concat-stream": "^1.6.2",
@@ -20,18 +23,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/new-computers/cabal.git"
+    "url": "git+https://github.com/cabal-club/cabal.git"
   },
   "keywords": [
     "hyperdb",
     "dat",
-    "cblgh",
+    "cabal",
     "p2p"
   ],
   "author": "cblgh",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/new-computers/cabal/issues"
+    "url": "https://github.com/cabal-club/cabal/issues"
   },
-  "homepage": "https://github.com/new-computers/cabal#readme"
+  "homepage": "https://github.com/cabal-club/cabal#readme"
 }
