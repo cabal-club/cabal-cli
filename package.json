@@ -7,6 +7,7 @@
       "cabal": "cli.js"
   },
   "dependencies": {
+    "cabal-node": "git+https://github.com/cabal-club/cabal-node.git",
     "chalk": "^2.4.1",
     "concat-stream": "^1.6.2",
     "dat-swarm-defaults": "^1.0.1",
