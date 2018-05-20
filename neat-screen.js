@@ -107,7 +107,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
 }
 
 function createMessage (messages) {
-  return messages.concat(Array(process.stdout.rows)).slice(1, process.stdout.rows - 1)
+  return messages.concat(Array(process.stdout.rows)).slice(0, process.stdout.rows - 2)
 }
 
 function formatTime (t) {

@@ -4,7 +4,7 @@
   "description": "p2p forum software",
   "main": "index.js",
   "bin": {
-      "cabal": "cli.js"
+    "cabal": "cli.js"
   },
   "dependencies": {
     "cabal-node": "git+https://github.com/cabal-club/cabal-node.git",
