@@ -6,13 +6,28 @@ var minimist = require('minimist')
 
 var args = minimist(process.argv.slice(2))
 
+var usage = `Usage
+
+  cabal --key dat://key
+
+  OR
+
+  cabal --db /path/to/db
+
+  Options:
+
+    --nick    Your nickname.
+
+Work in progress! Learn more at github.com/cabal-club
+`
+
+if (args.key) {
+  args.db = 'archives/' + args.key
+}
+
 if (!args.db) {
-  if (args.key) {
-    args.db = 'archives/' + args.key
-  } else {
-    console.error('error: need --db flag!\nexamples:\n\tnode index.js --db <your-new-db-file>\n\tnode index.js --db my.db')
-    process.exit(1)
-  }
+  process.stderr.write(usage)
+  process.exit(1)
 }
 
 var cabal = Cabal(args.db, args.key, {username: args.nick || 'conspirator'})
