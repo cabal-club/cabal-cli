@@ -1,5 +1,5 @@
-var Cabal = require('../cabal-club/cabal-node/index.js')
-var cabalSwarm = require('../cabal-club/cabal-node/swarm.js')
+var Cabal = require('cabal-node')
+var cabalSwarm = require('cabal-node/swarm.js')
 var frontend = require('./neat-screen.js')
 var minimist = require('minimist')
 
