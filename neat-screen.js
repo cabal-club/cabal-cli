@@ -41,7 +41,7 @@ function NeatScreen (cabal) {
   function view (state) {
     var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
     var msgs = state.messages
-    if (MAX_MESSAGES >= msgs.length) {
+    if (msgs.length < MAX_MESSAGES) {
       msgs = msgs.concat(Array(MAX_MESSAGES - msgs.length).fill())
     } else {
       msgs = msgs.slice(msgs.length - MAX_MESSAGES, msgs.length)
@@ -58,7 +58,7 @@ function NeatScreen (cabal) {
 
 // use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line) {
-  this.state.messages.push(line)
+  this.state.messages.push(`${chalk.gray(line)}`)
   this.bus.emit('render')
 }
 
@@ -79,14 +79,15 @@ NeatScreen.prototype.loadChannel = function (channel) {
   function onMessages (err, messages) {
     if (err) return
     messages.map((arr) => {
-      var m = arr[0] // TODO: why is there an array?
-      self.state.messages.push(self.formatMessage(m))
+      arr.forEach((m) => {
+        self.state.messages.push(self.formatMessage(m))
+      })
     })
-    self.render()
+    self.neat.render()
   }
   self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
-  self.watcher = self.cabal.watch(channel, () => {
+  self.watcher = self.cabal.db.watch(`${channel}/messages`, () => {
     self.cabal.getMessages(channel, 1, onMessages)
   })
 }
