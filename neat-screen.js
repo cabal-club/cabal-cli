@@ -12,13 +12,14 @@ var chalk = require('chalk')
 // * rewrite usage of state.messages,
 //   look at substack's approach in the og chatmesh
 
+const HEADER_ROWS = 6
+
 function NeatScreen (cabal) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(cabal)
   var self = this
 
   this.cabal = cabal
   this.commander = Commander(this, cabal)
-  this.MAX_MESSAGES = process.stdout.rows - 1
   this.watcher = null
 
   this.neat = neatLog(view, {fullscreen: true,
@@ -33,24 +34,25 @@ function NeatScreen (cabal) {
   this.neat.use(function (state, bus) {
     self.state = state
     self.bus = bus
-    state.messages = []
-    state.channel = 'default'
-
     // load initial state of the channel
-    self.monitor(state.channel)
-    self.loadChannel(state.channel)
-
-    cabal.on('message', (msg) => {
-      state.messages.push(self.formatMessage(msg))
-      bus.emit('render')
-    })
+    self.loadChannel('default')
   })
 
   function view (state) {
+    var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
+    var msgs = state.messages
+    if (MAX_MESSAGES >= msgs.length) {
+      msgs = msgs.concat(Array(MAX_MESSAGES - msgs.length).fill())
+    } else {
+      msgs = msgs.slice(msgs.length - MAX_MESSAGES, msgs.length)
+    }
+
     return output(`
-            ${chalk.gray('cabal key:')} ${self.cabal.db.key.toString('hex')}
-            ${createMessage(state.messages).join('\n')}
-            [${chalk.cyan(self.cabal.username)}:${state.channel}] ${self.neat.input.line()}`)
+      ${chalk.gray('Cabal')}
+      dat://${self.cabal.db.key.toString('hex')}
+
+      ${msgs.join('\n')}
+      [${chalk.cyan(self.cabal.username)}:${state.channel}] ${self.neat.input.line()}`)
   }
 }
 
@@ -60,22 +62,6 @@ NeatScreen.prototype.writeLine = function (line) {
   this.bus.emit('render')
 }
 
-NeatScreen.prototype.monitor = function (channel) {
-  var self = this
-  // if we monitor a new channel, destroy the old watcher first
-  if (self.watcher) self.watcher.destroy()
-  self.watcher = self.cabal.db.watch(channel, () => {
-    self.loadChannel(channel)
-  })
-}
-
-NeatScreen.prototype.changeChannel = function (channel) {
-  var self = this
-  self.state.channel = channel
-  self.monitor(channel)
-  self.loadChannel(channel)
-}
-
 NeatScreen.prototype.clear = function () {
   this.state.messages = []
   this.bus.emit('render')
@@ -83,16 +69,30 @@ NeatScreen.prototype.clear = function () {
 
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
+  self.state.channel = channel
+  var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
   // clear the old messages array
   self.state.messages = []
-  self.state.channel = channel
-  self.cabal.getMessages(channel, self.MAX_MESSAGES, (err, messages) => {
+  // if we monitor a new channel, destroy the old watcher first
+  if (self.watcher) self.watcher.destroy()
+
+  function onMessages (err, messages) {
     if (err) return
     messages.map((arr) => {
-      arr.forEach((m) => self.state.messages.push(self.formatMessage(m)))
+      var m = arr[0] // TODO: why is there an array?
+      self.state.messages.push(self.formatMessage(m))
     })
-    self.bus.emit('render')
+    self.render()
+  }
+  self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
+
+  self.watcher = self.cabal.watch(channel, () => {
+    self.cabal.getMessages(channel, 1, onMessages)
   })
+}
+
+NeatScreen.prototype.render = function () {
+  this.bus.emit('render')
 }
 
 NeatScreen.prototype.formatMessage = function (msg) {
@@ -104,10 +104,6 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
   var text = `${chalk.gray(formatTime(msg.time))} ${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')} ${msg.content}`
   return hilight ? chalk.bgRed(chalk.black(text)) : text
-}
-
-function createMessage (messages) {
-  return messages.concat(Array(process.stdout.rows)).slice(0, process.stdout.rows - 2)
 }
 
 function formatTime (t) {

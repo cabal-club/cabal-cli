@@ -39,17 +39,16 @@ Commander.prototype.process = function (line) {
     }))
   } else if (cmd === 'change') {
     if (arg === '') arg = 'default'
-    self.channel = arg
-    self.view.changeChannel(arg)
+    self.view.loadChannel(arg)
   } else if (cmd === 'messages') {
     // debug command
     console.log(self.view.state.messages)
   } else if (cmd === 'auth') {
     self.cabal.db.authorize(Buffer.from(arg, 'hex'), util.log)
   } else if (cmd === 'local') {
-    console.log('local key is\n\t', self.cabal.db.local.key.toString('hex'))
+    self.view.writeLine('local: ' + self.cabal.db.local.key.toString('hex'))
   } else if (cmd === 'db') {
-    console.log('db key is\n\t', self.cabal.db.key.toString('hex'))
+    self.view.writeLine('db:' + self.cabal.db.key.toString('hex'))
   } else if (cmd === 'registered') {
     self.cabal.db.authorized(Buffer.from(arg, 'hex'), util.log)
   } else {
