@@ -1,5 +1,5 @@
 var neatLog = require('neat-log')
-var output = require('neat-log/output')
+var output = require('./output')
 var strftime = require('strftime')
 var Commander = require('./commands.js')
 var chalk = require('chalk')
