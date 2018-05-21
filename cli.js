@@ -6,6 +6,9 @@ var frontend = require('./neat-screen.js')
 
 var args = minimist(process.argv.slice(2))
 
+var homedir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
+var rootdir = homedir + '/.cabal/archives/'
+
 var usage = `Usage
 
   cabal --key dat://key
@@ -23,7 +26,7 @@ Work in progress! Learn more at github.com/cabal-club
 
 if (args.key) {
   args.key = args.key.replace('dat://', '').replace(/\//g, '')
-  args.db = 'archives/' + args.key
+  args.db = rootdir + args.key
 }
 
 if (!args.db) {
