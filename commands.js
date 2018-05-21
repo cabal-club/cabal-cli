@@ -22,11 +22,13 @@ Commander.prototype.process = function (line) {
   } else if (cmd === 'list') {
     self.cabal.getChannels((err, channels) => {
       if (err) return
+      self.view.writeLine('* channels:')
       channels.map(self.view.writeLine.bind(self.view))
     })
   } else if (cmd === 'nick') {
     if (arg === '') return
-    self.cabal.username = arg
+    this.cabal.username = arg
+    self.view.writeLine("* you're now known as " + arg)
   } else if (cmd === 'clear') {
     self.view.clear()
   } else if (cmd === 'get') {
@@ -37,8 +39,11 @@ Commander.prototype.process = function (line) {
       console.log(chunk)
       next()
     }))
+  } else if (cmd === 'quit') {
+    process.exit(0)
   } else if (cmd === 'change') {
     if (arg === '') arg = 'default'
+    self.channel = arg
     self.view.loadChannel(arg)
   } else if (cmd === 'messages') {
     // debug command
