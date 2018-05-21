@@ -87,7 +87,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   }
   self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
-  self.watcher = self.cabal.db.watch(`${channel}/messages`, () => {
+  self.watcher = self.cabal.watch(channel, () => {
     self.cabal.getMessages(channel, 1, onMessages)
   })
 }
