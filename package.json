@@ -18,7 +18,9 @@
     "strftime": "^0.10.0",
     "through2": "^2.0.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "standard": "^11.0.1"
+  },
   "scripts": {
     "test": "standard --fix"
   },
