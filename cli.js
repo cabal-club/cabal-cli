@@ -22,6 +22,7 @@ Work in progress! Learn more at github.com/cabal-club
 `
 
 if (args.key) {
+  args.key = args.key.replace('dat://', '').replace(/\//g, '')
   args.db = 'archives/' + args.key
 }
 
