@@ -1,3 +1,5 @@
+var through = require('through2')
+
 function Commander (view, cabal) {
   if (!(this instanceof Commander)) return new Commander(view, cabal)
   this.cabal = cabal
@@ -19,6 +21,18 @@ function Commander (view, cabal) {
       help: () => 'exit the cabal process',
       call: (arg) => {
         process.exit(0)
+      }
+    },
+    debug: {
+      help: () => 'debug display',
+      call: (arg) => {
+        var stream = self.cabal.db.createHistoryStream()
+        stream.pipe(through.obj(function (chunk, enc, next) {
+          if (chunk.key.indexOf('metadata') < 0) {
+            self.view.writeLine(chunk.key + ': ' + JSON.stringify(chunk.value))
+          }
+          next()
+        }))
       }
     },
     list: {
