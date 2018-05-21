@@ -24,11 +24,11 @@ function Commander (view, cabal) {
       }
     },
     debug: {
-      help: () => 'debug display',
+      help: () => 'debug hyperdb keys',
       call: (arg) => {
         var stream = self.cabal.db.createHistoryStream()
         stream.pipe(through.obj(function (chunk, enc, next) {
-          if (chunk.key.indexOf('metadata') < 0) {
+          if (chunk.key.indexOf(arg) > -1) {
             self.view.writeLine(chunk.key + ': ' + JSON.stringify(chunk.value))
           }
           next()
