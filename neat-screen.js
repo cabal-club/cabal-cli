@@ -37,13 +37,13 @@ function NeatScreen (cabal) {
     // load initial state of the channel
     self.loadChannel('default')
   })
-    self.cabal.on("join", (username) => {
-        self.writeLine(`* ${username} joined`)
-    })
+  self.cabal.on('join', (username) => {
+    self.writeLine(`* ${username} joined`)
+  })
 
-    self.cabal.on("leave", (username) => {
-        self.writeLine(`* ${username} left`)
-    })
+  self.cabal.on('leave', (username) => {
+    self.writeLine(`* ${username} left`)
+  })
 
   function view (state) {
     var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS

@@ -35,6 +35,14 @@ function Commander (view, cabal) {
         }))
       }
     },
+    names: {
+      help: () => 'display the names of the currently logged in users',
+      call: (arg) => {
+        var users = Object.keys(self.cabal.users)
+        self.view.writeLine('* currently connected users:')
+        users.map((u) => self.view.writeLine(`  ${u}`))
+      }
+    },
     list: {
       help: () => "display the cabal's channels",
       call: (arg) => {
