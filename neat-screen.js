@@ -47,12 +47,11 @@ function NeatScreen (cabal) {
       msgs = msgs.slice(msgs.length - MAX_MESSAGES, msgs.length)
     }
 
-    return output(`
-      ${chalk.gray('Cabal')}
-      dat://${self.cabal.db.key.toString('hex')}
+    return output(`${chalk.gray('Cabal')}
+dat://${self.cabal.db.key.toString('hex')}
 
-      ${msgs.join('\n')}
-      [${chalk.cyan(self.cabal.username)}:${state.channel}] ${self.neat.input.line()}`)
+${msgs.join('\n')}
+[${chalk.cyan(self.cabal.username)}:${state.channel}] ${self.neat.input.line()}`)
   }
 }
 
