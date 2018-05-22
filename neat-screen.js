@@ -59,6 +59,8 @@ function NeatScreen (cabal) {
     }
   })
 
+  this.neat.input.on('ctrl-u', () => self.neat.input.set(''))
+
   this.neat.use(function (state, bus) {
     self.state = state
     self.bus = bus
