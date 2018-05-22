@@ -27,8 +27,8 @@ node cli.js --key dat://5fb497e58d2701e173f5a270dfff77ac516ec09289426519d0098209
 
 ## Commands
 ```
-/list 
-   display a channel listing
+/channels 
+   display channels you can join
 /change <channel> 
    change channels
 /nick <new nick>
