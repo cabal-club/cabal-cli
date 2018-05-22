@@ -43,6 +43,22 @@ function NeatScreen (cabal) {
     }
   })
 
+  this.neat.input.on('up', () => {
+    if (self.commander.history.length) {
+      var command = self.commander.history.pop()
+      self.commander.history.unshift(command)
+      self.neat.input.set(command)
+    }
+  })
+
+  this.neat.input.on('down', () => {
+    if (self.commander.history.length) {
+      var command = self.commander.history.shift()
+      self.commander.history.push(command)
+      self.neat.input.set(command)
+    }
+  })
+
   this.neat.use(function (state, bus) {
     self.state = state
     self.bus = bus

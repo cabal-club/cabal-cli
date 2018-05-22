@@ -6,6 +6,7 @@ function Commander (view, cabal) {
   this.channel = 'default'
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
+  this.history = []
 
   var self = this
   this.commands = {
@@ -82,6 +83,8 @@ function Commander (view, cabal) {
 
 Commander.prototype.process = function (line) {
   var self = this
+  self.history.push(line)
+  if (self.history.length > 1000) self.history.shift()
   var match = self.pattern.exec(line)
   var cmd = match ? match[1] : ''
   var arg = match ? match[2] : ''
