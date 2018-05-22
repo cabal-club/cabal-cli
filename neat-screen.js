@@ -31,6 +31,18 @@ function NeatScreen (cabal) {
   this.neat.input.on('update', () => this.neat.render())
   this.neat.input.on('enter', (line) => this.commander.process(line))
 
+  this.neat.input.on('tab', () => {
+    var users = Object.keys(self.cabal.users).sort()
+    var line = self.neat.input.rawLine()
+    var pattern = (/^(\w+)$/)
+    var match = pattern.exec(line)
+
+    if (match) {
+      users = users.filter(user => user.startsWith(match[0]))
+      if (users.length > 0) self.neat.input.set(users[0] + ': ')
+    }
+  })
+
   this.neat.use(function (state, bus) {
     self.state = state
     self.bus = bus
