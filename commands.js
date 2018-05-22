@@ -17,33 +17,15 @@ function Commander (view, cabal) {
         self.view.writeLine("* you're now known as " + arg)
       }
     },
-    quit: {
-      help: () => 'exit the cabal process',
-      call: (arg) => {
-        process.exit(0)
-      }
-    },
-    debug: {
-      help: () => 'debug hyperdb keys',
-      call: (arg) => {
-        var stream = self.cabal.db.createHistoryStream()
-        stream.pipe(through.obj(function (chunk, enc, next) {
-          if (chunk.key.indexOf(arg) > -1) {
-            self.view.writeLine(chunk.key + ': ' + JSON.stringify(chunk.value))
-          }
-          next()
-        }))
-      }
-    },
     names: {
       help: () => 'display the names of the currently logged in users',
       call: (arg) => {
         var users = Object.keys(self.cabal.users)
         self.view.writeLine('* currently connected users:')
-        users.map((u) => self.view.writeLine(`  ${u}`))
+        users.map((u) => self.view.writeLine.bind(self.view)(`  ${u}`))
       }
     },
-    list: {
+    channels: {
       help: () => "display the cabal's channels",
       call: (arg) => {
         self.cabal.getChannels((err, channels) => {
@@ -55,12 +37,6 @@ function Commander (view, cabal) {
         })
       }
     },
-    clear: {
-      help: () => 'clear the current backscroll',
-      call: (arg) => {
-        self.view.clear()
-      }
-    },
     change: {
       help: () => 'change to a new channel',
       call: (arg) => {
@@ -69,12 +45,36 @@ function Commander (view, cabal) {
         self.view.loadChannel(arg)
       }
     },
+    clear: {
+      help: () => 'clear the current backscroll',
+      call: (arg) => {
+        self.view.clear()
+      }
+    },
     help: {
       help: () => 'display this help message',
       call: (arg) => {
         for (var key in self.commands) {
           self.view.writeLine(`/${key}\n  ${self.commands[key].help()}`)
         }
+      }
+    },
+    debug: {
+      help: () => 'debug hyperdb keys',
+      call: (arg) => {
+        var stream = self.cabal.db.createHistoryStream()
+        stream.pipe(through.obj(function (chunk, enc, next) {
+          if (chunk.key.indexOf(arg) > -1) {
+            self.view.writeLine.bind(self.view)(chunk.key + ': ' + JSON.stringify(chunk.value))
+          }
+          next()
+        }))
+      }
+    },
+    quit: {
+      help: () => 'exit the cabal process',
+      call: (arg) => {
+        process.exit(0)
       }
     }
   }
