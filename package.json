@@ -7,12 +7,9 @@
     "cabal": "cli.js"
   },
   "dependencies": {
-    "cabal-node": "git+https://github.com/cabal-club/cabal-node.git",
+    "cabal-node": "^2.0.0",
     "chalk": "^2.4.1",
     "concat-stream": "^1.6.2",
-    "dat-swarm-defaults": "^1.0.1",
-    "discovery-swarm": "^5.1.1",
-    "hyperdb": "git+https://github.com/mafintosh/hyperdb.git",
     "minimist": "^1.2.0",
     "neat-log": "^2.4.0",
     "strftime": "^0.10.0",
@@ -30,8 +27,11 @@
   },
   "keywords": [
     "hyperdb",
+    "decent",
     "dat",
+    "chat",
     "cabal",
+    "decentralize",
     "p2p"
   ],
   "author": "cblgh",
