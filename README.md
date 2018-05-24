@@ -7,7 +7,7 @@ see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying da
 
 ![](https://i.cblgh.org/2018-05/2466txd.png)
 
-come talk to us:  
+chat with us:  
 `npx cabal --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892`
 ## Usage
 Start a new instance:
