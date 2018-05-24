@@ -221,7 +221,7 @@ function renderMessages (state, width, height) {
     }, [])
 
   if (lines.length < height) {
-    lines = lines.concat(Array(height - lines.length).fill())
+    lines = lines.concat(Array(height - lines.length).fill(''))
   } else {
     lines = lines.slice(lines.length - height, lines.length)
   }
