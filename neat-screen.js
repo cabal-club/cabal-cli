@@ -72,6 +72,9 @@ function NeatScreen (cabal) {
   })
 
   this.neat.use(function (state, bus) {
+    state.cabal = cabal
+    state.neat = self.neat
+
     self.state = state
     self.bus = bus
     // load initial state of the channel
@@ -86,20 +89,182 @@ function NeatScreen (cabal) {
   })
 
   function view (state) {
-    var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
-    var msgs = state.messages
-    if (msgs.length < MAX_MESSAGES) {
-      msgs = msgs.concat(Array(MAX_MESSAGES - msgs.length).fill())
-    } else {
-      msgs = msgs.slice(msgs.length - MAX_MESSAGES, msgs.length)
+    var screen = []
+
+    screen.push(chalk.gray('Cabal'))
+    screen.push(`dat://${self.cabal.db.key.toString('hex')}`)
+    screen.push('')
+    draw(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
+    draw(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+    draw(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
+    draw(screen, renderVerticalLine('|', process.stdout.rows - 6), 16, 3)
+    draw(screen, renderVerticalLine('|', process.stdout.rows - 6), process.stdout.columns - 17, 3)
+    draw(screen, renderPrompt(state), 18, process.stdout.rows - 2)
+
+    return output(screen.join('\n'))
+  }
+}
+
+function renderPrompt (state) {
+  return [
+    `${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+  ]
+}
+
+// Applies 'lines' to 'screen' at coordinates x/y
+function draw (screen, lines, x, y) {
+  // add any extra needed lines
+  var extraLinesNeeded = (y + lines.length) - screen.length
+  if (extraLinesNeeded > 0) {
+    screen.push.apply(screen, new Array(extraLinesNeeded).fill(''))
+  }
+
+  // patch lines
+  for (var i=y; i < y + lines.length; i++) {
+    screen[i] = mergeString(screen[i], lines[i - y], x)
+  }
+}
+
+// String, String -> String
+function mergeString (src, string, x) {
+  var res = src
+  var extraCharsNeeded = (x + strlenAnsi(string)) - strlenAnsi(src)
+  if (extraCharsNeeded > 0) {
+    res += (new Array(extraCharsNeeded).fill(' ')).join('')
+  }
+
+  return sliceAnsi(res, 0, x) + string + sliceAnsi(res, x + strlenAnsi(string))
+}
+
+// Like String#slice, but taking ANSI codes into account
+function sliceAnsi (str, from, to) {
+  var len = 0
+  var insideCode = false
+  var res = ''
+  to = (to === undefined) ? str.length : to
+
+  for (var i=0; i < str.length; i++) {
+    var chr = str.charAt(i)
+    if (chr === '\033') insideCode = true
+    if (!insideCode) len++
+    if (chr === 'm' && insideCode) insideCode = false
+
+    if (len > from && len <= to) {
+      res += chr
+    }
+  }
+
+  return res
+}
+
+// Length of 'str' sans ANSI codes
+function strlenAnsi (str) {
+  var len = 0
+  var insideCode = false
+
+  for (var i=0; i < str.length; i++) {
+    var chr = str.charAt(i)
+    if (chr === '\033') insideCode = true
+    if (!insideCode) len++
+    if (chr === 'm' && insideCode) insideCode = false
+  }
+
+  return len
+}
+
+function renderChannels (state, width, height) {
+  return [state.channel]
+  //state.cabal.getChannels((err, channels) => {
+  //  if (err) return
+  //  self.view.writeLine('* channels:')
+  //  channels.map((m) => {
+  //    self.view.writeLine.bind(self.view)(`  ${m}`)
+  //  })
+  //})
+}
+
+function renderVerticalLine (chr, height) {
+  return new Array(height).fill(chr)
+}
+
+function renderNicks (state, width, height) {
+  var users = Object.keys(state.cabal.users)
+    .map(function (username) {
+      return username.slice(0, width)
+    })
+  return users
+}
+
+function renderMessages (state, width, height) {
+  var msgs = state.messages
+
+  // Character-wrap to area edge
+  var lines = msgs.reduce(function (accum, msg) {
+      accum.push.apply(accum, wrapAnsi(msg, width))
+      return accum
+    }, [])
+
+  if (lines.length < height) {
+    lines = lines.concat(Array(height - lines.length).fill())
+  } else {
+    lines = lines.slice(lines.length - height, lines.length)
+  }
+
+  return lines
+}
+
+// Apply whitespace to move a string right and/or down
+// String, Int, Int -> String
+function offset (text, x, y) {
+  // Pad left
+  var lines = text.split('\n')
+    .map(function (line) {
+      return (new Array(x).fill(' ').join('')) + line
+    })
+
+  // Pad top
+  lines = (new Array(y).fill()).concat(lines)
+
+  return lines.join('\n')
+}
+
+// Character-wrap text containing ANSI escape codes.
+// String, Int -> [String]
+function wrapAnsi (text, width) {
+  if (!text) return []
+
+  var res = []
+
+  var line = []
+  var lineLen = 0
+  var insideCode = false
+  for (var i=0; i < text.length; i++) {
+    var chr = text.charAt(i)
+    if (chr === '\033') {
+      insideCode = true
     }
 
-    return output(`${chalk.gray('Cabal')}
-dat://${self.cabal.db.key.toString('hex')}
+    line.push(chr)
 
-${msgs.join('\n')}
-[${chalk.cyan(self.cabal.username)}:${state.channel}] ${self.neat.input.line()}`)
+    if (!insideCode) {
+      lineLen++
+      if (lineLen >= width - 1) {
+        res.push(line.join(''))
+        line = []
+        lineLen = 0
+      }
+    }
+
+    if (chr === 'm' && insideCode) {
+      insideCode = false
+    }
   }
+
+  if (line.length > 0) {
+    res.push(line.join(''))
+  }
+
+  return res
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
