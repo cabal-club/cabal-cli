@@ -91,14 +91,23 @@ function NeatScreen (cabal) {
   function view (state) {
     var screen = []
 
-    screen.push(chalk.gray('Cabal'))
-    screen.push(`dat://${self.cabal.db.key.toString('hex')}`)
-    screen.push('')
+    // title bar
+    draw(screen, renderTitlebar(state), 0, 0)
+
+    // channels pane
     draw(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
+
+    // chat messages
     draw(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+
+    // nicks pane
     draw(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
+
+    // vertical dividers
     draw(screen, renderVerticalLine('|', process.stdout.rows - 6), 16, 3)
     draw(screen, renderVerticalLine('|', process.stdout.rows - 6), process.stdout.columns - 17, 3)
+
+    // user input prompt
     draw(screen, renderPrompt(state), 18, process.stdout.rows - 2)
 
     return output(screen.join('\n'))
@@ -108,6 +117,13 @@ function NeatScreen (cabal) {
 function renderPrompt (state) {
   return [
     `${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+  ]
+}
+
+function renderTitlebar (state) {
+  return [
+    chalk.gray('Cabal'),
+    `dat://${state.cabal.db.key.toString('hex')}`
   ]
 }
 
