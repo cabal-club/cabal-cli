@@ -7,7 +7,7 @@ see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying da
 
 ![](https://i.cblgh.org/2018-05/2466txd.png)
 
-come talk to us in `dat://5fb497e58d2701e173f5a270dfff77ac516ec09289426519d0098209bf4e8954`
+come talk to us in `dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892`
 ## Usage
 Start a new instance:
 ```
@@ -20,8 +20,7 @@ node cli.js --key <key> --nick <nickname>
 ```
 e.g.
 ```
-node cli.js --key dat://5fb497e58d2701e173f5a270dfff77ac516ec09289426519d0098209bf4e8954
- --nick voynich
+node cli.js --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892 --nick voynich
 
 ```
 
@@ -29,12 +28,18 @@ node cli.js --key dat://5fb497e58d2701e173f5a270dfff77ac516ec09289426519d0098209
 ```
 /channels 
    display channels you can join
-/change <channel> 
-   change channels
+/names
+    display a list of the people currently online 
+/join <channel> 
+   join a channel
 /nick <new nick>
    pick a new username
 /clear
    clear the current backlog
+/debug <key>
+    debug the underlying hyperdb's keys
+/help
+    display a help message of the current commands
 /quit
    exit cabal
 ```

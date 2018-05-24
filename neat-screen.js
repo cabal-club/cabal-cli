@@ -61,6 +61,15 @@ function NeatScreen (cabal) {
 
   this.neat.input.on('ctrl-u', () => self.neat.input.set(''))
   this.neat.input.on('ctrl-d', () => process.exit(0))
+  this.neat.input.on('ctrl-w', () => {
+    const line = this.neat.input.rawLine()
+    const beforeCursor = line.substring(0, this.neat.input.cursor).replace(/\s*$/, '')
+    const afterCursor = line.substring(this.neat.input.cursor)
+    const prunedStart = beforeCursor.split(' ').slice(0, -1).join(' ')
+    const prunedWithSpace = prunedStart + (prunedStart.length > 0 ? ' ' : '')
+    this.neat.input.set(prunedWithSpace + afterCursor)
+    this.neat.input.cursor = prunedWithSpace.length
+  })
 
   this.neat.use(function (state, bus) {
     self.state = state

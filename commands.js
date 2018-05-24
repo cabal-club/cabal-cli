@@ -38,8 +38,8 @@ function Commander (view, cabal) {
         })
       }
     },
-    change: {
-      help: () => 'change to a new channel',
+    join: {
+      help: () => 'join a new channel',
       call: (arg) => {
         if (arg === '') arg = 'default'
         self.channel = arg
