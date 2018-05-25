@@ -118,7 +118,7 @@ function NeatScreen (cabal) {
 
 function renderPrompt (state) {
   return [
-    `${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+    `[${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
   ]
 }
 
