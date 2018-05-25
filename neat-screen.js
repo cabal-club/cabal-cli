@@ -4,6 +4,7 @@ var strftime = require('strftime')
 var Commander = require('./commands.js')
 var chalk = require('chalk')
 var blit = require('txt-blit')
+var util = require('./util')
 
 // TODO:
 // * introduce messages types
@@ -156,7 +157,7 @@ function renderMessages (state, width, height) {
 
   // Character-wrap to area edge
   var lines = msgs.reduce(function (accum, msg) {
-      accum.push.apply(accum, wrapAnsi(msg, width))
+      accum.push.apply(accum, util.wrapAnsi(msg, width))
       return accum
     }, [])
 
@@ -167,60 +168,6 @@ function renderMessages (state, width, height) {
   }
 
   return lines
-}
-
-// Apply whitespace to move a string right and/or down
-// String, Int, Int -> String
-function offset (text, x, y) {
-  // Pad left
-  var lines = text.split('\n')
-    .map(function (line) {
-      return (new Array(x).fill(' ').join('')) + line
-    })
-
-  // Pad top
-  lines = (new Array(y).fill()).concat(lines)
-
-  return lines.join('\n')
-}
-
-// Character-wrap text containing ANSI escape codes.
-// String, Int -> [String]
-function wrapAnsi (text, width) {
-  if (!text) return []
-
-  var res = []
-
-  var line = []
-  var lineLen = 0
-  var insideCode = false
-  for (var i=0; i < text.length; i++) {
-    var chr = text.charAt(i)
-    if (chr === '\033') {
-      insideCode = true
-    }
-
-    line.push(chr)
-
-    if (!insideCode) {
-      lineLen++
-      if (lineLen >= width - 1) {
-        res.push(line.join(''))
-        line = []
-        lineLen = 0
-      }
-    }
-
-    if (chr === 'm' && insideCode) {
-      insideCode = false
-    }
-  }
-
-  if (line.length > 0) {
-    res.push(line.join(''))
-  }
-
-  return res
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
