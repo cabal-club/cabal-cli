@@ -12,7 +12,8 @@
     "minimist": "^1.2.0",
     "neat-log": "^2.4.0",
     "strftime": "^0.10.0",
-    "through2": "^2.0.3"
+    "through2": "^2.0.3",
+    "txt-blit": "^1.0.0"
   },
   "devDependencies": {
     "standard": "^11.0.1"
