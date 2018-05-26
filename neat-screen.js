@@ -3,6 +3,8 @@ var output = require('./output')
 var strftime = require('strftime')
 var Commander = require('./commands.js')
 var chalk = require('chalk')
+var blit = require('txt-blit')
+var util = require('./util')
 
 // TODO:
 // * introduce messages types
@@ -72,6 +74,9 @@ function NeatScreen (cabal) {
   })
 
   this.neat.use(function (state, bus) {
+    state.cabal = cabal
+    state.neat = self.neat
+
     self.state = state
     self.bus = bus
     // load initial state of the channel
@@ -86,20 +91,76 @@ function NeatScreen (cabal) {
   })
 
   function view (state) {
-    var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
-    var msgs = state.messages
-    if (msgs.length < MAX_MESSAGES) {
-      msgs = msgs.concat(Array(MAX_MESSAGES - msgs.length).fill())
-    } else {
-      msgs = msgs.slice(msgs.length - MAX_MESSAGES, msgs.length)
-    }
+    var screen = []
 
-    return output(`${chalk.gray('Cabal')}
-dat://${self.cabal.db.key.toString('hex')}
+    // title bar
+    blit(screen, renderTitlebar(state), 0, 0)
 
-${msgs.join('\n')}
-[${chalk.cyan(self.cabal.username)}:${state.channel}] ${self.neat.input.line()}`)
+    // channels pane
+    blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
+
+    // chat messages
+    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+
+    // nicks pane
+    blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
+
+    // vertical dividers
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6), 16, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6), process.stdout.columns - 17, 3)
+
+    // user input prompt
+    blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
+
+    return output(screen.join('\n'))
   }
+}
+
+function renderPrompt (state) {
+  return [
+    `[${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+  ]
+}
+
+function renderTitlebar (state) {
+  return [
+    chalk.gray('Cabal'),
+    `dat://${state.cabal.db.key.toString('hex')}`
+  ]
+}
+
+function renderChannels (state, width, height) {
+  return state.channels
+}
+
+function renderVerticalLine (chr, height) {
+  return new Array(height).fill(chr)
+}
+
+function renderNicks (state, width, height) {
+  var users = Object.keys(state.cabal.users)
+    .map(function (username) {
+      return username.slice(0, width)
+    })
+  return users
+}
+
+function renderMessages (state, width, height) {
+  var msgs = state.messages
+
+  // Character-wrap to area edge
+  var lines = msgs.reduce(function (accum, msg) {
+    accum.push.apply(accum, util.wrapAnsi(msg, width))
+    return accum
+  }, [])
+
+  if (lines.length < height) {
+    lines = lines.concat(Array(height - lines.length).fill(''))
+  } else {
+    lines = lines.slice(lines.length - height, lines.length)
+  }
+
+  return lines
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
@@ -116,6 +177,12 @@ NeatScreen.prototype.clear = function () {
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   self.state.channel = channel
+  self.state.channels = []
+  self.state.cabal.getChannels((err, channels) => {
+    if (err) return
+    self.state.channels = channels
+    self.bus.emit('render')
+  })
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
   // clear the old messages array
   self.state.messages = []
