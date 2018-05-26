@@ -130,14 +130,7 @@ function renderTitlebar (state) {
 }
 
 function renderChannels (state, width, height) {
-  return [state.channel]
-  // state.cabal.getChannels((err, channels) => {
-  //  if (err) return
-  //  self.view.writeLine('* channels:')
-  //  channels.map((m) => {
-  //    self.view.writeLine.bind(self.view)(`  ${m}`)
-  //  })
-  // })
+  return state.channels
 }
 
 function renderVerticalLine (chr, height) {
@@ -184,6 +177,12 @@ NeatScreen.prototype.clear = function () {
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   self.state.channel = channel
+  self.state.channels = []
+  self.state.cabal.getChannels((err, channels) => {
+   if (err) return
+   self.state.channels = channels
+   self.bus.emit("render")
+  })
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
   // clear the old messages array
   self.state.messages = []
