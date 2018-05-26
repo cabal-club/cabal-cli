@@ -61,6 +61,7 @@ function NeatScreen (cabal) {
     }
   })
 
+  // set channel with alt-#
   this.neat.input.on('alt-1', () => { setChannelByIndex(0) })
   this.neat.input.on('alt-2', () => { setChannelByIndex(1) })
   this.neat.input.on('alt-3', () => { setChannelByIndex(2) })
@@ -71,6 +72,24 @@ function NeatScreen (cabal) {
   this.neat.input.on('alt-8', () => { setChannelByIndex(7) })
   this.neat.input.on('alt-9', () => { setChannelByIndex(8) })
   this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
+
+  // move up/down channels with ctrl+{n,p}
+  this.neat.input.on('ctrl-p', () => {
+    var currentIdx = self.channels.indexOf(self.commander.channel)
+    if (currentIdx !== -1) {
+      currentIdx--
+      if (currentIdx < 0) currentIdx = self.channels.length - 1
+      setChannelByIndex(currentIdx)
+    }
+  })
+  this.neat.input.on('ctrl-n', () => {
+    var currentIdx = self.channels.indexOf(self.commander.channel)
+    if (currentIdx !== -1) {
+      currentIdx++
+      currentIdx = currentIdx % self.channels.length
+      setChannelByIndex(currentIdx)
+    }
+  })
 
   function setChannelByIndex (n) {
     if (n < 0 || n >= self.channels.length) return
