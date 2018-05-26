@@ -110,7 +110,7 @@ function NeatScreen (cabal) {
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6), process.stdout.columns - 17, 3)
 
     // user input prompt
-    blit(screen, renderPrompt(state), 18, process.stdout.rows - 2)
+    blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
 
     return output(screen.join('\n'))
   }
@@ -179,9 +179,9 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.channel = channel
   self.state.channels = []
   self.state.cabal.getChannels((err, channels) => {
-   if (err) return
-   self.state.channels = channels
-   self.bus.emit("render")
+    if (err) return
+    self.state.channels = channels
+    self.bus.emit('render')
   })
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
   // clear the old messages array

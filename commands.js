@@ -80,6 +80,17 @@ function Commander (view, cabal) {
       }
     }
   }
+  // add aliases to commands
+  this.alias('join', 'j')
+  this.alias('nick', 'n')
+}
+
+Commander.prototype.alias = function (command, alias) {
+  var self = this
+  self.commands[alias] = {
+    help: self.commands[command].help,
+    call: self.commands[command].call
+  }
 }
 
 Commander.prototype.process = function (line) {
