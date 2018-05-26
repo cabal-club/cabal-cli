@@ -112,7 +112,7 @@ function NeatScreen (cabal) {
     var screen = []
 
     // title bar
-    blit(screen, renderTitlebar(state), 0, 0)
+    blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
 
     // channels pane
     blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
@@ -124,8 +124,12 @@ function NeatScreen (cabal) {
     blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
 
     // vertical dividers
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6), 16, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6), process.stdout.columns - 17, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
+
+    // horizontal dividers
+    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
+    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
 
     // user input prompt
     blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
@@ -140,10 +144,10 @@ function renderPrompt (state) {
   ]
 }
 
-function renderTitlebar (state) {
+function renderTitlebar (state, width) {
   return [
-    chalk.gray('Cabal'),
-    `dat://${state.cabal.db.key.toString('hex')}`
+    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
+    util.rightAlignText(chalk.white(`dat://${state.cabal.db.key.toString('hex')}`), width)
   ]
 }
 
@@ -158,8 +162,14 @@ function renderChannels (state, width, height) {
     })
 }
 
-function renderVerticalLine (chr, height) {
-  return new Array(height).fill(chr)
+function renderVerticalLine (chr, height, chlk) {
+  return new Array(height).fill(chlk ? chlk(chr) : chr)
+}
+
+function renderHorizontalLine (chr, width, chlk) {
+  var txt = new Array(width).fill(chr).join('')
+  if (chlk) txt = chlk(txt)
+  return [txt]
 }
 
 function renderNicks (state, width, height) {
