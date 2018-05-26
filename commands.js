@@ -56,7 +56,8 @@ function Commander (view, cabal) {
       help: () => 'display this help message',
       call: (arg) => {
         for (var key in self.commands) {
-          self.view.writeLine(`/${key}\n  ${self.commands[key].help()}`)
+          self.view.writeLine.bind(self.view)(`/${key}`)
+          self.view.writeLine.bind(self.view)(`  ${self.commands[key].help()}`)
         }
       }
     },

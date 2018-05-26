@@ -131,13 +131,13 @@ function renderTitlebar (state) {
 
 function renderChannels (state, width, height) {
   return [state.channel]
-  //state.cabal.getChannels((err, channels) => {
+  // state.cabal.getChannels((err, channels) => {
   //  if (err) return
   //  self.view.writeLine('* channels:')
   //  channels.map((m) => {
   //    self.view.writeLine.bind(self.view)(`  ${m}`)
   //  })
-  //})
+  // })
 }
 
 function renderVerticalLine (chr, height) {
@@ -157,9 +157,9 @@ function renderMessages (state, width, height) {
 
   // Character-wrap to area edge
   var lines = msgs.reduce(function (accum, msg) {
-      accum.push.apply(accum, util.wrapAnsi(msg, width))
-      return accum
-    }, [])
+    accum.push.apply(accum, util.wrapAnsi(msg, width))
+    return accum
+  }, [])
 
   if (lines.length < height) {
     lines = lines.concat(Array(height - lines.length).fill(''))
