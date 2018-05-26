@@ -61,6 +61,24 @@ function NeatScreen (cabal) {
     }
   })
 
+  this.neat.input.on('alt-1', () => { setChannelByIndex(0) })
+  this.neat.input.on('alt-2', () => { setChannelByIndex(1) })
+  this.neat.input.on('alt-3', () => { setChannelByIndex(2) })
+  this.neat.input.on('alt-4', () => { setChannelByIndex(3) })
+  this.neat.input.on('alt-5', () => { setChannelByIndex(4) })
+  this.neat.input.on('alt-6', () => { setChannelByIndex(5) })
+  this.neat.input.on('alt-7', () => { setChannelByIndex(6) })
+  this.neat.input.on('alt-8', () => { setChannelByIndex(7) })
+  this.neat.input.on('alt-9', () => { setChannelByIndex(8) })
+  this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
+
+  function setChannelByIndex (n) {
+    if (n < 0 || n >= self.channels.length) return
+
+    self.commander.channel = self.channels[n]
+    self.loadChannel(self.channels[n])
+  }
+
   this.neat.input.on('ctrl-u', () => self.neat.input.set(''))
   this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('ctrl-w', () => {
@@ -131,6 +149,13 @@ function renderTitlebar (state) {
 
 function renderChannels (state, width, height) {
   return state.channels
+    .map(function (channel, idx) {
+      if (state.channel === channel) {
+        return ' ' + chalk.bgBlue((idx+1) + '. ' + channel)
+      } else {
+        return ' ' + chalk.gray((idx+1) + '. ') + chalk.white(channel)
+      }
+    })
 }
 
 function renderVerticalLine (chr, height) {
@@ -177,10 +202,15 @@ NeatScreen.prototype.clear = function () {
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   self.state.channel = channel
+
+  // HACK: we can do better than this!
+  self.channels = []
+
   self.state.channels = []
   self.state.cabal.getChannels((err, channels) => {
     if (err) return
     self.state.channels = channels
+    self.channels = channels
     self.bus.emit('render')
   })
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
