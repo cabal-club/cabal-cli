@@ -67,6 +67,13 @@ function NeatScreen (cabal) {
   this.neat.input.on('alt-9', () => { setChannelByIndex(8) })
   this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
 
+  this.neat.input.on('keypress', (ch, key) => {
+    if (!key || !key.name) return
+    if (key.name === 'home') this.neat.input.cursor = 0
+    else if (key.name === 'end') this.neat.input.cursor = this.neat.input.rawLine().length
+    else return
+    this.bus.emit('render')
+  })
   // move up/down channels with ctrl+{n,p}
   this.neat.input.on('ctrl-p', () => {
     var currentIdx = self.channels.indexOf(self.commander.channel)
@@ -270,13 +277,18 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.type) { msg.type = 'chat/text' }
   if (msg.content && msg.author && msg.time) {
     if (msg.content.indexOf(user) > -1 && msg.author !== user) { hilight = true }
-    if (msg.type === 'chat/emote') {
-      return `${chalk.gray('* ' + msg.author + ' ' + msg.content)}`
-    }
 
     var timestamp = `${chalk.gray(formatTime(msg.time))}`
     var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
-    return timestamp + ' ' + (hilight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + msg.content
+    var content = msg.content
+    var emote = (msg.type === 'chat/emote')
+
+    if (emote) {
+      authorText = `${chalk.white(msg.author)}`
+      content = `${chalk.gray(msg.content)}`
+    }
+
+    return timestamp + (emote ? ' * ' : ' ') + (hilight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
   return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))
 }
