@@ -270,12 +270,14 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.type) { msg.type = 'chat/text' }
   if (msg.content && msg.author && msg.time) {
     if (msg.content.indexOf(user) > -1 && msg.author !== user) { hilight = true }
-    if (msg.type === 'chat/emote') {
-      return `${chalk.gray('* ' + msg.author + ' ' + msg.content)}`
-    }
 
     var timestamp = `${chalk.gray(formatTime(msg.time))}`
     var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
+
+    if (msg.type === 'chat/emote') {
+      authorText = `${chalk.cyan(msg.author)}`
+    }
+
     return timestamp + ' ' + (hilight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + msg.content
   }
   return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))
