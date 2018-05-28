@@ -7,12 +7,6 @@ var blit = require('txt-blit')
 var util = require('./util')
 
 // TODO:
-// * introduce messages types
-//   type: chat/text
-//   type: chat/info
-//
-// * rewrite usage of state.messages,
-//   look at substack's approach in the og chatmesh
 
 const HEADER_ROWS = 6
 
@@ -61,6 +55,43 @@ function NeatScreen (cabal) {
     }
   })
 
+  // set channel with alt-#
+  this.neat.input.on('alt-1', () => { setChannelByIndex(0) })
+  this.neat.input.on('alt-2', () => { setChannelByIndex(1) })
+  this.neat.input.on('alt-3', () => { setChannelByIndex(2) })
+  this.neat.input.on('alt-4', () => { setChannelByIndex(3) })
+  this.neat.input.on('alt-5', () => { setChannelByIndex(4) })
+  this.neat.input.on('alt-6', () => { setChannelByIndex(5) })
+  this.neat.input.on('alt-7', () => { setChannelByIndex(6) })
+  this.neat.input.on('alt-8', () => { setChannelByIndex(7) })
+  this.neat.input.on('alt-9', () => { setChannelByIndex(8) })
+  this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
+
+  // move up/down channels with ctrl+{n,p}
+  this.neat.input.on('ctrl-p', () => {
+    var currentIdx = self.channels.indexOf(self.commander.channel)
+    if (currentIdx !== -1) {
+      currentIdx--
+      if (currentIdx < 0) currentIdx = self.channels.length - 1
+      setChannelByIndex(currentIdx)
+    }
+  })
+  this.neat.input.on('ctrl-n', () => {
+    var currentIdx = self.channels.indexOf(self.commander.channel)
+    if (currentIdx !== -1) {
+      currentIdx++
+      currentIdx = currentIdx % self.channels.length
+      setChannelByIndex(currentIdx)
+    }
+  })
+
+  function setChannelByIndex (n) {
+    if (n < 0 || n >= self.channels.length) return
+
+    self.commander.channel = self.channels[n]
+    self.loadChannel(self.channels[n])
+  }
+
   this.neat.input.on('ctrl-u', () => self.neat.input.set(''))
   this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('ctrl-w', () => {
@@ -94,7 +125,7 @@ function NeatScreen (cabal) {
     var screen = []
 
     // title bar
-    blit(screen, renderTitlebar(state), 0, 0)
+    blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
 
     // channels pane
     blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
@@ -106,8 +137,12 @@ function NeatScreen (cabal) {
     blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
 
     // vertical dividers
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6), 16, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6), process.stdout.columns - 17, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
+
+    // horizontal dividers
+    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
+    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
 
     // user input prompt
     blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
@@ -122,19 +157,32 @@ function renderPrompt (state) {
   ]
 }
 
-function renderTitlebar (state) {
+function renderTitlebar (state, width) {
   return [
-    chalk.gray('Cabal'),
-    `dat://${state.cabal.db.key.toString('hex')}`
+    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
+    util.rightAlignText(chalk.white(`dat://${state.cabal.db.key.toString('hex')}`), width)
   ]
 }
 
 function renderChannels (state, width, height) {
   return state.channels
+    .map(function (channel, idx) {
+      if (state.channel === channel) {
+        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
+      } else {
+        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channel)
+      }
+    })
 }
 
-function renderVerticalLine (chr, height) {
-  return new Array(height).fill(chr)
+function renderVerticalLine (chr, height, chlk) {
+  return new Array(height).fill(chlk ? chlk(chr) : chr)
+}
+
+function renderHorizontalLine (chr, width, chlk) {
+  var txt = new Array(width).fill(chr).join('')
+  if (chlk) txt = chlk(txt)
+  return [txt]
 }
 
 function renderNicks (state, width, height) {
@@ -177,10 +225,15 @@ NeatScreen.prototype.clear = function () {
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   self.state.channel = channel
+
+  // HACK: we can do better than this!
+  self.channels = []
+
   self.state.channels = []
   self.state.cabal.getChannels((err, channels) => {
     if (err) return
     self.state.channels = channels
+    self.channels = channels
     self.bus.emit('render')
   })
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
@@ -217,14 +270,13 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.type) { msg.type = 'chat/text' }
   if (msg.content && msg.author && msg.time) {
     if (msg.content.indexOf(user) > -1 && msg.author !== user) { hilight = true }
-    var text = ''
-    if (msg.type === 'chat/text') {
-      text = `${chalk.gray(formatTime(msg.time))} ${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')} ${msg.content}`
-    } else if (msg.type === 'chat/emote') {
-      text = `${chalk.gray('* ' + msg.author + ' ' + msg.content)}`
+    if (msg.type === 'chat/emote') {
+      return `${chalk.gray('* ' + msg.author + ' ' + msg.content)}`
     }
 
-    return hilight ? chalk.bgRed(chalk.black(text)) : text
+    var timestamp = `${chalk.gray(formatTime(msg.time))}`
+    var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
+    return timestamp + ' ' + (hilight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + msg.content
   }
   return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))
 }
