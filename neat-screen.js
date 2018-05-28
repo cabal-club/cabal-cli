@@ -68,6 +68,7 @@ function NeatScreen (cabal) {
   this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
 
   this.neat.input.on('keypress', (ch, key) => {
+    if (!key || !key.name) return
     if (key.name === 'home') this.neat.input.cursor = 0
     else if (key.name === 'end') this.neat.input.cursor = this.neat.input.rawLine().length
     else return
