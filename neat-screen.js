@@ -214,10 +214,16 @@ NeatScreen.prototype.formatMessage = function (msg) {
   var hilight = false
   var user = self.cabal.username
   if (msg.value) { msg = msg.value }
+  if (!msg.type) { msg.type = 'chat/text' }
   if (msg.content && msg.author && msg.time) {
     if (msg.content.indexOf(user) > -1 && msg.author !== user) { hilight = true }
+    var text = ''
+    if (msg.type === 'chat/text') {
+      text = `${chalk.gray(formatTime(msg.time))} ${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')} ${msg.content}`
+    } else if (msg.type === 'chat/emote') {
+      text = `${chalk.gray('* ' + msg.author + ' ' + msg.content)}`
+    }
 
-    var text = `${chalk.gray(formatTime(msg.time))} ${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')} ${msg.content}`
     return hilight ? chalk.bgRed(chalk.black(text)) : text
   }
   return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))

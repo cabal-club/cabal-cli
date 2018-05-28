@@ -18,6 +18,12 @@ function Commander (view, cabal) {
         self.view.writeLine("* you're now known as " + arg)
       }
     },
+    emote: {
+      help: () => 'write an old-school text emote',
+      call: (arg) => {
+        self.cabal.message(self.channel, arg, {type: 'chat/emote'})
+      }
+    },
     names: {
       help: () => 'display the names of the currently logged in users',
       call: (arg) => {
@@ -83,6 +89,7 @@ function Commander (view, cabal) {
   // add aliases to commands
   this.alias('join', 'j')
   this.alias('nick', 'n')
+  this.alias('emote', 'me')
 }
 
 Commander.prototype.alias = function (command, alias) {
