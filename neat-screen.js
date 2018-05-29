@@ -110,6 +110,8 @@ function NeatScreen (cabal) {
     this.neat.input.set(prunedWithSpace + afterCursor)
     this.neat.input.cursor = prunedWithSpace.length
   })
+  this.neat.input.on('pageup', () => self.state.scrollback++)
+  this.neat.input.on('pagedown', () => self.state.scrollback = Math.max(0, self.state.scrollback - 1))
 
   this.neat.use(function (state, bus) {
     state.cabal = cabal
@@ -204,17 +206,25 @@ function renderMessages (state, width, height) {
   var msgs = state.messages
 
   // Character-wrap to area edge
-  var lines = msgs.reduce(function (accum, msg) {
+  var allLines = msgs.reduce(function (accum, msg) {
     accum.push.apply(accum, util.wrapAnsi(msg, width))
     return accum
   }, [])
 
-  if (lines.length < height) {
-    lines = lines.concat(Array(height - lines.length).fill(''))
-  } else {
-    lines = lines.slice(lines.length - height, lines.length)
+  state.scrollback = Math.min(state.scrollback, allLines.length - height)
+  if (allLines.length < height) {
+    state.scrollback = 0
   }
 
+  var lines = (allLines.length < height) ?
+    allLines.concat(Array(height - allLines.length).fill('')) :
+    allLines.slice(
+      allLines.length - height - state.scrollback,
+      allLines.length - state.scrollback
+    )
+  if (state.scrollback > 0) {
+    lines = lines.slice(0,lines.length - 2).concat(['','More messages below . . .'])
+  }
   return lines
 }
 
@@ -231,6 +241,7 @@ NeatScreen.prototype.clear = function () {
 
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
+  self.state.scrollback = 0;
   self.state.channel = channel
 
   // HACK: we can do better than this!
