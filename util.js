@@ -67,6 +67,7 @@ function centerText (text, width) {
 
 function rightAlignText (text, width) {
   var left = width - strlenAnsi(text)
+  if (left < 0) return text
   var lspace = new Array(left).fill(' ').join('')
   return lspace + text
 }
