@@ -76,27 +76,27 @@ function NeatScreen (cabal) {
   })
   // move up/down channels with ctrl+{n,p}
   this.neat.input.on('ctrl-p', () => {
-    var currentIdx = self.channels.indexOf(self.commander.channel)
+    var currentIdx = self.state.cabal.channels.indexOf(self.commander.channel)
     if (currentIdx !== -1) {
       currentIdx--
-      if (currentIdx < 0) currentIdx = self.channels.length - 1
+      if (currentIdx < 0) currentIdx = self.state.cabal.channels.length - 1
       setChannelByIndex(currentIdx)
     }
   })
   this.neat.input.on('ctrl-n', () => {
-    var currentIdx = self.channels.indexOf(self.commander.channel)
+    var currentIdx = self.state.cabal.channels.indexOf(self.commander.channel)
     if (currentIdx !== -1) {
       currentIdx++
-      currentIdx = currentIdx % self.channels.length
+      currentIdx = currentIdx % self.state.cabal.channels.length
       setChannelByIndex(currentIdx)
     }
   })
 
   function setChannelByIndex (n) {
-    if (n < 0 || n >= self.channels.length) return
+    if (n < 0 || n >= self.state.cabal.channels.length) return
 
-    self.commander.channel = self.channels[n]
-    self.loadChannel(self.channels[n])
+    self.commander.channel = self.state.cabal.channels[n]
+    self.loadChannel(self.state.cabal.channels[n])
   }
 
   this.neat.input.on('ctrl-u', () => self.neat.input.set(''))
@@ -117,8 +117,13 @@ function NeatScreen (cabal) {
 
     self.state = state
     self.bus = bus
-    // load initial state of the channel
-    self.loadChannel('default')
+
+    self.state.cabal.getChannels((err, channels) => {
+      if (err) return
+      self.state.cabal.channels = channels
+      // load initial state of the channel
+      self.loadChannel('default')
+    })
   })
   self.cabal.on('join', (username) => {
     self.writeLine(`* ${username} joined`)
@@ -172,7 +177,7 @@ function renderTitlebar (state, width) {
 }
 
 function renderChannels (state, width, height) {
-  return state.channels
+  return state.cabal.channels
     .map(function (channel, idx) {
       if (state.channel === channel) {
         return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
@@ -231,18 +236,9 @@ NeatScreen.prototype.clear = function () {
 
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
+  self.state.cabal.joinChannel(channel)
   self.state.channel = channel
 
-  // HACK: we can do better than this!
-  self.channels = []
-
-  self.state.channels = []
-  self.state.cabal.getChannels((err, channels) => {
-    if (err) return
-    self.state.channels = channels
-    self.channels = channels
-    self.bus.emit('render')
-  })
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
   // clear the old messages array
   self.state.messages = []
