@@ -21,7 +21,13 @@ function Commander (view, cabal) {
     emote: {
       help: () => 'write an old-school text emote',
       call: (arg) => {
-        self.cabal.message(self.channel, arg, {type: 'chat/emote'})
+        self.cabal.publish({
+          type: 'chat/emote',
+          content: {
+            channel: self.channel,
+            text: arg
+          }
+        })
       }
     },
     names: {
@@ -116,7 +122,13 @@ Commander.prototype.process = function (line) {
   } else {
     line = line.trim()
     if (line !== '') {
-      self.cabal.message(self.channel, line)
+      self.cabal.publish({
+        type: 'chat/text',
+        content: {
+          channel: self.channel,
+          text: line
+        }
+      })
     }
   }
 }

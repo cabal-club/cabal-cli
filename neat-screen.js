@@ -4,6 +4,9 @@ var chalk = require('chalk')
 var strftime = require('strftime')
 var Commander = require('./commands.js')
 var views = require('./views')
+var chalk = require('chalk')
+var blit = require('txt-blit')
+var util = require('./util')
 
 const HEADER_ROWS = 6
 
@@ -199,24 +202,22 @@ NeatScreen.prototype.loadChannel = function (channel) {
   }
   self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
-  self.watcher = self.cabal.watch(channel, () => {
-    self.cabal.getMessages(channel, 1, (err, messages) => {
-      onMessages(err, messages)
-      beepOnHighlight(err, messages)
+  var rs = self.cabal.readMessages(channel, {limit: MAX_MESSAGES})
+  rs.on('data', function (msg) {
+    onMessages([msg])
 
-      function beepOnHighlight (err, messages) {
-        if (err) return
-        messages.forEach((arr) => {
-          arr.forEach((msg) => {
-            var user = self.cabal.username
-            if (msg.value) { msg = msg.value }
-            if (!msg.type) { msg.type = 'chat/text' }
-            if (detectMention(msg, user)) { beep() }
-          })
-        })
-      }
-    })
+    // beep on mention
+    var user = self.cabal.username
+    if (msg.value) { msg = msg.value }
+    if (!msg.type) { msg.type = 'chat/text' }
+    if (msg.content && msg.author && 
+        msg.type === 'chat/text' &&
+        msg.content.indexOf(user) > -1 && 
+        msg.author !== user) {
+      process.stdout.write('\x07')  // beep character
+     } 
   })
+  rs.on('end', function () { self.neat.render() })
 }
 
 NeatScreen.prototype.render = function () {
@@ -227,24 +228,25 @@ NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
   var highlight = false
   var user = self.cabal.username
-  if (msg.value) { msg = msg.value }
-  if (!msg.type) { msg.type = 'chat/text' }
-  if (msg.content && msg.author && msg.time) {
-    if (detectMention(msg, user)) { highlight = true }
+  if (!msg.value.type) { msg.type = 'chat/text' }
+  if (msg.value.content && msg.value.timestamp) {
+    if (msg.value.content.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
+    
+    var author = msg.key.slice(0, 8)
 
-    var timestamp = `${chalk.gray(formatTime(msg.time))}`
-    var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
-    var content = msg.content
-    var emote = (msg.type === 'chat/emote')
+    var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
+    var authorText = `${chalk.gray('<')}${chalk.cyan(author)}${chalk.gray('>')}`
+    var content = msg.value.content.text
+    var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
-      authorText = `${chalk.white(msg.author)}`
-      content = `${chalk.gray(msg.content)}`
+      authorText = `${chalk.white(author)}`
+      content = `${chalk.gray(msg.value.content)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
-  return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))
+  return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg.value))
 }
 
 function formatTime (t) {
