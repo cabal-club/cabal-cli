@@ -102,6 +102,7 @@ Commander.prototype.alias = function (command, alias) {
 
 Commander.prototype.process = function (line) {
   var self = this
+  line = line.trim()
   self.history.push(line)
   if (self.history.length > 1000) self.history.shift()
   var match = self.pattern.exec(line)
