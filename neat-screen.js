@@ -137,16 +137,103 @@ function NeatScreen (cabal) {
 
     self.state = state
     self.bus = bus
+
     // initialize messages
     self.state.messages = []
 
-    self.state.cabal.getChannels((err, channels) => {
-      if (err) return
-      self.state.cabal.channels = channels
-      // load initial state of the channel
-      self.loadChannel('default')
+    // TODO: use cabal-node api for all of this
+    self.cabal.db.ready(function () {
+      self.cabal.db.api.channels.get((err, channels) => {
+        if (err) return
+        self.state.cabal.channels = channels
+        self.loadChannel('default')
+        self.bus.emit('render')
+      })
+
+      self.cabal.db.api.users.getAll(function (err, users) {
+        if (err) return
+        state.users = users
+        self.bus.emit('render')
+      })
     })
   })
+
+  function view (state) {
+    var screen = []
+
+    // title bar
+    blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
+
+    // channels pane
+    blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
+
+    // chat messages
+    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+
+    // nicks pane
+    blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
+
+    // vertical dividers
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
+
+    // horizontal dividers
+    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
+    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
+
+    // user input prompt
+    blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
+
+    return output(screen.join('\n'))
+  }
+}
+
+function renderPrompt (state) {
+  return [
+    `[${chalk.cyan(state.username)}:${state.channel}] ${state.neat.input.line()}`
+  ]
+}
+
+function renderTitlebar (state, width) {
+  return [
+    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
+    util.rightAlignText(chalk.white(`dat://${state.cabal.key}`), width)
+  ]
+}
+
+function renderChannels (state, width, height) {
+  return state.channels
+    .map(function (channel, idx) {
+      if (state.channel === channel) {
+        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
+      } else {
+        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channel)
+      }
+    })
+}
+
+function renderVerticalLine (chr, height, chlk) {
+  return new Array(height).fill(chlk ? chlk(chr) : chr)
+}
+
+function renderHorizontalLine (chr, width, chlk) {
+  var txt = new Array(width).fill(chr).join('')
+  if (chlk) txt = chlk(txt)
+  return [txt]
+}
+
+function renderNicks (state, width, height) {
+  return (Object.keys(state.users || {}) || [])
+    .map(function (key) {
+      var user = state.users[key]
+      if (user.name) return user.name.slice(0, width)
+      else return key
+    })
+}
+
+function renderMessages (state, width, height) {
+  var msgs = state.messages
+>>>>>>> wip
 
   self.cabal.on('join', (username) => {
     self.bus.emit('render')
@@ -224,7 +311,7 @@ NeatScreen.prototype.render = function () {
   this.bus.emit('render')
 }
 
-NeatScreen.prototype.formatMessage = function (msg) {
+NeatScreen.prototype.formatMessage = function (state, msg) {
   var self = this
   var highlight = false
   var user = self.cabal.username
@@ -232,7 +319,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (msg.value.content && msg.value.timestamp) {
     if (msg.value.content.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
     
-    var author = msg.key.slice(0, 8)
+    var author
+    if (state.users && state.users[msg.key]) author = state.users[msg.key].name
+    else author = msg.key.slice(0, 8)
 
     var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.gray('<')}${chalk.cyan(author)}${chalk.gray('>')}`

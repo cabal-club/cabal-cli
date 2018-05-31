@@ -14,7 +14,12 @@ function Commander (view, cabal) {
       help: () => 'change your display name',
       call: (arg) => {
         if (arg === '') return
-        self.cabal.username = arg
+        self.cabal.publish({
+          type: 'about',
+          content: {
+            name: arg
+          }
+        })
         self.view.writeLine("* you're now known as " + arg)
       }
     },
