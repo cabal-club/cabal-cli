@@ -101,16 +101,24 @@ function renderMessages (state, width, height) {
   var msgs = state.messages
 
   // Character-wrap to area edge
-  var lines = msgs.reduce(function (accum, msg) {
+  var allLines = msgs.reduce(function (accum, msg) {
     accum.push.apply(accum, util.wrapAnsi(msg, width))
     return accum
   }, [])
 
-  if (lines.length < height) {
-    lines = lines.concat(Array(height - lines.length).fill(''))
-  } else {
-    lines = lines.slice(lines.length - height, lines.length)
+  state.scrollback = Math.min(state.scrollback, allLines.length - height)
+  if (allLines.length < height) {
+    state.scrollback = 0
   }
 
+  var lines = (allLines.length < height) ?
+    allLines.concat(Array(height - allLines.length).fill('')) :
+    allLines.slice(
+      allLines.length - height - state.scrollback,
+      allLines.length - state.scrollback
+    )
+  if (state.scrollback > 0) {
+    lines = lines.slice(0,lines.length - 2).concat(['','More messages below . . .'])
+  }
   return lines
 }
