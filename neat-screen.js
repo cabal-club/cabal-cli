@@ -171,6 +171,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.messages = []
   // if we monitor a new channel, destroy the old watcher first
   if (self.watcher) self.watcher.destroy()
+  this.neat.render()
 
   function onMessages (err, messages) {
     if (err) return
