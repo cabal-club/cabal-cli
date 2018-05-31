@@ -25,14 +25,25 @@ function NeatScreen (cabal) {
   this.neat.input.on('enter', (line) => this.commander.process(line))
 
   this.neat.input.on('tab', () => {
-    var users = Object.keys(self.cabal.users).sort()
     var line = self.neat.input.rawLine()
-    var pattern = (/^(\w+)$/)
-    var match = pattern.exec(line)
+    if (line.length > 1 && line[0] === '/') {
+      // command completion
+      var soFar = line.slice(1)
+      var commands = Object.keys(this.commander.commands)
+      var matchingCommands = commands.filter(cmd => cmd.startsWith(soFar))
+      if (matchingCommands.length == 1) {
+        self.neat.input.set('/' + matchingCommands[0])
+      }
+    } else {
+      // nick completion
+      var users = Object.keys(self.cabal.users).sort()
+      var pattern = (/^(\w+)$/)
+      var match = pattern.exec(line)
 
-    if (match) {
-      users = users.filter(user => user.startsWith(match[0]))
-      if (users.length > 0) self.neat.input.set(users[0] + ': ')
+      if (match) {
+        users = users.filter(user => user.startsWith(match[0]))
+        if (users.length > 0) self.neat.input.set(users[0] + ': ')
+      }
     }
   })
 
