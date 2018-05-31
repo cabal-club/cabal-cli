@@ -107,6 +107,8 @@ function NeatScreen (cabal) {
     this.neat.input.set(prunedWithSpace + afterCursor)
     this.neat.input.cursor = prunedWithSpace.length
   })
+  this.neat.input.on('pageup', () => self.state.scrollback++)
+  this.neat.input.on('pagedown', () => self.state.scrollback = Math.max(0, self.state.scrollback - 1))
 
   this.neat.use(function (state, bus) {
     state.cabal = cabal
@@ -136,6 +138,74 @@ function NeatScreen (cabal) {
   }
 }
 
+function renderPrompt (state) {
+  return [
+    `[${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+  ]
+}
+
+function renderTitlebar (state, width) {
+  return [
+    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
+    util.rightAlignText(chalk.white(`dat://${state.cabal.db.key.toString('hex')}`), width)
+  ]
+}
+
+function renderChannels (state, width, height) {
+  return state.cabal.channels
+    .map(function (channel, idx) {
+      if (state.channel === channel) {
+        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
+      } else {
+        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channel)
+      }
+    })
+}
+
+function renderVerticalLine (chr, height, chlk) {
+  return new Array(height).fill(chlk ? chlk(chr) : chr)
+}
+
+function renderHorizontalLine (chr, width, chlk) {
+  var txt = new Array(width).fill(chr).join('')
+  if (chlk) txt = chlk(txt)
+  return [txt]
+}
+
+function renderNicks (state, width, height) {
+  var users = Object.keys(state.cabal.users)
+    .map(function (username) {
+      return username.slice(0, width)
+    })
+  return users
+}
+
+function renderMessages (state, width, height) {
+  var msgs = state.messages
+
+  // Character-wrap to area edge
+  var allLines = msgs.reduce(function (accum, msg) {
+    accum.push.apply(accum, util.wrapAnsi(msg, width))
+    return accum
+  }, [])
+
+  state.scrollback = Math.min(state.scrollback, allLines.length - height)
+  if (allLines.length < height) {
+    state.scrollback = 0
+  }
+
+  var lines = (allLines.length < height) ?
+    allLines.concat(Array(height - allLines.length).fill('')) :
+    allLines.slice(
+      allLines.length - height - state.scrollback,
+      allLines.length - state.scrollback
+    )
+  if (state.scrollback > 0) {
+    lines = lines.slice(0,lines.length - 2).concat(['','More messages below . . .'])
+  }
+  return lines
+}
+
 // use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line) {
   this.state.messages.push(`${chalk.gray(line)}`)
@@ -149,6 +219,7 @@ NeatScreen.prototype.clear = function () {
 
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
+  self.state.scrollback = 0;
   self.state.cabal.joinChannel(channel)
   self.state.channel = channel
 
