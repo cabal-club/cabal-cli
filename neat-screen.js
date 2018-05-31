@@ -1,13 +1,10 @@
 var neatLog = require('neat-log')
-var output = require('./output')
+var chalk = require('chalk')
 var strftime = require('strftime')
 var Commander = require('./commands.js')
-var chalk = require('chalk')
-var blit = require('txt-blit')
-var util = require('./util')
+var views = require('./views')
 
 // TODO:
-
 const HEADER_ROWS = 6
 
 function NeatScreen (cabal) {
@@ -134,93 +131,9 @@ function NeatScreen (cabal) {
   })
 
   function view (state) {
-    var screen = []
-
-    // title bar
-    blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
-
-    // channels pane
-    blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
-
-    // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
-
-    // nicks pane
-    blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
-
-    // vertical dividers
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
-
-    // horizontal dividers
-    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
-    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
-
-    // user input prompt
-    blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
-
-    return output(screen.join('\n'))
+    if (process.stdout.columns > 80) return views.big(state)
+    else return views.small(state)
   }
-}
-
-function renderPrompt (state) {
-  return [
-    `[${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
-  ]
-}
-
-function renderTitlebar (state, width) {
-  return [
-    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
-    util.rightAlignText(chalk.white(`dat://${state.cabal.db.key.toString('hex')}`), width)
-  ]
-}
-
-function renderChannels (state, width, height) {
-  return state.cabal.channels
-    .map(function (channel, idx) {
-      if (state.channel === channel) {
-        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
-      } else {
-        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channel)
-      }
-    })
-}
-
-function renderVerticalLine (chr, height, chlk) {
-  return new Array(height).fill(chlk ? chlk(chr) : chr)
-}
-
-function renderHorizontalLine (chr, width, chlk) {
-  var txt = new Array(width).fill(chr).join('')
-  if (chlk) txt = chlk(txt)
-  return [txt]
-}
-
-function renderNicks (state, width, height) {
-  var users = Object.keys(state.cabal.users)
-    .map(function (username) {
-      return username.slice(0, width)
-    })
-  return users
-}
-
-function renderMessages (state, width, height) {
-  var msgs = state.messages
-
-  // Character-wrap to area edge
-  var lines = msgs.reduce(function (accum, msg) {
-    accum.push.apply(accum, util.wrapAnsi(msg, width))
-    return accum
-  }, [])
-
-  if (lines.length < height) {
-    lines = lines.concat(Array(height - lines.length).fill(''))
-  } else {
-    lines = lines.slice(lines.length - height, lines.length)
-  }
-
-  return lines
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
