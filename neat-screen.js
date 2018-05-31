@@ -107,6 +107,8 @@ function NeatScreen (cabal) {
     this.neat.input.set(prunedWithSpace + afterCursor)
     this.neat.input.cursor = prunedWithSpace.length
   })
+  this.neat.input.on('pageup', () => self.state.scrollback++)
+  this.neat.input.on('pagedown', () => self.state.scrollback = Math.max(0, self.state.scrollback - 1))
 
   this.neat.use(function (state, bus) {
     state.cabal = cabal
@@ -122,13 +124,13 @@ function NeatScreen (cabal) {
       self.loadChannel('default')
     })
   })
-  self.cabal.on('join', (username) => {
-    self.writeLine(`* ${username} joined`)
-  })
-
-  self.cabal.on('leave', (username) => {
-    self.writeLine(`* ${username} left`)
-  })
+  // self.cabal.on('join', (username) => {
+  //   self.writeLine(`* ${username} joined`)
+  // })
+  //
+  // self.cabal.on('leave', (username) => {
+  //   self.writeLine(`* ${username} left`)
+  // })
 
   function view (state) {
     if (process.stdout.columns > 80) return views.big(state)
@@ -150,6 +152,7 @@ NeatScreen.prototype.clear = function () {
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   self.state.cabal.joinChannel(channel)
+  self.state.scrollback = 0;
   self.state.channel = channel
 
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
