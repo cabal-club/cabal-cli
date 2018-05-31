@@ -127,6 +127,8 @@ function NeatScreen (cabal) {
 
     self.state = state
     self.bus = bus
+    // initialize messages
+    self.state.messages = []
 
     self.state.cabal.getChannels((err, channels) => {
       if (err) return
