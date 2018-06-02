@@ -35,7 +35,7 @@ if (!args.db) {
   process.exit(1)
 }
 
-var nick = args.seeder ? 'cabal-seeder' : args.nick || 'conspirator'
+var nick = args.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
 var cabal = Cabal(args.db, args.key, {username: nick})
 cabal.db.on('ready', function () {
   if (!args.seeder) {
