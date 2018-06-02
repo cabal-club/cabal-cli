@@ -25,6 +25,11 @@ node cli.js --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec587
 
 ```
 
+Reseed a cabal instance, headlessly (e.g. on a VPS):
+```
+node cli.js --key <key> --seeder
+```
+
 ## Commands
 ```
 /channels 
