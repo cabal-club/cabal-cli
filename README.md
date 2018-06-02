@@ -10,12 +10,12 @@ see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying da
 chat with us:  
 `npx cabal --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892`
 ## Usage
-Start a new instance:
+#### Start a new instance:
 ```
 node cli.js --db <file path> --nick <nickname>
 ```
 
-Connect to an existing instance:
+#### Connect to an existing instance:
 ```
 node cli.js --key <key> --nick <nickname>
 ```
@@ -25,7 +25,7 @@ node cli.js --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec587
 
 ```
 
-Reseed a cabal instance, headlessly (e.g. on a VPS):
+#### Reseed a cabal instance, headlessly (e.g. on a VPS):
 ```
 node cli.js --key <key> --seeder
 ```
