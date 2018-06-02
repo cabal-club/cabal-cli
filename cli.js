@@ -20,6 +20,7 @@ var usage = `Usage
   Options:
 
     --nick    Your nickname.
+    --seeder  Start a headless seeder for the specified cabal key
 
 Work in progress! Learn more at github.com/cabal-club
 `
@@ -34,8 +35,13 @@ if (!args.db) {
   process.exit(1)
 }
 
-var cabal = Cabal(args.db, args.key, {username: args.nick || 'conspirator'})
+var nick = args.seeder ? 'cabal-seeder' : args.nick || 'conspirator'
+var cabal = Cabal(args.db, args.key, {username: nick})
 cabal.db.on('ready', function () {
-  frontend(cabal)
+  if (!args.seeder) {
+    frontend(cabal)
+  } else {
+    console.log('reseeding the cabal at dat://' + cabal.db.key.toString('hex'))
+  }
   cabalSwarm(cabal)
 })
