@@ -137,13 +137,13 @@ function NeatScreen (cabal) {
       self.loadChannel('default')
     })
   })
-  // self.cabal.on('join', (username) => {
-  //   self.writeLine(`* ${username} joined`)
-  // })
-  //
-  // self.cabal.on('leave', (username) => {
-  //   self.writeLine(`* ${username} left`)
-  // })
+
+  self.cabal.on('join', (username) => {
+      self.bus.emit("render")
+  })
+  self.cabal.on('leave', (username) => {
+      self.bus.emit("render")
+  })
 
   function view (state) {
     if (process.stdout.columns > 80) return views.big(state)
