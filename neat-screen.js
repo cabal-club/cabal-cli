@@ -25,14 +25,25 @@ function NeatScreen (cabal) {
   this.neat.input.on('enter', (line) => this.commander.process(line))
 
   this.neat.input.on('tab', () => {
-    var users = Object.keys(self.cabal.users).sort()
     var line = self.neat.input.rawLine()
-    var pattern = (/^(\w+)$/)
-    var match = pattern.exec(line)
+    if (line.length > 1 && line[0] === '/') {
+      // command completion
+      var soFar = line.slice(1)
+      var commands = Object.keys(this.commander.commands)
+      var matchingCommands = commands.filter(cmd => cmd.startsWith(soFar))
+      if (matchingCommands.length == 1) {
+        self.neat.input.set('/' + matchingCommands[0])
+      }
+    } else {
+      // nick completion
+      var users = Object.keys(self.cabal.users).sort()
+      var pattern = (/^(\w+)$/)
+      var match = pattern.exec(line)
 
-    if (match) {
-      users = users.filter(user => user.startsWith(match[0]))
-      if (users.length > 0) self.neat.input.set(users[0] + ': ')
+      if (match) {
+        users = users.filter(user => user.startsWith(match[0]))
+        if (users.length > 0) self.neat.input.set(users[0] + ': ')
+      }
     }
   })
 
@@ -116,6 +127,8 @@ function NeatScreen (cabal) {
 
     self.state = state
     self.bus = bus
+    // initialize messages
+    self.state.messages = []
 
     self.state.cabal.getChannels((err, channels) => {
       if (err) return
@@ -160,6 +173,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.messages = []
   // if we monitor a new channel, destroy the old watcher first
   if (self.watcher) self.watcher.destroy()
+  this.neat.render()
 
   function onMessages (err, messages) {
     if (err) return
