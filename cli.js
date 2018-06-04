@@ -19,27 +19,64 @@ var usage = `Usage
 
   cabal --db /path/to/db
 
+  OR
+
+  cabal youraliashere
+
   Options:
 
-    --nick    Your nickname.
-    --seeder  Start a headless seeder for the specified cabal key
+    --nick <name>         Use <name> as nick for this session
+    --seeder              Start a headless seeder for the specified cabal key
+    --new-alias <name>    Add an alias to your config. Must be used with --key
+    --config-nick <name>  Set <name> as your default nick from now on
 
 Work in progress! Learn more at github.com/cabal-club
 `
 
+function saveConfig(cfg) {
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
+}
+
+var config
 if (fs.existsSync(configPath)) {
+  // load config
   try {
-    var config = JSON.parse('testconfig.json')
-  } catch (SyntaxError e) {
-    console.error("Something is wrong with your config.")
+    config = JSON.parse(fs.readFileSync(configPath))
+  } catch (SyntaxError) {
+    process.stderr.write("Something is wrong with your config.\n")
   }
 } else {
   // generate default config
+  config = {
+    keyAliases : {}
+  }
+  saveConfig(config)
 }
 
-if (args.key) {
-  args.key = args.key.replace('dat://', '').replace(/\//g, '')
-  args.db = rootdir + args.key
+if (args['new-alias']) {
+  if (args.key) {
+    config.keyAliases[args['new-alias']] = args.key
+    saveConfig(config)
+    process.stdout.write("alias " + args['new-alias'] + " saved.\n")
+    process.exit(0)
+  } else {
+    process.stderr.write(usage)
+    process.exit(1)
+  }
+}
+
+if (args['config-nick']) {
+  config.nick = args['config-nick']
+  saveConfig(config)
+  process.stdout.write("nick " + args['config-nick'] + " saved.\n")
+  process.exit(0)
+}
+
+var key = args.key || config.keyAliases[args._[0]]
+
+if (key) {
+  key = key.replace('dat://', '').replace(/\//g, '')
+  args.db = rootdir + key
 }
 
 if (!args.db) {
@@ -47,8 +84,8 @@ if (!args.db) {
   process.exit(1)
 }
 
-var nick = args.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
-var cabal = Cabal(args.db, args.key, {username: nick})
+var nick = args.nick || config.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
+var cabal = Cabal(args.db, key, {username: nick})
 cabal.db.on('ready', function () {
   if (!args.seeder) {
     frontend(cabal)
