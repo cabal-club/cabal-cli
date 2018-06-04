@@ -1,5 +1,5 @@
 # Cabal
-p2p forum software
+p2p chat software
 
 cabal is a place where mesh conspirators can talk about p2p topics in a p2p way   
 
@@ -10,12 +10,12 @@ see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying da
 chat with us:  
 `npx cabal --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892`
 ## Usage
-Start a new instance:
+#### Start a new instance:
 ```
 node cli.js --db <file path> --nick <nickname>
 ```
 
-Connect to an existing instance:
+#### Connect to an existing instance:
 ```
 node cli.js --key <key> --nick <nickname>
 ```
@@ -23,6 +23,13 @@ e.g.
 ```
 node cli.js --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892 --nick voynich
 
+```
+
+#### Headless mode
+
+This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VPS) and make its data more available:
+```
+node cli.js --key <key> --seeder
 ```
 
 ## Commands

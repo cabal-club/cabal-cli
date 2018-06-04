@@ -1,6 +1,6 @@
 {
   "name": "cabal",
-  "version": "2.3.1",
+  "version": "2.4.2",
   "description": "p2p forum software",
   "main": "index.js",
   "bin": {
@@ -35,7 +35,7 @@
     "p2p"
   ],
   "author": "cblgh",
-  "license": "AGPL",
+  "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/cabal-club/cabal/issues"
   },
