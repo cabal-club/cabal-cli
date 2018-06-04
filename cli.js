@@ -3,11 +3,13 @@ var Cabal = require('cabal-node')
 var cabalSwarm = require('cabal-node/swarm.js')
 var minimist = require('minimist')
 var frontend = require('./neat-screen.js')
+var fs = require('fs')
 
 var args = minimist(process.argv.slice(2))
 
 var homedir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
 var rootdir = homedir + '/.cabal/archives/'
+var configPath = homedir + '/.cabal/config.json'
 
 var usage = `Usage
 
@@ -23,6 +25,16 @@ var usage = `Usage
 
 Work in progress! Learn more at github.com/cabal-club
 `
+
+if (fs.existsSync(configPath)) {
+  try {
+    var config = JSON.parse('testconfig.json')
+  } catch (SyntaxError e) {
+    console.error("Something is wrong with your config.")
+  }
+} else {
+  // generate default config
+}
 
 if (args.key) {
   args.key = args.key.replace('dat://', '').replace(/\//g, '')
