@@ -27,8 +27,8 @@ var usage = `Usage
 
     --nick <name>         Use <name> as nick for this session
     --seeder              Start a headless seeder for the specified cabal key
-    --new-alias <name>    Add an alias to your config. Must be used with --key
-    --config-nick <name>  Set <name> as your default nick from now on
+    --set-alias <name>    Add an alias to your config. Must be used with --key
+    --set-nick <name>  Set <name> as your default nick from now on
 
 Work in progress! Learn more at github.com/cabal-club
 `
@@ -53,11 +53,18 @@ if (fs.existsSync(configPath)) {
   saveConfig(config)
 }
 
-if (args['new-alias']) {
+
+var key = args.key || config.keyAliases[args._[0]]
+
+if (key) {
+  key = key.replace('dat://', '').replace(/\//g, '')
+  args.db = rootdir + key
+}
+
+if (args['set-alias']) {
   if (args.key) {
-    config.keyAliases[args['new-alias']] = args.key
+    config.keyAliases[args['set-alias']] = args.key
     saveConfig(config)
-    process.stdout.write("alias " + args['new-alias'] + " saved.\n")
     process.exit(0)
   } else {
     process.stderr.write(usage)
@@ -65,18 +72,12 @@ if (args['new-alias']) {
   }
 }
 
-if (args['config-nick']) {
-  config.nick = args['config-nick']
+if (args['set-nick']) {
+  config.nick = args['set-nick']
   saveConfig(config)
-  process.stdout.write("nick " + args['config-nick'] + " saved.\n")
-  process.exit(0)
-}
-
-var key = args.key || config.keyAliases[args._[0]]
-
-if (key) {
-  key = key.replace('dat://', '').replace(/\//g, '')
-  args.db = rootdir + key
+  if (!args.db) {
+    process.exit(0)
+  }
 }
 
 if (!args.db) {
