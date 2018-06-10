@@ -8,7 +8,7 @@ see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying da
 ![](https://i.cblgh.org/2018-05/2466txd.png)
 
 chat with us:  
-`npx cabal --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892`
+`npx cabal --key dat://59813e3169b4b2a6d3741b077f80cce014d84d67b4a8f9fa4c19605b5cff637f`
 ## Usage
 #### Start a new instance:
 ```
@@ -21,7 +21,7 @@ node cli.js --key <key> --nick <nickname>
 ```
 e.g.
 ```
-node cli.js --key dat://21b2b9ff201b01e6081709d82e6b81a5cf3a68d2cd5f092d0ffec58772642892 --nick voynich
+node cli.js --key dat://59813e3169b4b2a6d3741b077f80cce014d84d67b4a8f9fa4c19605b5cff637f --nick voynich
 
 ```
 
