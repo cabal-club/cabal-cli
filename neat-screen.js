@@ -4,7 +4,6 @@ var strftime = require('strftime')
 var Commander = require('./commands.js')
 var views = require('./views')
 
-// TODO:
 const HEADER_ROWS = 6
 
 function NeatScreen (cabal) {
@@ -31,7 +30,7 @@ function NeatScreen (cabal) {
       var soFar = line.slice(1)
       var commands = Object.keys(this.commander.commands)
       var matchingCommands = commands.filter(cmd => cmd.startsWith(soFar))
-      if (matchingCommands.length == 1) {
+      if (matchingCommands.length === 1) {
         self.neat.input.set('/' + matchingCommands[0])
       }
     } else {
@@ -139,10 +138,10 @@ function NeatScreen (cabal) {
   })
 
   self.cabal.on('join', (username) => {
-      self.bus.emit("render")
+    self.bus.emit('render')
   })
   self.cabal.on('leave', (username) => {
-      self.bus.emit("render")
+    self.bus.emit('render')
   })
 
   function view (state) {
@@ -165,12 +164,13 @@ NeatScreen.prototype.clear = function () {
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
   self.state.cabal.joinChannel(channel)
-  self.state.scrollback = 0;
+  self.state.scrollback = 0
   self.state.channel = channel
 
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
   // clear the old messages array
   self.state.messages = []
+  self.state.latest_date = new Date(0)
   // if we monitor a new channel, destroy the old watcher first
   if (self.watcher) self.watcher.destroy()
   this.neat.render()
@@ -179,6 +179,11 @@ NeatScreen.prototype.loadChannel = function (channel) {
     if (err) return
     messages.map((arr) => {
       arr.forEach((m) => {
+        var msgDate = new Date(m.value.time)
+        if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
+          self.state.latest_date = msgDate
+          self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+        }
         self.state.messages.push(self.formatMessage(m))
       })
     })
