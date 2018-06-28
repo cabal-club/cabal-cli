@@ -47,7 +47,8 @@ function Commander (view, cabal) {
     join: {
       help: () => 'join a new channel',
       call: (arg) => {
-        if (arg === '') arg = 'default'
+        if (arg === '') arg = '#default'
+        else if (!arg.startsWith('#')) arg = `#${arg}`
         self.channel = arg
         self.view.loadChannel(arg)
       }

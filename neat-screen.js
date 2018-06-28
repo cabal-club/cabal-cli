@@ -133,7 +133,7 @@ function NeatScreen (cabal) {
       if (err) return
       self.state.cabal.channels = channels
       // load initial state of the channel
-      self.loadChannel('default')
+      self.loadChannel('#default')
     })
   })
 
