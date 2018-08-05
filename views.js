@@ -111,14 +111,14 @@ function renderMessages (state, width, height) {
     state.scrollback = 0
   }
 
-  var lines = (allLines.length < height) ?
-    allLines.concat(Array(height - allLines.length).fill('')) :
-    allLines.slice(
+  var lines = (allLines.length < height)
+    ? allLines.concat(Array(height - allLines.length).fill(''))
+    : allLines.slice(
       allLines.length - height - state.scrollback,
       allLines.length - state.scrollback
     )
   if (state.scrollback > 0) {
-    lines = lines.slice(0,lines.length - 2).concat(['','More messages below . . .'])
+    lines = lines.slice(0, lines.length - 2).concat(['', 'More messages below . . .'])
   }
   return lines
 }
