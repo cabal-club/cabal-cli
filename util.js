@@ -60,8 +60,8 @@ function strlenAnsi (str) {
 function centerText (text, width) {
   var left = Math.floor((width - strlenAnsi(text)) / 2)
   var right = Math.ceil((width - strlenAnsi(text)) / 2)
-  var lspace = new Array(left).fill(' ').join('')
-  var rspace = new Array(right).fill(' ').join('')
+  var lspace = left > 0 ? new Array(left).fill(' ').join('') : ''
+  var rspace = right > 0 ? new Array(right).fill(' ').join('') : ''
   return lspace + text + rspace
 }
 
