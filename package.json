@@ -9,6 +9,7 @@
   "dependencies": {
     "cabal-node": "^2.2.0",
     "chalk": "^2.4.1",
+    "discovery-swarm": "^5.1.2",
     "minimist": "^1.2.0",
     "neat-log": "^2.4.0",
     "strftime": "^0.10.0",

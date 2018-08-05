@@ -11,7 +11,7 @@ var rootdir = homedir + '/.cabal/archives/'
 
 var usage = `Usage
 
-  cabal --key dat://key
+  cabal --key cabal://key
 
   OR
 
@@ -26,7 +26,7 @@ Work in progress! Learn more at github.com/cabal-club
 `
 
 if (args.key) {
-  args.key = args.key.replace('dat://', '').replace(/\//g, '')
+  args.key = args.key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   args.db = rootdir + args.key
 }
 
@@ -41,7 +41,7 @@ cabal.db.on('ready', function () {
   if (!args.seeder) {
     frontend(cabal)
   } else {
-    console.log('reseeding the cabal at dat://' + cabal.db.key.toString('hex'))
+    console.log('reseeding the cabal at cabal://' + cabal.db.key.toString('hex'))
   }
   cabalSwarm(cabal)
 })

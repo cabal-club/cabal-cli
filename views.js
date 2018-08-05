@@ -52,7 +52,7 @@ function big (state) {
 }
 
 function linkSize (state) {
-  return `dat://${state.cabal.db.key.toString('hex')}`.length
+  return `cabal://${state.cabal.db.key.toString('hex')}`.length
 }
 
 function renderPrompt (state) {
@@ -64,7 +64,7 @@ function renderPrompt (state) {
 function renderTitlebar (state, width) {
   return [
     chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
-    util.rightAlignText(chalk.white(`dat://${state.cabal.db.key.toString('hex')}`), width)
+    util.rightAlignText(chalk.white(`cabal://${state.cabal.db.key.toString('hex')}`), width)
   ]
 }
 
