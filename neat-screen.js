@@ -106,17 +106,7 @@ function NeatScreen (cabal) {
     self.loadChannel(self.state.cabal.channels[n])
   }
 
-  this.neat.input.on('ctrl-u', () => self.neat.input.set(''))
   this.neat.input.on('ctrl-d', () => process.exit(0))
-  this.neat.input.on('ctrl-w', () => {
-    const line = this.neat.input.rawLine()
-    const beforeCursor = line.substring(0, this.neat.input.cursor).replace(/\s*$/, '')
-    const afterCursor = line.substring(this.neat.input.cursor)
-    const prunedStart = beforeCursor.split(' ').slice(0, -1).join(' ')
-    const prunedWithSpace = prunedStart + (prunedStart.length > 0 ? ' ' : '')
-    this.neat.input.set(prunedWithSpace + afterCursor)
-    this.neat.input.cursor = prunedWithSpace.length
-  })
   this.neat.input.on('pageup', () => self.state.scrollback++)
   this.neat.input.on('pagedown', () => self.state.scrollback = Math.max(0, self.state.scrollback - 1))
 
