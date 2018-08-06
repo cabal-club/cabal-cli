@@ -1,3 +1,4 @@
+var beep = require("beepbeep")
 var neatLog = require('neat-log')
 var chalk = require('chalk')
 var strftime = require('strftime')
@@ -181,9 +182,26 @@ NeatScreen.prototype.loadChannel = function (channel) {
   }
   self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
-  self.watcher = self.cabal.watch(channel, () => {
-    self.cabal.getMessages(channel, 1, onMessages)
-  })
+    self.watcher = self.cabal.watch(channel, () => {
+        self.cabal.getMessages(channel, 1, (err, messages) => {
+            onMessages(err, messages)
+            beepOnHighlight(err, messages)
+
+            function beepOnHighlight(err, messages) {
+                messages.forEach((arr) => {
+                    arr.forEach((msg) => {
+                        var user = self.cabal.username
+                        if (msg.value) { msg = msg.value }
+                        if (!msg.type) { msg.type = 'chat/text' }
+                        if (msg.content && msg.author && 
+                            msg.type === 'chat/text' &&
+                            msg.content.indexOf(user) > -1 && 
+                            msg.author !== user) { beep() }
+                    })
+                })
+            }
+        })
+    })
 }
 
 NeatScreen.prototype.render = function () {
@@ -192,12 +210,12 @@ NeatScreen.prototype.render = function () {
 
 NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
-  var hilight = false
+  var highlight = false
   var user = self.cabal.username
   if (msg.value) { msg = msg.value }
   if (!msg.type) { msg.type = 'chat/text' }
   if (msg.content && msg.author && msg.time) {
-    if (msg.content.indexOf(user) > -1 && msg.author !== user) { hilight = true }
+    if (msg.content.indexOf(user) > -1 && msg.author !== user) { highlight = true }
 
     var timestamp = `${chalk.gray(formatTime(msg.time))}`
     var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
@@ -209,7 +227,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
       content = `${chalk.gray(msg.content)}`
     }
 
-    return timestamp + (emote ? ' * ' : ' ') + (hilight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
+    return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
   return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))
 }
