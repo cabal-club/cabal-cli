@@ -35,7 +35,7 @@ function big (state) {
   blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
 
   // nicks pane
-  blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
+  blit(screen, renderNicks(state, 15, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
 
   // vertical dividers
   blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
