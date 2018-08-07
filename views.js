@@ -71,10 +71,11 @@ function renderTitlebar (state, width) {
 function renderChannels (state, width, height) {
   return state.cabal.channels
     .map(function (channel, idx) {
+      var channelTruncated = channel.substring(0, width - 5)
       if (state.channel === channel) {
-        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
+        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channelTruncated)
       } else {
-        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channel)
+        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channelTruncated)
       }
     })
 }
