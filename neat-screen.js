@@ -1,4 +1,4 @@
-var beep = require("beepbeep")
+var beep = require('beepbeep')
 var neatLog = require('neat-log')
 var chalk = require('chalk')
 var strftime = require('strftime')
@@ -6,6 +6,12 @@ var Commander = require('./commands.js')
 var views = require('./views')
 
 const HEADER_ROWS = 6
+
+function detectMention (msg, user) {
+  if (!msg || !msg.content || !msg.author || !msg.type || msg.type !== 'chat/text') return false
+  if (msg.content.indexOf(user) > -1 && msg.author !== user) return true
+  return false
+}
 
 function NeatScreen (cabal) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(cabal)
@@ -107,6 +113,17 @@ function NeatScreen (cabal) {
     self.loadChannel(self.state.cabal.channels[n])
   }
 
+  // TODO: implement simple notifications for messages in channels
+  function watchChannels () {
+    // watch all channels
+    // for each channel
+    // remember index/date of last message
+    // parse the message to detect mentions
+    // if new message, prefix * rune to channel name
+    // if mention, prefix ! rune to channel name
+    // when loading new channel, clear rune
+  }
+
   this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('pageup', () => self.state.scrollback++)
   this.neat.input.on('pagedown', () => self.state.scrollback = Math.max(0, self.state.scrollback - 1))
@@ -182,26 +199,24 @@ NeatScreen.prototype.loadChannel = function (channel) {
   }
   self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
-    self.watcher = self.cabal.watch(channel, () => {
-        self.cabal.getMessages(channel, 1, (err, messages) => {
-            onMessages(err, messages)
-            beepOnHighlight(err, messages)
+  self.watcher = self.cabal.watch(channel, () => {
+    self.cabal.getMessages(channel, 1, (err, messages) => {
+      onMessages(err, messages)
+      beepOnHighlight(err, messages)
 
-            function beepOnHighlight(err, messages) {
-                messages.forEach((arr) => {
-                    arr.forEach((msg) => {
-                        var user = self.cabal.username
-                        if (msg.value) { msg = msg.value }
-                        if (!msg.type) { msg.type = 'chat/text' }
-                        if (msg.content && msg.author && 
-                            msg.type === 'chat/text' &&
-                            msg.content.indexOf(user) > -1 && 
-                            msg.author !== user) { beep() }
-                    })
-                })
-            }
+      function beepOnHighlight (err, messages) {
+        if (err) return
+        messages.forEach((arr) => {
+          arr.forEach((msg) => {
+            var user = self.cabal.username
+            if (msg.value) { msg = msg.value }
+            if (!msg.type) { msg.type = 'chat/text' }
+            if (detectMention(msg, user)) { beep() }
+          })
         })
+      }
     })
+  })
 }
 
 NeatScreen.prototype.render = function () {
@@ -215,7 +230,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (msg.value) { msg = msg.value }
   if (!msg.type) { msg.type = 'chat/text' }
   if (msg.content && msg.author && msg.time) {
-    if (msg.content.indexOf(user) > -1 && msg.author !== user) { highlight = true }
+    if (detectMention(msg, user)) { highlight = true }
 
     var timestamp = `${chalk.gray(formatTime(msg.time))}`
     var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
