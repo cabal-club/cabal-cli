@@ -144,14 +144,14 @@ function NeatScreen (cabal) {
 
     // TODO: use cabal-node api for all of this
     self.cabal.db.ready(function () {
-      self.cabal.getChannels((err, channels) => {
+      self.cabal.channels.get((err, channels) => {
         if (err) return
         self.state.channels = channels
         self.loadChannel('default')
         self.bus.emit('render')
       })
 
-      self.cabal.db.api.users.getAll(function (err, users) {
+      self.cabal.users.getAll(function (err, users) {
         if (err) return
         state.users = users
         self.bus.emit('render')
@@ -177,6 +177,11 @@ NeatScreen.prototype.clear = function () {
 }
 
 NeatScreen.prototype.loadChannel = function (channel) {
+  if (this.state.msgListener) {
+    this.cabal.messages.events.removeListener(this.state.channel, this.state.msgListener)
+    this.state.msgListener = null
+  }
+
   var self = this
   // TODO: self.state.cabal.joinChannel(channel)
   self.state.scrollback = 0
@@ -197,10 +202,16 @@ NeatScreen.prototype.loadChannel = function (channel) {
       self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
     }
     self.state.messages.push(self.formatMessage(msg))
+
+    // add channel if new
+    if (self.state.channels.indexOf(msg.value.content.channel) === -1) {
+      self.state.channels.push(msg.value.content.channel)
+    }
+
     if (redraw) self.neat.render()
   }
 
-  var rs = self.cabal.readMessages(channel, {limit: MAX_MESSAGES})
+  var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES})
   rs.on('data', function (msg) {
     onMessage(msg, false)
 
@@ -217,15 +228,13 @@ NeatScreen.prototype.loadChannel = function (channel) {
   })
   rs.on('end', function () {
     self.neat.render()
-    listenNewMessages()
-  })
 
-  function listenNewMessages (since) {
-    self.cabal.listenMessages(channel, function (msg) {
+    function onmsg (msg) {
       onMessage(msg, true)
-      self.neat.render()
-    })
-  }
+    }
+    self.cabal.messages.events.on(channel, onmsg)
+    self.state.msgListener = onmsg
+  })
 }
 
 NeatScreen.prototype.render = function () {
