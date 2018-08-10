@@ -24,7 +24,7 @@ function NeatScreen (cabal) {
   this.commander = Commander(this, cabal)
   this.watcher = null
 
-  this.neat = neatLog(view, {fullscreen: true,
+  this.neat = neatLog(renderApp, {fullscreen: true,
     style: function (start, cursor, end) {
       if (!cursor) cursor = ' '
       return start + chalk.underline(cursor) + end
@@ -93,27 +93,27 @@ function NeatScreen (cabal) {
   })
   // move up/down channels with ctrl+{n,p}
   this.neat.input.on('ctrl-p', () => {
-    var currentIdx = self.state.cabal.channels.indexOf(self.commander.channel)
+    var currentIdx = self.state.channels.indexOf(self.commander.channel)
     if (currentIdx !== -1) {
       currentIdx--
-      if (currentIdx < 0) currentIdx = self.state.cabal.channels.length - 1
+      if (currentIdx < 0) currentIdx = self.state.channels.length - 1
       setChannelByIndex(currentIdx)
     }
   })
   this.neat.input.on('ctrl-n', () => {
-    var currentIdx = self.state.cabal.channels.indexOf(self.commander.channel)
+    var currentIdx = self.state.channels.indexOf(self.commander.channel)
     if (currentIdx !== -1) {
       currentIdx++
-      currentIdx = currentIdx % self.state.cabal.channels.length
+      currentIdx = currentIdx % self.state.channels.length
       setChannelByIndex(currentIdx)
     }
   })
 
   function setChannelByIndex (n) {
-    if (n < 0 || n >= self.state.cabal.channels.length) return
+    if (n < 0 || n >= self.state.channels.length) return
 
-    self.commander.channel = self.state.cabal.channels[n]
-    self.loadChannel(self.state.cabal.channels[n])
+    self.commander.channel = self.state.channels[n]
+    self.loadChannel(self.state.channels[n])
   }
 
   // TODO: implement simple notifications for messages in channels
@@ -138,14 +138,15 @@ function NeatScreen (cabal) {
     self.state = state
     self.bus = bus
 
-    // initialize messages
     self.state.messages = []
+    self.state.channels = []
+    self.state.users = []
 
     // TODO: use cabal-node api for all of this
     self.cabal.db.ready(function () {
-      self.cabal.db.api.channels.get((err, channels) => {
+      self.cabal.getChannels((err, channels) => {
         if (err) return
-        self.state.cabal.channels = channels
+        self.state.channels = channels
         self.loadChannel('default')
         self.bus.emit('render')
       })
@@ -157,95 +158,11 @@ function NeatScreen (cabal) {
       })
     })
   })
-
-  function view (state) {
-    var screen = []
-
-    // title bar
-    blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
-
-    // channels pane
-    blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
-
-    // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
-
-    // nicks pane
-    blit(screen, renderNicks(state, 16, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
-
-    // vertical dividers
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
-
-    // horizontal dividers
-    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
-    blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
-
-    // user input prompt
-    blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
-
-    return output(screen.join('\n'))
-  }
 }
 
-function renderPrompt (state) {
-  return [
-    `[${chalk.cyan(state.username)}:${state.channel}] ${state.neat.input.line()}`
-  ]
-}
-
-function renderTitlebar (state, width) {
-  return [
-    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
-    util.rightAlignText(chalk.white(`dat://${state.cabal.key}`), width)
-  ]
-}
-
-function renderChannels (state, width, height) {
-  return state.channels
-    .map(function (channel, idx) {
-      if (state.channel === channel) {
-        return ' ' + chalk.bgBlue((idx + 1) + '. ' + channel)
-      } else {
-        return ' ' + chalk.gray((idx + 1) + '. ') + chalk.white(channel)
-      }
-    })
-}
-
-function renderVerticalLine (chr, height, chlk) {
-  return new Array(height).fill(chlk ? chlk(chr) : chr)
-}
-
-function renderHorizontalLine (chr, width, chlk) {
-  var txt = new Array(width).fill(chr).join('')
-  if (chlk) txt = chlk(txt)
-  return [txt]
-}
-
-function renderNicks (state, width, height) {
-  return (Object.keys(state.users || {}) || [])
-    .map(function (key) {
-      var user = state.users[key]
-      if (user.name) return user.name.slice(0, width)
-      else return key
-    })
-}
-
-function renderMessages (state, width, height) {
-  var msgs = state.messages
->>>>>>> wip
-
-  self.cabal.on('join', (username) => {
-    self.bus.emit('render')
-  })
-  self.cabal.on('leave', (username) => {
-    self.bus.emit('render')
-  })
-
-  function view (state) {
-    if (process.stdout.columns > 80) return views.big(state)
-    else return views.small(state)
-  }
+function renderApp (state) {
+  if (process.stdout.columns > 80) return views.big(state)
+  else return views.small(state)
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
@@ -261,7 +178,7 @@ NeatScreen.prototype.clear = function () {
 
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
-  self.state.cabal.joinChannel(channel)
+  // TODO: self.state.cabal.joinChannel(channel)
   self.state.scrollback = 0
   self.state.channel = channel
 
@@ -273,25 +190,19 @@ NeatScreen.prototype.loadChannel = function (channel) {
   if (self.watcher) self.watcher.destroy()
   this.neat.render()
 
-  function onMessages (err, messages) {
-    if (err) return
-    messages.map((arr) => {
-      arr.forEach((m) => {
-        var msgDate = new Date(m.value.time)
-        if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
-          self.state.latest_date = msgDate
-          self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
-        }
-        self.state.messages.push(self.formatMessage(m))
-      })
-    })
-    self.neat.render()
+  function onMessage (msg, redraw) {
+    var msgDate = new Date(msg.value.timestamp)
+    if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
+      self.state.latest_date = msgDate
+      self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+    }
+    self.state.messages.push(self.formatMessage(msg))
+    if (redraw) self.neat.render()
   }
-  self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
   var rs = self.cabal.readMessages(channel, {limit: MAX_MESSAGES})
   rs.on('data', function (msg) {
-    onMessages([msg])
+    onMessage(msg, false)
 
     // beep on mention
     var user = self.cabal.username
@@ -311,7 +222,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
 
   function listenNewMessages (since) {
     self.cabal.listenMessages(channel, function (msg) {
-      self.state.messages.push(self.formatMessage(self.state, msg))
+      onMessage(msg, true)
       self.neat.render()
     })
   }
@@ -321,16 +232,16 @@ NeatScreen.prototype.render = function () {
   this.bus.emit('render')
 }
 
-NeatScreen.prototype.formatMessage = function (state, msg) {
+NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
   var highlight = false
   var user = self.cabal.username
   if (!msg.value.type) { msg.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
-    if (msg.value.content.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
+    if (msg.value.content.text.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
     
     var author
-    if (state.users && state.users[msg.key]) author = state.users[msg.key].name
+    if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name
     else author = msg.key.slice(0, 8)
 
     var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`

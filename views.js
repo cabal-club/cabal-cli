@@ -64,12 +64,12 @@ function renderPrompt (state) {
 function renderTitlebar (state, width) {
   return [
     chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
-    util.rightAlignText(chalk.white(`cabal://${state.cabal.db.key.toString('hex')}`), width)
+    util.rightAlignText(chalk.white(`cabal://${state.cabal.key.toString('hex')}`), width)
   ]
 }
 
 function renderChannels (state, width, height) {
-  return state.cabal.channels
+  return state.channels
     .map(function (channel, idx) {
       var channelTruncated = channel.substring(0, width - 5)
       if (state.channel === channel) {
@@ -91,6 +91,7 @@ function renderHorizontalLine (chr, width, chlk) {
 }
 
 function renderNicks (state, width, height) {
+  return ''
   var users = Object.keys(state.cabal.users)
     .map(function (username) {
       return username.slice(0, width)

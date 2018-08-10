@@ -37,11 +37,11 @@ if (!args.db) {
 
 var nick = args.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
 var cabal = Cabal(args.db, args.key, {username: nick})
-cabal.db.on('ready', function () {
+cabal.db.ready(function () {
   if (!args.seeder) {
     frontend(cabal)
   } else {
     console.log('reseeding the cabal at cabal://' + cabal.db.key.toString('hex'))
   }
-  cabalSwarm(cabal)
+  swarm(cabal)
 })
