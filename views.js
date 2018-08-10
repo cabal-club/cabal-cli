@@ -52,12 +52,14 @@ function big (state) {
 }
 
 function linkSize (state) {
-  return `cabal://${state.cabal.db.key.toString('hex')}`.length
+  if (state.cabal.db.key) return `cabal://${state.cabal.db.key.toString('hex')}`.length
+  else return 'cabal://...'
 }
 
 function renderPrompt (state) {
+  var name = state.user ? (state.user.name || state.user.key.substring(0, 12)) : 'unknown'
   return [
-    `[${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+    `[${chalk.cyan(name)}:${state.channel}] ${state.neat.input.line()}`
   ]
 }
 

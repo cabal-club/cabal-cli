@@ -141,6 +141,7 @@ function NeatScreen (cabal) {
     self.state.messages = []
     self.state.channels = []
     self.state.users = []
+    self.state.user = null
 
     // TODO: use cabal-node api for all of this
     self.cabal.db.ready(function () {
@@ -154,7 +155,15 @@ function NeatScreen (cabal) {
       self.cabal.users.getAll(function (err, users) {
         if (err) return
         state.users = users
-        self.bus.emit('render')
+        self.cabal.getLocalKey(function (err, lkey) {
+          if (err) return self.bus.emit('render')
+          Object.keys(users).forEach(function (key) {
+            if (key === lkey) {
+              self.state.user = users[key]
+            }
+          })
+          self.bus.emit('render')
+        })
       })
     })
   })
