@@ -304,7 +304,17 @@ NeatScreen.prototype.loadChannel = function (channel) {
       process.stdout.write('\x07')  // beep character
      } 
   })
-  rs.on('end', function () { self.neat.render() })
+  rs.on('end', function () {
+    self.neat.render()
+    listenNewMessages()
+  })
+
+  function listenNewMessages (since) {
+    self.cabal.listenMessages(channel, function (msg) {
+      self.state.messages.push(self.formatMessage(self.state, msg))
+      self.neat.render()
+    })
+  }
 }
 
 NeatScreen.prototype.render = function () {
