@@ -91,10 +91,11 @@ function renderHorizontalLine (chr, width, chlk) {
 }
 
 function renderNicks (state, width, height) {
-  return ''
-  var users = Object.keys(state.cabal.users)
-    .map(function (username) {
-      return username.slice(0, width)
+  var users = Object.keys(state.users)
+    .map(function (key) {
+      var about = state.users[key]
+      if (about && about.name) return about.name.slice(0, width)
+      else return key.slice(0, width)
     })
   return users
 }
