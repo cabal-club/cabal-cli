@@ -92,6 +92,7 @@ function renderHorizontalLine (chr, width, chlk) {
 
 function renderNicks (state, width, height) {
   var users = Object.keys(state.cabal.users)
+    .sort()
     .map(function (username) {
       return username.slice(0, width)
     })
