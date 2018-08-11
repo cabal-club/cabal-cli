@@ -1,9 +1,10 @@
 # Cabal
 p2p chat software
 
-cabal is a place where mesh conspirators can talk about p2p topics in a p2p way   
+Cabal is a place where mesh conspirators can talk about p2p topics in a p2p way.
 
-see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying database & api
+See [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying
+database & api.
 
 ![](https://i.cblgh.org/2018-05/2466txd.png)
 
@@ -13,33 +14,26 @@ chat with us:
 ## Installation
 
 ```
-git clone https://github.com/cabal-club/cabal-client.git
-cd cabal-client
-npm install
+$ npm install --global cabal
+$ cabal --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b --nick conspirator
 ```
-
 
 ## Usage
 #### Start a new instance:
 ```
-node cli.js --db <file path> --nick <nickname>
+cabal --db <file path> --nick <nickname>
 ```
 
 #### Connect to an existing instance:
 ```
-node cli.js --key <key> --nick <nickname>
-```
-e.g.
-```
-node cli.js --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b --nick voynich
-
+cabal --key <key> --nick <nickname>
 ```
 
 #### Headless mode
 
 This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VPS) and make its data more available:
 ```
-node cli.js --key <key> --seeder
+cabal --key <key> --seeder
 ```
 
 ## Commands
