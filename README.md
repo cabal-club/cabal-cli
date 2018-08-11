@@ -10,6 +10,15 @@ see [cabal-node](https://github.com/cabal-club/cabal-node) for the underlying da
 chat with us:  
 `npx cabal --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b`
 
+## Installation
+
+```
+git clone https://github.com/cabal-club/cabal-client.git
+cd cabal-client
+npm install
+```
+
+
 ## Usage
 #### Start a new instance:
 ```
@@ -38,11 +47,19 @@ node cli.js --key <key> --seeder
 /channels 
    display channels you can join
 /names
-    display a list of the people currently online 
+   display a list of the people currently online 
 /join <channel> 
    join a channel
+/j
+   alias for /join
 /nick <new nick>
    pick a new username
+/n
+   alias for /nick
+/emote <some text> 
+   write an old-school text emote
+/me
+   alias for /emote
 /clear
    clear the current backlog
 /debug <key>
