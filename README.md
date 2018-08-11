@@ -15,7 +15,7 @@ chat with us:
 
 ```
 $ npm install --global cabal
-$ cabal --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b --nick conspirator
+$ cabal --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b --nick <nickname>
 ```
 
 ## Usage
