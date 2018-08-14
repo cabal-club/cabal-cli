@@ -1,6 +1,6 @@
 {
   "name": "@noffle/cabal",
-  "version": "2.7.3",
+  "version": "2.7.4",
   "description": "p2p forum software",
   "main": "index.js",
   "bin": {
