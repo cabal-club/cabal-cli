@@ -4,7 +4,7 @@
   "description": "p2p forum software",
   "main": "index.js",
   "bin": {
-    "cabal": "cli.js"
+    "kabal": "cli.js"
   },
   "dependencies": {
     "@noffle/cabal-core": "^2.2.0",
