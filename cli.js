@@ -25,9 +25,24 @@ var usage = `Usage
 Work in progress! Learn more at github.com/cabal-club
 `
 
+var nick = args.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
+
 if (args.key) {
   args.key = args.key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   args.db = rootdir + args.key
+
+  var cabal = Cabal(args.db, args.key, {username: nick})
+  cabal.db.ready(function () {
+    start(args.key)
+  })
+} else {
+  var cabal = Cabal(args.db, null, {username: nick})
+  cabal.db.ready(function () {
+    cabal.getLocalKey(function (err, key) {
+      if (err) throw err
+      start(key)
+    })
+  })
 }
 
 if (!args.db) {
@@ -35,13 +50,11 @@ if (!args.db) {
   process.exit(1)
 }
 
-var nick = args.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
-var cabal = Cabal(args.db, args.key, {username: nick})
-cabal.db.ready(function () {
+function start (key) {
   if (!args.seeder) {
     frontend(cabal)
   } else {
-    console.log('reseeding the cabal at cabal://' + cabal.db.key.toString('hex'))
+    console.log('reseeding the cabal')
   }
   swarm(cabal)
-})
+}
