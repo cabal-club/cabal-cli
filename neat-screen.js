@@ -1,4 +1,3 @@
-var beep = require('beepbeep')
 var neatLog = require('neat-log')
 var chalk = require('chalk')
 var strftime = require('strftime')
@@ -7,6 +6,7 @@ var views = require('./views')
 var chalk = require('chalk')
 var blit = require('txt-blit')
 var util = require('./util')
+var collect = require('collect-stream')
 
 const HEADER_ROWS = 6
 
@@ -232,29 +232,29 @@ NeatScreen.prototype.loadChannel = function (channel) {
     if (redraw) self.neat.render()
   }
 
-  var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES})
-  rs.on('data', function (msg) {
-    onMessage(msg, false)
+  var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES, lt: '~'})
+  collect(rs, function (err, msgs) {
+    msgs.reverse()
 
-    // beep on mention
-    var user = self.cabal.username
-    if (msg.value) { msg = msg.value }
-    if (!msg.type) { msg.type = 'chat/text' }
-    if (msg.content && msg.author && 
-        msg.type === 'chat/text' &&
-        msg.content.indexOf(user) > -1 && 
-        msg.author !== user) {
-      process.stdout.write('\x07')  // beep character
-     } 
-  })
-  rs.on('end', function () {
+    msgs.forEach(function (msg) {
+      onMessage(msg, false)
+
+      // beep on mention
+      var user = self.cabal.username
+      if (msg.value) { msg = msg.value }
+      if (!msg.type) { msg.type = 'chat/text' }
+      if (msg.content && msg.author && 
+          msg.type === 'chat/text' &&
+          msg.content.indexOf(user) > -1 && 
+          msg.author !== user) {
+        process.stdout.write('\x07')  // beep character
+      } 
+    })
     self.neat.render()
 
-    function onmsg (msg) {
-      onMessage(msg, true)
-    }
     self.cabal.messages.events.on(channel, onmsg)
     self.state.msgListener = onmsg
+    function onmsg (msg) { onMessage(msg, true) }
   })
 }
 
