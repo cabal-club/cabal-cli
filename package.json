@@ -1,5 +1,5 @@
 {
-  "name": "cabal",
+  "name": "@noffle/cabal",
   "version": "2.7.2",
   "description": "p2p forum software",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "cabal": "cli.js"
   },
   "dependencies": {
-    "cabal-node": "^2.2.0",
+    "@noffle/cabal-core": "^2.2.0",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
     "discovery-swarm": "^5.1.2",
