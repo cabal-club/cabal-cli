@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-var Cabal = require('cabal-node')
-var cabalSwarm = require('cabal-node/swarm.js')
+var Cabal = require('cabal-core')
+var cabalSwarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var frontend = require('./neat-screen.js')
 
