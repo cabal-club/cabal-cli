@@ -19,14 +19,20 @@ function wrapAnsi (text, width) {
       insideCode = true
     }
 
-    line.push(chr)
+    if (chr !== '\n') {
+      line.push(chr)
+    }
 
     if (!insideCode) {
       lineLen++
-      if (lineLen >= width - 1) {
+      if (lineLen >= width - 1 || chr === '\n') {
         res.push(line.join(''))
         line = []
         lineLen = 0
+      }
+      if (chr === '\n') {
+        line = ['            ']
+        lineLen = line.length
       }
     }
 
