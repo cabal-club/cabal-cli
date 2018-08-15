@@ -1,6 +1,6 @@
 {
   "name": "cabal",
-  "version": "2.7.2",
+  "version": "2.8.0",
   "description": "p2p forum software",
   "main": "index.js",
   "bin": {
