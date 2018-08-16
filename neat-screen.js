@@ -161,21 +161,24 @@ function NeatScreen (cabal) {
             if (err) return
             user.key = key
             state.users[key] = user
-            if (key === self.state.user.key) self.state.user = user
+            if (self.state.user && key === self.state.user.key) self.state.user = user
+            if (!self.state.user) updateLocalKey()
             self.bus.emit('render')
           })
         })
 
-        self.cabal.getLocalKey(function (err, lkey) {
-          if (err) return self.bus.emit('render')
-          Object.keys(users).forEach(function (key) {
-            if (key === lkey) {
-              self.state.user = users[key]
-              self.state.user.key = key
-            }
+        function updateLocalKey () {
+          self.cabal.getLocalKey(function (err, lkey) {
+            if (err) return self.bus.emit('render')
+            Object.keys(users).forEach(function (key) {
+              if (key === lkey) {
+                self.state.user = users[key]
+                self.state.user.key = key
+              }
+            })
+            self.bus.emit('render')
           })
-          self.bus.emit('render')
-        })
+        }
       })
     })
   })
