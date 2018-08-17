@@ -173,6 +173,7 @@ function NeatScreen (cabal) {
 
         self.cabal.channels.events.on('add', function (channel) {
           self.state.channels.push(channel)
+          self.state.channels.sort()
           self.bus.emit('render')
         })
       })
