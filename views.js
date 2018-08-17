@@ -57,7 +57,7 @@ function linkSize (state) {
 }
 
 function renderPrompt (state) {
-  var name = state.user ? (state.user.name || state.user.key.substring(0, 12)) : 'unknown'
+  var name = state.user ? (state.user.name || state.user.key.substring(0, 8)) : 'unknown'
   return [
     `[${chalk.cyan(name)}:${state.channel}] ${state.neat.input.line()}`
   ]
@@ -103,7 +103,7 @@ function renderNicks (state, width, height) {
       var sigil = ''
       // if (user.online) sigil = chalk.green('+')
       if (user && user.name) name += user.name.slice(0, width)
-      else name += key.slice(0, width)
+      else name += key.slice(0, Math.min(8, width))
       if (!user.online) name = chalk.gray(name)
       return sigil + name
     })
