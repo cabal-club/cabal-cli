@@ -45,7 +45,10 @@ function NeatScreen (cabal) {
       }
     } else {
       // nick completion
-      var users = Object.keys(self.cabal.users).sort()
+      var users = Object.keys(self.state.users)
+        .map(key => self.state.users[key])
+        .map(user => user.name || user.key.substring(0, 8))
+        .sort()
       var pattern = (/^(\w+)$/)
       var match = pattern.exec(line)
 
@@ -166,7 +169,6 @@ function NeatScreen (cabal) {
         self.cabal.users.events.on('update', function (key) {
           self.cabal.users.get(key, function (err, user) {
             if (err) return
-            user.key = key
             state.users[key] = user
             if (self.state.user && key === self.state.user.key) self.state.user = user
             if (!self.state.user) updateLocalKey()
