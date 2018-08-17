@@ -94,12 +94,29 @@ function renderHorizontalLine (chr, width, chlk) {
 
 function renderNicks (state, width, height) {
   var users = Object.keys(state.users)
-    .map(function (key) {
-      var about = state.users[key]
-      if (about && about.name) return about.name.slice(0, width)
-      else return key.slice(0, width)
+    .map(key => state.users[key])
+    .sort(cmpUser)
+
+  users = users
+    .map(function (user) {
+      var name = ''
+      var sigil = ''
+      // if (user.online) sigil = chalk.green('+')
+      if (user && user.name) name += user.name.slice(0, width)
+      else name += key.slice(0, width)
+      if (!user.online) name = chalk.gray(name)
+      return sigil + name
     })
   return users
+}
+
+function cmpUser (a, b) {
+  if (a.online && !b.online) return -1
+  if (b.online && !a.online) return 1
+  if (a.name && !b.name) return -1
+  if (b.name && !a.name) return 1
+  if (a.name && b.name) return b.name - a.name
+  return b.key - a.key
 }
 
 function renderMessages (state, width, height) {

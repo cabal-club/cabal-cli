@@ -143,8 +143,25 @@ function NeatScreen (cabal) {
 
     self.state.messages = []
     self.state.channels = []
-    self.state.users = []
+    self.state.users = {}
     self.state.user = null
+
+    self.cabal.on('peer-added', function (key) {
+      Object.keys(self.state.users).forEach(function (k) {
+        if (k === key) {
+          self.state.users[k].online = true
+          self.bus.emit('render')
+        }
+      })
+    })
+    self.cabal.on('peer-dropped', function (key) {
+      Object.keys(self.state.users).forEach(function (k) {
+        if (k === key) {
+          self.state.users[k].online = false
+          self.bus.emit('render')
+        }
+      })
+    })
 
     // TODO: use cabal-core api for all of this
     self.cabal.db.ready(function () {
@@ -182,6 +199,8 @@ function NeatScreen (cabal) {
             Object.keys(users).forEach(function (key) {
               if (key === lkey) {
                 self.state.user = users[key]
+                self.state.user.local = true
+                self.state.user.online = true
                 self.state.user.key = key
               }
             })

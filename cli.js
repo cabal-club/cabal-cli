@@ -53,8 +53,9 @@ if (!args.db) {
 function start (key) {
   if (!args.seeder) {
     frontend(cabal)
+    setTimeout(function () { swarm(cabal) }, 300)
   } else {
     console.log('reseeding the cabal')
+    swarm(cabal)
   }
-  swarm(cabal)
 }
