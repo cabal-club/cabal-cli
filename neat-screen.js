@@ -143,7 +143,7 @@ function NeatScreen (cabal) {
     self.state.users = []
     self.state.user = null
 
-    // TODO: use cabal-node api for all of this
+    // TODO: use cabal-core api for all of this
     self.cabal.db.ready(function () {
       self.cabal.channels.get((err, channels) => {
         if (err) return
@@ -230,6 +230,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
     // add channel if new
     if (self.state.channels.indexOf(msg.value.content.channel) === -1) {
       self.state.channels.push(msg.value.content.channel)
+      redraw = true
     }
 
     if (redraw) self.neat.render()
