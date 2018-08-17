@@ -150,6 +150,11 @@ function NeatScreen (cabal) {
         self.state.channels = channels
         self.loadChannel('default')
         self.bus.emit('render')
+
+        self.cabal.channels.events.on('add', function (channel) {
+          self.state.channels.push(channel)
+          self.bus.emit('render')
+        })
       })
 
       self.cabal.users.getAll(function (err, users) {
@@ -226,12 +231,6 @@ NeatScreen.prototype.loadChannel = function (channel) {
       self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
     }
     self.state.messages.push(self.formatMessage(msg))
-
-    // add channel if new
-    if (self.state.channels.indexOf(msg.value.content.channel) === -1) {
-      self.state.channels.push(msg.value.content.channel)
-      redraw = true
-    }
 
     if (redraw) self.neat.render()
   }
