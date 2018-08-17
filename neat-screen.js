@@ -298,7 +298,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (msg.value.content.text.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
     
     var author
-    if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name
+    if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name || this.state.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
 
     var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
