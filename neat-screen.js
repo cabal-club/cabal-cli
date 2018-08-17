@@ -187,8 +187,8 @@ function NeatScreen (cabal) {
         self.cabal.users.events.on('update', function (key) {
           self.cabal.users.get(key, function (err, user) {
             if (err) return
-            state.users[key] = user
-            if (self.state.user && key === self.state.user.key) self.state.user = user
+            state.users[key] = Object.assign(state.users[key] || {}, user)
+            if (self.state.user && key === self.state.user.key) self.state.user = state.users[key]
             if (!self.state.user) updateLocalKey()
             self.bus.emit('render')
           })
