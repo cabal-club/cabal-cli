@@ -9,13 +9,13 @@ database & api.
 ![](https://i.cblgh.org/2018-05/2466txd.png)
 
 chat with us:  
-`npx cabal --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b`
+`npx cabal --key cabal://cabal://4ae5ec168a9f6b45b9d35e3cc1d0f4e3a436000d37fae8f53b3f8dadfe8f192f`
 
 ## Installation
 
 ```
 $ npm install --global cabal
-$ cabal --key cabal://7d99b453506b9743bf5e71fe749f66c814d7cd9388a5d394a27eed4c5640302b --nick <nickname>
+$ cabal --key cabal://cabal://4ae5ec168a9f6b45b9d35e3cc1d0f4e3a436000d37fae8f53b3f8dadfe8f192f --nick <nickname>
 ```
 
 ## Usage
