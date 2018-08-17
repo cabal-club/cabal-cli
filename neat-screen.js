@@ -286,7 +286,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     if (emote) {
       authorText = `${chalk.white(author)}`
-      content = `${chalk.gray(msg.value.content)}`
+      content = `${chalk.gray(msg.value.content.text)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
