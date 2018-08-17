@@ -161,6 +161,8 @@ function NeatScreen (cabal) {
         if (err) return
         state.users = users
 
+        updateLocalKey()
+
         self.cabal.users.events.on('update', function (key) {
           self.cabal.users.get(key, function (err, user) {
             if (err) return
