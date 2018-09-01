@@ -263,6 +263,8 @@ NeatScreen.prototype.loadChannel = function (channel) {
       if (pending > 1) {
         pending = 0
         onMessage()
+      } else {
+        pending = 0
       }
     })
   }
