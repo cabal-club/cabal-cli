@@ -172,6 +172,7 @@ function NeatScreen (cabal) {
         updateLocalKey()
 
         self.cabal.users.events.on('update', function (key) {
+          // TODO: rate-limit
           self.cabal.users.get(key, function (err, user) {
             if (err) return
             state.users[key] = Object.assign(state.users[key] || {}, user)
@@ -259,7 +260,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
 
       self.neat.render()
 
-      if (pending > 0) {
+      if (pending > 1) {
         pending = 0
         onMessage()
       }
