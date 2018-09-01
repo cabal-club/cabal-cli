@@ -121,11 +121,6 @@ function cmpUser (a, b) {
 
 function renderMessages (state, width, height) {
   var msgs = state.messages
-  if (!msgs.length) {
-    msgs = new Array(height).fill(' ')
-    var left = new Array(Math.floor(width/2 - 14)).fill('').join(' ')
-    msgs[Math.floor(height/2)] = left + '---- LOADING MESSAGES ----'
-  }
 
   // Character-wrap to area edge
   var allLines = msgs.reduce(function (accum, msg) {
