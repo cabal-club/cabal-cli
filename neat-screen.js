@@ -3,17 +3,9 @@ var chalk = require('chalk')
 var strftime = require('strftime')
 var Commander = require('./commands.js')
 var views = require('./views')
-var blit = require('txt-blit')
-var util = require('./util')
 var collect = require('collect-stream')
 
 const HEADER_ROWS = 6
-
-function detectMention (msg, user) {
-  if (!msg || !msg.content || !msg.author || !msg.type || msg.type !== 'chat/text') return false
-  if (msg.content.indexOf(user) > -1 && msg.author !== user) return true
-  return false
-}
 
 function NeatScreen (cabal) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(cabal)
@@ -116,17 +108,6 @@ function NeatScreen (cabal) {
 
     self.commander.channel = self.state.channels[n]
     self.loadChannel(self.state.channels[n])
-  }
-
-  // TODO: implement simple notifications for messages in channels
-  function watchChannels () {
-    // watch all channels
-    // for each channel
-    // remember index/date of last message
-    // parse the message to detect mentions
-    // if new message, prefix * rune to channel name
-    // if mention, prefix ! rune to channel name
-    // when loading new channel, clear rune
   }
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
@@ -260,6 +241,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
 
   var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES, lt: '~'})
   collect(rs, function (err, msgs) {
+    if (err) return
     msgs.reverse()
 
     msgs.forEach(function (msg) {
@@ -269,12 +251,12 @@ NeatScreen.prototype.loadChannel = function (channel) {
       var user = self.cabal.username
       if (msg.value) { msg = msg.value }
       if (!msg.type) { msg.type = 'chat/text' }
-      if (msg.content && msg.author && 
+      if (msg.content && msg.author &&
           msg.type === 'chat/text' &&
-          msg.content.indexOf(user) > -1 && 
+          msg.content.indexOf(user) > -1 &&
           msg.author !== user) {
-        process.stdout.write('\x07')  // beep character
-      } 
+        process.stdout.write('\x07') // beep character
+      }
     })
     self.neat.render()
 
@@ -295,7 +277,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.value.type) { msg.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
     if (msg.value.content.text.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
-    
+
     var author
     if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name || this.state.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
