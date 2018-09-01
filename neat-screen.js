@@ -126,12 +126,20 @@ function NeatScreen (cabal) {
     self.state.user = null
 
     self.cabal.on('peer-added', function (key) {
+      var found = false
       Object.keys(self.state.users).forEach(function (k) {
         if (k === key) {
           self.state.users[k].online = true
-          self.bus.emit('render')
+          found = true
         }
       })
+      if (!found) {
+        self.state.users[key] = {
+          key: key,
+          online: true
+        }
+      }
+      self.bus.emit('render')
     })
     self.cabal.on('peer-dropped', function (key) {
       Object.keys(self.state.users).forEach(function (k) {
