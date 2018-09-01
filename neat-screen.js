@@ -13,7 +13,6 @@ function NeatScreen (cabal) {
 
   this.cabal = cabal
   this.commander = Commander(this, cabal)
-  this.watcher = null
 
   this.neat = neatLog(renderApp, {fullscreen: true,
     style: function (start, cursor, end) {
@@ -216,54 +215,53 @@ NeatScreen.prototype.loadChannel = function (channel) {
   }
 
   var self = this
-  // TODO: self.state.cabal.joinChannel(channel)
-  self.state.scrollback = 0
+
+  // This is really cheap, so we could load many more if we wanted to!
+  var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS + 50
+
   self.state.channel = channel
 
-  var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
-  // clear the old messages array
+  // clear the old channel state
+  self.state.scrollback = 0
   self.state.messages = []
-  self.state.latest_date = new Date(0)
-  // if we monitor a new channel, destroy the old watcher first
-  if (self.watcher) self.watcher.destroy()
-  this.neat.render()
+  self.neat.render()
 
-  function onMessage (msg, redraw) {
-    var msgDate = new Date(msg.value.timestamp)
-    if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
-      self.state.latest_date = msgDate
-      self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+  // MISSING: mention beeps
+  // MISSING: day change messages
+
+  var pending = 0
+  function onMessage () {
+    if (pending > 0) {
+      pending++
+      return
     }
-    self.state.messages.push(self.formatMessage(msg))
+    pending = 1
 
-    if (redraw) self.neat.render()
-  }
+    // TODO: wrap this up in a nice interface and expose it via cabal-client
+    var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES, lt: '~'})
+    collect(rs, function (err, msgs) {
+      if (err) return
+      msgs.reverse()
 
-  var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES, lt: '~'})
-  collect(rs, function (err, msgs) {
-    if (err) return
-    msgs.reverse()
+      self.state.messages = []
 
-    msgs.forEach(function (msg) {
-      onMessage(msg, false)
+      msgs.forEach(function (msg) {
+        self.state.messages.push(self.formatMessage(msg))
+      })
 
-      // beep on mention
-      var user = self.cabal.username
-      if (msg.value) { msg = msg.value }
-      if (!msg.type) { msg.type = 'chat/text' }
-      if (msg.content && msg.author &&
-          msg.type === 'chat/text' &&
-          msg.content.indexOf(user) > -1 &&
-          msg.author !== user) {
-        process.stdout.write('\x07') // beep character
+      self.neat.render()
+
+      if (pending > 0) {
+        pending = 0
+        onMessage()
       }
     })
-    self.neat.render()
+  }
 
-    self.cabal.messages.events.on(channel, onmsg)
-    self.state.msgListener = onmsg
-    function onmsg (msg) { onMessage(msg, true) }
-  })
+  self.cabal.messages.events.on(channel, onMessage)
+  self.state.msgListener = onMessage
+
+  onMessage()
 }
 
 NeatScreen.prototype.render = function () {
