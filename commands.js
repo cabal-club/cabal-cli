@@ -41,7 +41,7 @@ function Commander (view, cabal) {
     channels: {
       help: () => "display the cabal's channels",
       call: (arg) => {
-        self.cabal.getChannels((err, channels) => {
+        self.cabal.channels.get((err, channels) => {
           if (err) return
           self.view.writeLine('* channels:')
           channels.map((m) => {
