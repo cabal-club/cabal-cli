@@ -1,1 +1,1 @@
-module.exports = require('@noffle/cabal-core')
+module.exports = require('cabal-core')
