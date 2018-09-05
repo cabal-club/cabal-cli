@@ -1,6 +1,6 @@
 {
   "name": "cabal",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "p2p chat",
   "main": "index.js",
   "bin": {
@@ -36,7 +36,13 @@
     "decentralize",
     "p2p"
   ],
-  "authors": ["cblgh", "noffle", "hunor karamán", "karissa", "ralphtheninja"],
+  "authors": [
+    "cblgh",
+    "noffle",
+    "hunor karamán",
+    "karissa",
+    "ralphtheninja"
+  ],
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/cabal-club/cabal/issues"
