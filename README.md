@@ -1,7 +1,6 @@
-# Cabal
-p2p chat software
+# cabal-cli
 
-Cabal is a place where mesh conspirators can talk about p2p topics in a p2p way.
+> Terminal client for cabal, the p2p chat platform.
 
 See [cabal-core](https://github.com/cabal-club/cabal-core) for the underlying
 database & api.
