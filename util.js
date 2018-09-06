@@ -13,7 +13,7 @@ function wrapAnsi (text, width) {
   var line = []
   var lineLen = 0
   var insideCode = false
-  for (var i=0; i < text.length; i++) {
+  for (var i = 0; i < text.length; i++) {
     var chr = text.charAt(i)
     if (chr.charCodeAt(0) === 27) {
       insideCode = true
@@ -53,9 +53,9 @@ function strlenAnsi (str) {
   var len = 0
   var insideCode = false
 
-  for (var i=0; i < str.length; i++) {
+  for (var i = 0; i < str.length; i++) {
     var chr = str.charAt(i)
-    if (chr === '\033') insideCode = true
+    if (chr.charCodeAt(0) === 27) insideCode = true
     if (!insideCode) len++
     if (chr === 'm' && insideCode) insideCode = false
   }
