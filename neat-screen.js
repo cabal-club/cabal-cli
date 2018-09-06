@@ -111,7 +111,7 @@ function NeatScreen (cabal) {
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('pageup', () => self.state.scrollback++)
-  this.neat.input.on('pagedown', () => self.state.scrollback = Math.max(0, self.state.scrollback - 1))
+  this.neat.input.on('pagedown', () => { self.state.scrollback = Math.max(0, self.state.scrollback - 1); return null })
 
   this.neat.use(function (state, bus) {
     state.cabal = cabal

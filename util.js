@@ -15,7 +15,7 @@ function wrapAnsi (text, width) {
   var insideCode = false
   for (var i=0; i < text.length; i++) {
     var chr = text.charAt(i)
-    if (chr === '\033') {
+    if (chr.charCodeAt(0) === 27) {
       insideCode = true
     }
 

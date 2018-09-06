@@ -33,7 +33,7 @@ if (args.key) {
     start(args.key)
   })
 } else {
-  var cabal = Cabal(args.db, null)
+  cabal = Cabal(args.db, null)
   cabal.db.ready(function () {
     cabal.getLocalKey(function (err, key) {
       if (err) throw err
