@@ -52,24 +52,26 @@ function big (state) {
 }
 
 function linkSize (state) {
-  return `cabal://${state.cabal.db.key.toString('hex')}`.length
+  if (state.cabal.db.key) return `cabal://${state.cabal.db.key.toString('hex')}`.length
+  else return 'cabal://...'
 }
 
 function renderPrompt (state) {
+  var name = state.user ? (state.user.name || state.user.key.substring(0, 8)) : 'unknown'
   return [
-    `[${chalk.cyan(state.cabal.username)}:${state.channel}] ${state.neat.input.line()}`
+    `[${chalk.cyan(name)}:${state.channel}] ${state.neat.input.line()}`
   ]
 }
 
 function renderTitlebar (state, width) {
   return [
     chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
-    util.rightAlignText(chalk.white(`cabal://${state.cabal.db.key.toString('hex')}`), width)
+    util.rightAlignText(chalk.white(`cabal://${state.cabal.key.toString('hex')}`), width)
   ]
 }
 
 function renderChannels (state, width, height) {
-  return state.cabal.channels
+  return state.channels
     .map(function (channel, idx) {
       var channelTruncated = channel.substring(0, width - 5)
       if (state.channel === channel) {
@@ -91,12 +93,30 @@ function renderHorizontalLine (chr, width, chlk) {
 }
 
 function renderNicks (state, width, height) {
-  var users = Object.keys(state.cabal.users)
-    .sort()
-    .map(function (username) {
-      return username.slice(0, width)
+  var users = Object.keys(state.users)
+    .map(key => state.users[key])
+    .sort(cmpUser)
+
+  users = users
+    .map(function (user) {
+      var name = ''
+      var sigil = ''
+      // if (user.online) sigil = chalk.green('+')
+      if (user && user.name) name += user.name.slice(0, width)
+      else name += user.key.slice(0, Math.min(8, width))
+      if (!user.online) name = chalk.gray(name)
+      return sigil + name
     })
   return users
+}
+
+function cmpUser (a, b) {
+  if (a.online && !b.online) return -1
+  if (b.online && !a.online) return 1
+  if (a.name && !b.name) return -1
+  if (b.name && !a.name) return 1
+  if (a.name && b.name) return a.name < b.name ? -1 : 1
+  return a.key < b.key ? -1 : 1
 }
 
 function renderMessages (state, width, height) {

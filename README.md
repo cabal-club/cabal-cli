@@ -14,18 +14,22 @@ chat with us:
 
 ```
 $ npm install --global cabal
-$ cabal --key cabal://4ae5ec168a9f6b45b9d35e3cc1d0f4e3a436000d37fae8f53b3f8dadfe8f192f --nick <nickname>
+$ cabal --key cabal://4ae5ec168a9f6b45b9d35e3cc1d0f4e3a436000d37fae8f53b3f8dadfe8f192f
 ```
 
 ## Usage
 #### Start a new instance:
 ```
-cabal --db <file path> --nick <nickname>
+cabal --db <file path>
 ```
 
 #### Connect to an existing instance:
 ```
-cabal --key <key> --nick <nickname>
+cabal --key <key>
+```
+e.g.
+```
+cabal --key cabal://4ae5ec168a9f6b45b9d35e3cc1d0f4e3a436000d37fae8f53b3f8dadfe8f192f
 ```
 
 #### Headless mode

@@ -1,15 +1,15 @@
 {
   "name": "cabal",
-  "version": "2.8.1",
-  "description": "p2p forum software",
+  "version": "3.0.2",
+  "description": "p2p chat",
   "main": "index.js",
   "bin": {
     "cabal": "cli.js"
   },
   "dependencies": {
-    "beepbeep": "^1.2.2",
-    "cabal-core": "^2.2.0",
+    "cabal-core": "^3.0.0",
     "chalk": "^2.4.1",
+    "collect-stream": "^1.2.1",
     "discovery-swarm": "^5.1.2",
     "minimist": "^1.2.0",
     "neat-log": "^3.1.0",
@@ -36,7 +36,13 @@
     "decentralize",
     "p2p"
   ],
-  "author": "cblgh",
+  "authors": [
+    "cblgh",
+    "noffle",
+    "hunor karamán",
+    "karissa",
+    "ralphtheninja"
+  ],
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/cabal-club/cabal/issues"

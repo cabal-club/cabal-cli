@@ -14,14 +14,20 @@ function Commander (view, cabal) {
       help: () => 'change your display name',
       call: (arg) => {
         if (arg === '') return
-        self.cabal.username = arg
+        self.cabal.publishNick(arg)
         self.view.writeLine("* you're now known as " + arg)
       }
     },
     emote: {
       help: () => 'write an old-school text emote',
       call: (arg) => {
-        self.cabal.message(self.channel, arg, {type: 'chat/emote'})
+        self.cabal.publish({
+          type: 'chat/emote',
+          content: {
+            channel: self.channel,
+            text: arg
+          }
+        })
       }
     },
     names: {
@@ -35,7 +41,7 @@ function Commander (view, cabal) {
     channels: {
       help: () => "display the cabal's channels",
       call: (arg) => {
-        self.cabal.getChannels((err, channels) => {
+        self.cabal.channels.get((err, channels) => {
           if (err) return
           self.view.writeLine('* channels:')
           channels.map((m) => {
@@ -116,7 +122,13 @@ Commander.prototype.process = function (line) {
   } else {
     line = line.trim()
     if (line !== '') {
-      self.cabal.message(self.channel, line)
+      self.cabal.publish({
+        type: 'chat/text',
+        content: {
+          channel: self.channel,
+          text: line
+        }
+      })
     }
   }
 }

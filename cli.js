@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var Cabal = require('cabal-core')
-var cabalSwarm = require('cabal-core/swarm.js')
+var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var frontend = require('./neat-screen.js')
 
@@ -19,8 +19,7 @@ var usage = `Usage
 
   Options:
 
-    --nick    Your nickname.
-    --seeder  Start a headless seeder for the specified cabal key
+    --seed  Start a headless seed for the specified cabal key
 
 Work in progress! Learn more at github.com/cabal-club
 `
@@ -28,6 +27,19 @@ Work in progress! Learn more at github.com/cabal-club
 if (args.key) {
   args.key = args.key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   args.db = rootdir + args.key
+
+  var cabal = Cabal(args.db, args.key)
+  cabal.db.ready(function () {
+    start(args.key)
+  })
+} else {
+  var cabal = Cabal(args.db, null)
+  cabal.db.ready(function () {
+    cabal.getLocalKey(function (err, key) {
+      if (err) throw err
+      start(key)
+    })
+  })
 }
 
 if (!args.db) {
@@ -35,13 +47,12 @@ if (!args.db) {
   process.exit(1)
 }
 
-var nick = args.nick || (args.seeder ? 'cabal [seed]' : 'conspirator')
-var cabal = Cabal(args.db, args.key, {username: nick})
-cabal.db.on('ready', function () {
-  if (!args.seeder) {
+function start (key) {
+  if (!args.seed) {
     frontend(cabal)
+    setTimeout(function () { swarm(cabal) }, 300)
   } else {
-    console.log('reseeding the cabal at cabal://' + cabal.db.key.toString('hex'))
+    console.log('Seeding', key)
+    swarm(cabal)
   }
-  cabalSwarm(cabal)
-})
+}

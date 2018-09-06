@@ -1,17 +1,11 @@
-var beep = require('beepbeep')
 var neatLog = require('neat-log')
 var chalk = require('chalk')
 var strftime = require('strftime')
 var Commander = require('./commands.js')
 var views = require('./views')
+var collect = require('collect-stream')
 
 const HEADER_ROWS = 6
-
-function detectMention (msg, user) {
-  if (!msg || !msg.content || !msg.author || !msg.type || msg.type !== 'chat/text') return false
-  if (msg.content.indexOf(user) > -1 && msg.author !== user) return true
-  return false
-}
 
 function NeatScreen (cabal) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(cabal)
@@ -19,9 +13,8 @@ function NeatScreen (cabal) {
 
   this.cabal = cabal
   this.commander = Commander(this, cabal)
-  this.watcher = null
 
-  this.neat = neatLog(view, {fullscreen: true,
+  this.neat = neatLog(renderApp, {fullscreen: true,
     style: function (start, cursor, end) {
       if (!cursor) cursor = ' '
       return start + chalk.underline(cursor) + end
@@ -42,7 +35,10 @@ function NeatScreen (cabal) {
       }
     } else {
       // nick completion
-      var users = Object.keys(self.cabal.users).sort()
+      var users = Object.keys(self.state.users)
+        .map(key => self.state.users[key])
+        .map(user => user.name || user.key.substring(0, 8))
+        .sort()
       var pattern = (/^(\w+)$/)
       var match = pattern.exec(line)
 
@@ -90,38 +86,27 @@ function NeatScreen (cabal) {
   })
   // move up/down channels with ctrl+{n,p}
   this.neat.input.on('ctrl-p', () => {
-    var currentIdx = self.state.cabal.channels.indexOf(self.commander.channel)
+    var currentIdx = self.state.channels.indexOf(self.commander.channel)
     if (currentIdx !== -1) {
       currentIdx--
-      if (currentIdx < 0) currentIdx = self.state.cabal.channels.length - 1
+      if (currentIdx < 0) currentIdx = self.state.channels.length - 1
       setChannelByIndex(currentIdx)
     }
   })
   this.neat.input.on('ctrl-n', () => {
-    var currentIdx = self.state.cabal.channels.indexOf(self.commander.channel)
+    var currentIdx = self.state.channels.indexOf(self.commander.channel)
     if (currentIdx !== -1) {
       currentIdx++
-      currentIdx = currentIdx % self.state.cabal.channels.length
+      currentIdx = currentIdx % self.state.channels.length
       setChannelByIndex(currentIdx)
     }
   })
 
   function setChannelByIndex (n) {
-    if (n < 0 || n >= self.state.cabal.channels.length) return
+    if (n < 0 || n >= self.state.channels.length) return
 
-    self.commander.channel = self.state.cabal.channels[n]
-    self.loadChannel(self.state.cabal.channels[n])
-  }
-
-  // TODO: implement simple notifications for messages in channels
-  function watchChannels () {
-    // watch all channels
-    // for each channel
-    // remember index/date of last message
-    // parse the message to detect mentions
-    // if new message, prefix * rune to channel name
-    // if mention, prefix ! rune to channel name
-    // when loading new channel, clear rune
+    self.commander.channel = self.state.channels[n]
+    self.loadChannel(self.state.channels[n])
   }
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
@@ -134,28 +119,91 @@ function NeatScreen (cabal) {
 
     self.state = state
     self.bus = bus
-    // initialize messages
-    self.state.messages = []
 
-    self.state.cabal.getChannels((err, channels) => {
-      if (err) return
-      self.state.cabal.channels = channels
-      // load initial state of the channel
-      self.loadChannel('default')
+    self.state.messages = []
+    self.state.channels = []
+    self.state.users = {}
+    self.state.user = null
+
+    self.cabal.on('peer-added', function (key) {
+      var found = false
+      Object.keys(self.state.users).forEach(function (k) {
+        if (k === key) {
+          self.state.users[k].online = true
+          found = true
+        }
+      })
+      if (!found) {
+        self.state.users[key] = {
+          key: key,
+          online: true
+        }
+      }
+      self.bus.emit('render')
+    })
+    self.cabal.on('peer-dropped', function (key) {
+      Object.keys(self.state.users).forEach(function (k) {
+        if (k === key) {
+          self.state.users[k].online = false
+          self.bus.emit('render')
+        }
+      })
+    })
+
+    // TODO: use cabal-core api for all of this
+    self.cabal.db.ready(function () {
+      self.cabal.channels.get((err, channels) => {
+        if (err) return
+        self.state.channels = channels
+        self.loadChannel('default')
+        self.bus.emit('render')
+
+        self.cabal.channels.events.on('add', function (channel) {
+          self.state.channels.push(channel)
+          self.state.channels.sort()
+          self.bus.emit('render')
+        })
+      })
+
+      self.cabal.users.getAll(function (err, users) {
+        if (err) return
+        state.users = users
+
+        updateLocalKey()
+
+        self.cabal.users.events.on('update', function (key) {
+          // TODO: rate-limit
+          self.cabal.users.get(key, function (err, user) {
+            if (err) return
+            state.users[key] = Object.assign(state.users[key] || {}, user)
+            if (self.state.user && key === self.state.user.key) self.state.user = state.users[key]
+            if (!self.state.user) updateLocalKey()
+            self.bus.emit('render')
+          })
+        })
+
+        function updateLocalKey () {
+          self.cabal.getLocalKey(function (err, lkey) {
+            if (err) return self.bus.emit('render')
+            Object.keys(users).forEach(function (key) {
+              if (key === lkey) {
+                self.state.user = users[key]
+                self.state.user.local = true
+                self.state.user.online = true
+                self.state.user.key = key
+              }
+            })
+            self.bus.emit('render')
+          })
+        }
+      })
     })
   })
+}
 
-  self.cabal.on('join', (username) => {
-    self.bus.emit('render')
-  })
-  self.cabal.on('leave', (username) => {
-    self.bus.emit('render')
-  })
-
-  function view (state) {
-    if (process.stdout.columns > 80) return views.big(state)
-    else return views.small(state)
-  }
+function renderApp (state) {
+  if (process.stdout.columns > 80) return views.big(state)
+  else return views.small(state)
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
@@ -170,53 +218,61 @@ NeatScreen.prototype.clear = function () {
 }
 
 NeatScreen.prototype.loadChannel = function (channel) {
+  if (this.state.msgListener) {
+    this.cabal.messages.events.removeListener(this.state.channel, this.state.msgListener)
+    this.state.msgListener = null
+  }
+
   var self = this
-  self.state.cabal.joinChannel(channel)
-  self.state.scrollback = 0
+
+  // This is really cheap, so we could load many more if we wanted to!
+  var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS + 50
+
   self.state.channel = channel
 
-  var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS
-  // clear the old messages array
+  // clear the old channel state
+  self.state.scrollback = 0
   self.state.messages = []
-  self.state.latest_date = new Date(0)
-  // if we monitor a new channel, destroy the old watcher first
-  if (self.watcher) self.watcher.destroy()
-  this.neat.render()
+  self.neat.render()
 
-  function onMessages (err, messages) {
-    if (err) return
-    messages.map((arr) => {
-      arr.forEach((m) => {
-        var msgDate = new Date(m.value.time)
-        if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
-          self.state.latest_date = msgDate
-          self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
-        }
-        self.state.messages.push(self.formatMessage(m))
+  // MISSING: mention beeps
+  // MISSING: day change messages
+
+  var pending = 0
+  function onMessage () {
+    if (pending > 0) {
+      pending++
+      return
+    }
+    pending = 1
+
+    // TODO: wrap this up in a nice interface and expose it via cabal-client
+    var rs = self.cabal.messages.read(channel, {limit: MAX_MESSAGES, lt: '~'})
+    collect(rs, function (err, msgs) {
+      if (err) return
+      msgs.reverse()
+
+      self.state.messages = []
+
+      msgs.forEach(function (msg) {
+        self.state.messages.push(self.formatMessage(msg))
       })
-    })
-    self.neat.render()
-  }
-  self.cabal.getMessages(channel, MAX_MESSAGES, onMessages)
 
-  self.watcher = self.cabal.watch(channel, () => {
-    self.cabal.getMessages(channel, 1, (err, messages) => {
-      onMessages(err, messages)
-      beepOnHighlight(err, messages)
+      self.neat.render()
 
-      function beepOnHighlight (err, messages) {
-        if (err) return
-        messages.forEach((arr) => {
-          arr.forEach((msg) => {
-            var user = self.cabal.username
-            if (msg.value) { msg = msg.value }
-            if (!msg.type) { msg.type = 'chat/text' }
-            if (detectMention(msg, user)) { beep() }
-          })
-        })
+      if (pending > 1) {
+        pending = 0
+        onMessage()
+      } else {
+        pending = 0
       }
     })
-  })
+  }
+
+  self.cabal.messages.events.on(channel, onMessage)
+  self.state.msgListener = onMessage
+
+  onMessage()
 }
 
 NeatScreen.prototype.render = function () {
@@ -227,24 +283,27 @@ NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
   var highlight = false
   var user = self.cabal.username
-  if (msg.value) { msg = msg.value }
-  if (!msg.type) { msg.type = 'chat/text' }
-  if (msg.content && msg.author && msg.time) {
-    if (detectMention(msg, user)) { highlight = true }
+  if (!msg.value.type) { msg.type = 'chat/text' }
+  if (msg.value.content && msg.value.timestamp) {
+    if (msg.value.content.text.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
 
-    var timestamp = `${chalk.gray(formatTime(msg.time))}`
-    var authorText = `${chalk.gray('<')}${chalk.cyan(msg.author)}${chalk.gray('>')}`
-    var content = msg.content
-    var emote = (msg.type === 'chat/emote')
+    var author
+    if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name || this.state.users[msg.key].key.slice(0, 8)
+    else author = msg.key.slice(0, 8)
+
+    var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
+    var authorText = `${chalk.gray('<')}${chalk.cyan(author)}${chalk.gray('>')}`
+    var content = msg.value.content.text
+    var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
-      authorText = `${chalk.white(msg.author)}`
-      content = `${chalk.gray(msg.content)}`
+      authorText = `${chalk.white(author)}`
+      content = `${chalk.gray(msg.value.content.text)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
-  return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg))
+  return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg.value))
 }
 
 function formatTime (t) {
