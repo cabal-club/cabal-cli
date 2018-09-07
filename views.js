@@ -107,6 +107,7 @@ function renderNicks (state, width, height) {
       if (!user.online) name = chalk.gray(name)
       return sigil + name
     })
+    .slice(0, height)
   return users
 }
 
