@@ -291,8 +291,10 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name || this.state.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
 
+    var color = keyToColour(msg.key)
+
     var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
-    var authorText = `${chalk.gray('<')}${chalk.cyan(author)}${chalk.gray('>')}`
+    var authorText = `${chalk.gray('<')}${chalk[color](author)}${chalk.gray('>')}`
     var content = msg.value.content.text
     var emote = (msg.value.type === 'chat/emote')
 
@@ -309,5 +311,32 @@ NeatScreen.prototype.formatMessage = function (msg) {
 function formatTime (t) {
   return strftime('%T', new Date(t))
 }
+
+function keyToColour (key) {
+  var n = 0
+  for (var i = 0; i < key.length; i++) {
+    n += parseInt(key[i], 16)
+    n = n % colours.length
+  }
+  return colours[n]
+}
+
+var colours = [
+ 'red',
+ 'green',
+ 'yellow',
+ 'blue',
+ 'magenta',
+ 'cyan',
+ 'white',
+// 'gray',
+ 'redBright',
+ 'greenBright',
+ 'yellowBright',
+ 'blueBright',
+ 'magentaBright',
+ 'cyanBright',
+ 'whiteBright'
+]
 
 module.exports = NeatScreen
