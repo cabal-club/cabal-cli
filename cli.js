@@ -35,15 +35,6 @@ if (args.key) {
 
   var cabal = Cabal(args.db, args.key)
   cabal.db.ready(function () {
-    if (args.message) {
-      publishSingleMessage({
-        channel: args.channel,
-        message: args.message,
-        messageType: args.type,
-        timeout: args.timeout
-      })
-      return
-    }
     start(args.key)
   })
 } else {
@@ -51,15 +42,6 @@ if (args.key) {
   cabal.db.ready(function () {
     cabal.getLocalKey(function (err, key) {
       if (err) throw err
-      if (args.message) {
-        publishSingleMessage({
-          channel: args.channel,
-          message: args.message,
-          messageType: args.type,
-          timeout: args.timeout
-        })
-        return
-      }
       start(key)
     })
   })
@@ -72,6 +54,15 @@ if (!args.db) {
 
 function start (key) {
   if (!args.seed) {
+    if (args.message) {
+      publishSingleMessage({
+        channel: args.channel,
+        message: args.message,
+        messageType: args.type,
+        timeout: args.timeout
+      })
+      return
+    }
     frontend(cabal)
     setTimeout(function () { swarm(cabal) }, 300)
   } else {
