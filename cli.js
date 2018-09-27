@@ -37,10 +37,10 @@ if (args.key) {
   cabal.db.ready(function () {
     if (args.message) {
       publishSingleMessage({
-        channel: args.channel || 'default',
+        channel: args.channel,
         message: args.message,
-        messageType: args.type || 'chat/text',
-        timeout: args.timeout || 5000
+        messageType: args.type,
+        timeout: args.timeout
       })
       return
     }
@@ -51,6 +51,15 @@ if (args.key) {
   cabal.db.ready(function () {
     cabal.getLocalKey(function (err, key) {
       if (err) throw err
+      if (args.message) {
+        publishSingleMessage({
+          channel: args.channel,
+          message: args.message,
+          messageType: args.type,
+          timeout: args.timeout
+        })
+        return
+      }
       start(key)
     })
   })
@@ -74,12 +83,12 @@ function start (key) {
 function publishSingleMessage ({channel, message, messageType, timeout}) {
   console.log('Publishing message to channel - ' + channel + ': "' + message + '"...')
   cabal.publish({
-    type: messageType,
+    type: messageType || 'chat/text',
     content: {
-      channel: channel,
+      channel: channel || 'default',
       text: message
     }
   })
   swarm(cabal)
-  setTimeout(function () { process.exit(0) }, timeout)
+  setTimeout(function () { process.exit(0) }, timeout || 5000)
 }
