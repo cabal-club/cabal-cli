@@ -81,5 +81,5 @@ function publishSingleMessage ({channel, message, messageType, timeout}) {
     }
   })
   swarm(cabal)
-  setTimeout(function () { process.exit(1) }, timeout)
+  setTimeout(function () { process.exit(0) }, timeout)
 }
