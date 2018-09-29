@@ -19,7 +19,12 @@ var usage = `Usage
 
   Options:
 
-    --seed  Start a headless seed for the specified cabal key
+    --seed    Start a headless seed for the specified cabal key
+
+    --message Publish a single message; then quit after \`timeout\`
+    --channel Channel name to publish to for \`message\` option; default: "default"
+    --timeout Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
+    --type    Message type set to message for \`message\` option; default: "chat/text"
 
 Work in progress! Learn more at github.com/cabal-club
 `
@@ -49,10 +54,32 @@ if (!args.db) {
 
 function start (key) {
   if (!args.seed) {
+    if (args.message) {
+      publishSingleMessage({
+        channel: args.channel,
+        message: args.message,
+        messageType: args.type,
+        timeout: args.timeout
+      })
+      return
+    }
     frontend(cabal)
     setTimeout(function () { swarm(cabal) }, 300)
   } else {
     console.log('Seeding', key)
     swarm(cabal)
   }
+}
+
+function publishSingleMessage ({channel, message, messageType, timeout}) {
+  console.log('Publishing message to channel - ' + channel + ': "' + message + '"...')
+  cabal.publish({
+    type: messageType || 'chat/text',
+    content: {
+      channel: channel || 'default',
+      text: message
+    }
+  })
+  swarm(cabal)
+  setTimeout(function () { process.exit(0) }, timeout || 5000)
 }
