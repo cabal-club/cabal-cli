@@ -322,21 +322,21 @@ function keyToColour (key) {
 }
 
 var colours = [
- 'red',
- 'green',
- 'yellow',
- 'blue',
- 'magenta',
- 'cyan',
- 'white',
-// 'gray',
- 'redBright',
- 'greenBright',
- 'yellowBright',
- 'blueBright',
- 'magentaBright',
- 'cyanBright',
- 'whiteBright'
+  'red',
+  'green',
+  'yellow',
+  'blue',
+  'magenta',
+  'cyan',
+  'white',
+  // 'gray',
+  'redBright',
+  'greenBright',
+  'yellowBright',
+  'blueBright',
+  'magentaBright',
+  'cyanBright',
+  'whiteBright'
 ]
 
 module.exports = NeatScreen
