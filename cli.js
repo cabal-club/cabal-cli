@@ -7,7 +7,7 @@ var frontend = require('./neat-screen.js')
 var args = minimist(process.argv.slice(2))
 
 var homedir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
-var rootdir = homedir + '/.cabal/archives/'
+var rootdir = args.dir || (homedir + '/.cabal/archives/')
 
 var usage = `Usage
 
