@@ -233,6 +233,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   // clear the old channel state
   self.state.scrollback = 0
   self.state.messages = []
+  self.state.topic = ''
   self.neat.render()
 
   // MISSING: mention beeps
@@ -301,6 +302,10 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (emote) {
       authorText = `${chalk.white(author)}`
       content = `${chalk.gray(msg.value.content.text)}`
+    }
+    if (msg.value.type === 'chat/motd') {
+      self.state.topic = msg.value.content.text
+      content = chalk.gray(' * MOTD: ' + msg.value.content.text)
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content

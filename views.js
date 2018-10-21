@@ -3,7 +3,7 @@ var chalk = require('chalk')
 var blit = require('txt-blit')
 var util = require('./util')
 
-const HEADER_ROWS = 6
+const HEADER_ROWS = 7
 
 module.exports = { big, small }
 
@@ -31,8 +31,13 @@ function big (state) {
   // channels pane
   blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
 
+  // channel topic description
+  if (state.topic) {
+    blit(screen, renderChannelTopic(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+  }
+
   // chat messages
-  blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+  blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, state.topic ? 4 : 3)
 
   // nicks pane
   blit(screen, renderNicks(state, 15, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
@@ -118,6 +123,17 @@ function cmpUser (a, b) {
   if (b.name && !a.name) return 1
   if (a.name && b.name) return a.name < b.name ? -1 : 1
   return a.key < b.key ? -1 : 1
+}
+
+function renderChannelTopic (state, width, height) {
+  var topic = state.topic || state.channel
+  var line = '➤ ' + topic
+  line = line.substring(0, width - 1)
+  if (line.length === width - 1) {
+    line = line.substring(0, line.length - 1) + '…'
+  }
+  line = line + new Array(width - line.length - 1).fill(' ').join('')
+  return [chalk.bgBlue(chalk.white(line))]
 }
 
 function renderMessages (state, width, height) {
