@@ -91,17 +91,10 @@ function Commander (view, cabal) {
         process.exit(0)
       }
     },
-    motd: {
+    topic: {
       help: () => 'set the topic/description/`message of the day` for a channel',
       call: (arg) => {
-        self.cabal.publish({
-          type: 'chat/motd',
-          content: {
-            channel: self.channel,
-            text: arg
-          }
-        })
-        self.view.writeLine('* motd set as: ' + arg)
+        self.cabal.publishChannelTopic(self.channel, arg)
       }
     }
   }
@@ -109,7 +102,7 @@ function Commander (view, cabal) {
   this.alias('join', 'j')
   this.alias('nick', 'n')
   this.alias('emote', 'me')
-  this.alias('motd', 'topic')
+  this.alias('topic', 'motd')
 }
 
 Commander.prototype.alias = function (command, alias) {

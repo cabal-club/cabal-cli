@@ -163,6 +163,11 @@ function NeatScreen (cabal) {
           self.state.channels.sort()
           self.bus.emit('render')
         })
+
+        self.cabal.topics.events.on('update', function (msg) {
+          self.state.topic = msg.value.content.topic
+          self.bus.emit('render')
+        })
       })
 
       self.cabal.users.getAll(function (err, users) {
@@ -261,6 +266,14 @@ NeatScreen.prototype.loadChannel = function (channel) {
 
       self.neat.render()
 
+      self.cabal.topics.get(channel, (err, topic) => {
+        if (err) return
+        if (topic) {
+          self.state.topic = topic
+          self.neat.render()
+        }
+      })
+
       if (pending > 1) {
         pending = 0
         onMessage()
@@ -303,9 +316,8 @@ NeatScreen.prototype.formatMessage = function (msg) {
       authorText = `${chalk.white(author)}`
       content = `${chalk.gray(msg.value.content.text)}`
     }
-    if (msg.value.type === 'chat/motd') {
-      self.state.topic = msg.value.content.text
-      content = chalk.gray(' * MOTD: ' + msg.value.content.text)
+    if (msg.value.type === 'chat/topic') {
+      content = `${chalk.gray(`* ${self.state.channel} MOTD: ${msg.value.content.text}`)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
