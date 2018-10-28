@@ -2,6 +2,7 @@
 var Cabal = require('cabal-core')
 var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
+var os = require('os')
 var fs = require('fs')
 var yaml = require('js-yaml')
 
@@ -9,7 +10,7 @@ var frontend = require('./neat-screen.js')
 
 var args = minimist(process.argv.slice(2))
 
-var homedir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
+var homedir = os.homedir()
 var rootdir = args.dir || (homedir + '/.cabal/archives/')
 
 var keys = []

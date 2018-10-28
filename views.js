@@ -85,7 +85,7 @@ function renderCabals (state, width, height) {
       var keyTruncated = key.substring(0, width - 1)
       if (state.cabal.key === key) {
         if (state.selectedWindowPane === 'cabals') {
-          return '>' + chalk.bgBlue.bold(keyTruncated)
+          return '➤' + chalk.bgBlue.bold(keyTruncated)
         } else {
           return ' ' + chalk.bgBlue(keyTruncated)
         }
@@ -101,7 +101,7 @@ function renderChannels (state, width, height) {
       var channelTruncated = channel.substring(0, width - 1)
       if (state.cabal.client.channel === channel) {
         if (state.selectedWindowPane === 'channels') {
-          return '>' + chalk.bgBlue.bold(channelTruncated)
+          return '➤' + chalk.bgBlue.bold(channelTruncated)
         } else {
           return ' ' + chalk.bgBlue(channelTruncated)
         }
