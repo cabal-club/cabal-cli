@@ -11,9 +11,8 @@ var frontend = require('./neat-screen.js')
 var args = minimist(process.argv.slice(2))
 
 var homedir = os.homedir()
-var rootdir = args.dir || (homedir + '/.cabal/archives/')
-
-var keys = []
+var rootdir = args.dir || (homedir + '/.cabal')
+var archivesdir = `${rootdir}/archives/`
 
 var usage = `Usage
 
@@ -35,64 +34,59 @@ var usage = `Usage
 Work in progress! Learn more at github.com/cabal-club
 `
 
+var cabalKeys = []
+
 // Attempt to load local or homedir config file
 try {
   var config
-  var configFilename = '.cabal.yml'
-  if (fs.existsSync(configFilename)) {
-    config = yaml.safeLoad(fs.readFileSync(configFilename, 'utf8'))
-  } else if (fs.existsSync(args.dir || homedir)) {
-    config = yaml.safeLoad(fs.readFileSync((args.dir || homedir) + '/' + configFilename, 'utf8'))
+  var configFilename = 'config.yml'
+  var currentDirConfigFilename = '.cabal.yml'
+  if (args.config && fs.existsSync(args.config)) {
+    config = yaml.safeLoad(fs.readFileSync(args.config, 'utf8'))
+  } else if (fs.existsSync(currentDirConfigFilename)) {
+    config = yaml.safeLoad(fs.readFileSync(currentDirConfigFilename, 'utf8'))
+  } else if (fs.existsSync(rootdir + '/' + configFilename)) {
+    config = yaml.safeLoad(fs.readFileSync(rootdir + '/' + configFilename, 'utf8'))
   }
-  if (config && config.keys) {
-    keys = config.keys
+  if (config && config.cabals) {
+    cabalKeys = config.cabals
   }
 } catch (e) {
   console.log(e)
 }
 
-// Load a single cabal key
 if (args.key) {
-  var key = parseKey(args.key)
-  var db = rootdir + key
-  var cabal = Cabal(db, key)
+  // If a key is provided, place it at the top of the list
+  cabalKeys.unshift(args.key)
+}
+
+if (cabalKeys.length) {
+  Promise.all(cabalKeys.map((key) => {
+    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+    var db = archivesdir + key
+    var cabal = Cabal(db, key)
+    return new Promise((resolve) => {
+      cabal.db.ready(() => {
+        resolve(cabal)
+      })
+    })
+  })).then((cabals) => {
+    start(cabals)
+  })
+} else if (args.db) {
+  cabal = Cabal(args.db, null)
   cabal.db.ready(function () {
-    start([cabal])
+    cabal.getLocalKey(function (err, key) {
+      if (err) throw err
+      start([cabal])
+    })
   })
 } else {
-  // Load multiple keys from config
-  if (keys.length) {
-    Promise.all(keys.map((key) => {
-      key = parseKey(key)
-      var db = rootdir + key
-      var cabal = Cabal(db, key)
-      return new Promise((resolve) => {
-        cabal.db.ready(() => {
-          resolve(cabal)
-        })
-      })
-    })).then((cabals) => {
-      start(cabals)
-    })
-  } else if (args.db) {
-    cabal = Cabal(args.db, null)
-    cabal.db.ready(function () {
-      cabal.getLocalKey(function (err, key) {
-        if (err) throw err
-        start([cabal])
-      })
-    })
-  } else {
-    process.stderr.write(usage)
-    process.exit(1)
-  }
+  process.stderr.write(usage)
+  process.exit(1)
 }
 
-function parseKey (key) {
-  return key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-}
-
-function start (cabals = []) {
+function start (cabals) {
   if (!args.seed) {
     if (args.key && args.message) {
       publishSingleMessage({
