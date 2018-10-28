@@ -98,7 +98,7 @@ function NeatScreen (cabals) {
   this.neat.input.on('ctrl-p', () => {
     var currentIdx
     if (self.state.selectedWindowPane === 'cabals') {
-      currentIdx = self.state.cabals.indexOf(self.commander.cabal.key)
+      currentIdx = self.state.cabals.findIndex((cabal) => cabal.key === self.commander.cabal.key)
       if (currentIdx !== -1) {
         currentIdx--
         if (currentIdx < 0) currentIdx = self.state.cabals.length - 1
