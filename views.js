@@ -30,13 +30,13 @@ function big (state) {
 
   if (state.cabals.length > 1) {
     // cabals pane
-    blit(screen, renderCabals(state, 5, process.stdout.rows - HEADER_ROWS), 0, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 5, 3)
+    blit(screen, renderCabals(state, 6, process.stdout.rows - HEADER_ROWS), 0, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 6, 3)
     // channels pane
-    blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 6, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 20, 3)
+    blit(screen, renderChannels(state, 18, process.stdout.rows - HEADER_ROWS), 7, 3)
+    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 23, 3)
     // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 20 - 17, process.stdout.rows - HEADER_ROWS), 21, 3)
+    blit(screen, renderMessages(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
   } else {
     // channels pane
     blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
@@ -82,12 +82,13 @@ function renderCabals (state, width, height) {
   return state.cabals
     .map(function (cabal, idx) {
       var key = cabal.key
-      var keyTruncated = key.substring(0, width - 1)
+      var keyTruncated = key.substring(0, 4)
       if (state.cabal.key === key) {
+        var fill = ' '
         if (state.selectedWindowPane === 'cabals') {
-          return '➤' + chalk.bgBlue.bold(keyTruncated)
+          return '>' + chalk.bgBlue(keyTruncated + fill)
         } else {
-          return ' ' + chalk.bgBlue(keyTruncated)
+          return ' ' + chalk.bgBlue(keyTruncated + fill)
         }
       } else {
         return ' ' + chalk.white(keyTruncated)
@@ -98,12 +99,14 @@ function renderCabals (state, width, height) {
 function renderChannels (state, width, height) {
   return state.cabal.client.channels
     .map(function (channel, idx) {
-      var channelTruncated = channel.substring(0, width - 1)
+      var channelTruncated = channel.substring(0, width - 3)
       if (state.cabal.client.channel === channel) {
+        var fillWidth = width - channelTruncated.length - 3
+        var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
         if (state.selectedWindowPane === 'channels') {
-          return '➤' + chalk.bgBlue.bold(channelTruncated)
+          return '>' + chalk.bgBlue(channelTruncated + fill)
         } else {
-          return ' ' + chalk.bgBlue(channelTruncated)
+          return ' ' + chalk.bgBlue(channelTruncated + fill)
         }
       } else {
         return ' ' + chalk.white(channelTruncated)
