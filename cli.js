@@ -2,12 +2,17 @@
 var Cabal = require('cabal-core')
 var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
+var fs = require('fs')
+var yaml = require('js-yaml')
+
 var frontend = require('./neat-screen.js')
 
 var args = minimist(process.argv.slice(2))
 
 var homedir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
 var rootdir = args.dir || (homedir + '/.cabal/archives/')
+
+var keys = []
 
 var usage = `Usage
 
@@ -29,32 +34,66 @@ var usage = `Usage
 Work in progress! Learn more at github.com/cabal-club
 `
 
-if (args.key) {
-  args.key = args.key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-  args.db = rootdir + args.key
+// Attempt to load local or homedir config file
+try {
+  var config
+  var configFilename = '.cabal.yml'
+  if (fs.existsSync(configFilename)) {
+    config = yaml.safeLoad(fs.readFileSync(configFilename, 'utf8'))
+  } else if (fs.existsSync(args.dir || homedir)) {
+    config = yaml.safeLoad(fs.readFileSync((args.dir || homedir) + '/' + configFilename, 'utf8'))
+  }
+  if (config && config.keys) {
+    keys = config.keys
+  }
+} catch (e) {
+  console.log(e)
+}
 
-  var cabal = Cabal(args.db, args.key)
+// Load a single cabal key
+if (args.key) {
+  var key = parseKey(args.key)
+  var db = rootdir + key
+  var cabal = Cabal(db, key)
   cabal.db.ready(function () {
-    start(args.key)
+    start([cabal])
   })
 } else {
-  cabal = Cabal(args.db, null)
-  cabal.db.ready(function () {
-    cabal.getLocalKey(function (err, key) {
-      if (err) throw err
-      start(key)
+  // Load multiple keys from config
+  if (keys.length) {
+    Promise.all(keys.map((key) => {
+      key = parseKey(key)
+      var db = rootdir + key
+      var cabal = Cabal(db, key)
+      return new Promise((resolve) => {
+        cabal.db.ready(() => {
+          resolve(cabal)
+        })
+      })
+    })).then((cabals) => {
+      start(cabals)
     })
-  })
+  } else if (args.db) {
+    cabal = Cabal(args.db, null)
+    cabal.db.ready(function () {
+      cabal.getLocalKey(function (err, key) {
+        if (err) throw err
+        start([cabal])
+      })
+    })
+  } else {
+    process.stderr.write(usage)
+    process.exit(1)
+  }
 }
 
-if (!args.db) {
-  process.stderr.write(usage)
-  process.exit(1)
+function parseKey (key) {
+  return key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
 }
 
-function start (key) {
+function start (cabals = []) {
   if (!args.seed) {
-    if (args.message) {
+    if (args.key && args.message) {
       publishSingleMessage({
         channel: args.channel,
         message: args.message,
@@ -63,11 +102,17 @@ function start (key) {
       })
       return
     }
-    frontend(cabal)
-    setTimeout(function () { swarm(cabal) }, 300)
+    frontend(cabals)
+    setTimeout(() => {
+      cabals.forEach((cabal) => {
+        swarm(cabal)
+      })
+    }, 300)
   } else {
-    console.log('Seeding', key)
-    swarm(cabal)
+    cabals.forEach((cabal) => {
+      console.log('Seeding', cabal.key)
+      swarm(cabal)
+    })
   }
 }
 
