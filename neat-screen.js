@@ -287,19 +287,17 @@ NeatScreen.prototype.render = function () {
 NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
   var highlight = false
-  var user = self.cabal.username
   if (!msg.value.type) { msg.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
-    if (msg.value.content.text.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
-
     var author
     if (this.state.users && this.state.users[msg.key]) author = this.state.users[msg.key].name || this.state.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
+    if (msg.value.content.text.indexOf(this.state.user.name) > -1 && author !== this.state.user.name) { highlight = true }
 
     var color = keyToColour(msg.key)
 
     var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
-    var authorText = `${chalk.gray('<')}${chalk[color](author)}${chalk.gray('>')}`
+    var authorText = `${chalk.gray('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.gray('>')}`
     var content = msg.value.content.text
     var emote = (msg.value.type === 'chat/emote')
 
