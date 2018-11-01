@@ -320,7 +320,6 @@ NeatScreen.prototype.loadChannel = function (channel) {
         if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
           self.state.latest_date = msgDate
           self.state.cabal.client.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
-          self.state.cabal.client.messages.push(self.formatMessage(msg))
         }
         self.state.cabal.client.messages.push(self.formatMessage(msg))
       })
@@ -354,7 +353,8 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var author
     if (this.state.cabal.client.users && this.state.cabal.client.users[msg.key]) author = this.state.cabal.client.users[msg.key].name || this.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
-    if (msg.value.content.text.indexOf(this.state.user.name) > -1 && author !== this.state.user.name) { highlight = true }
+    let localNick = this.state.cabal.client.user.name 
+    if (msg.value.content.text.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key)
 
