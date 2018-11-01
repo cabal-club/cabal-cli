@@ -234,9 +234,9 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.scrollback = 0
   self.state.messages = []
   self.neat.render()
+  self.state.latest_date = new Date(0)
 
   // MISSING: mention beeps
-  // MISSING: day change messages
 
   var pending = 0
   function onMessage () {
@@ -255,6 +255,11 @@ NeatScreen.prototype.loadChannel = function (channel) {
       self.state.messages = []
 
       msgs.forEach(function (msg) {
+        var msgDate = new Date(msg.value.timestamp)
+        if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
+          self.state.latest_date = msgDate
+          self.state.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+        }
         self.state.messages.push(self.formatMessage(msg))
       })
 
