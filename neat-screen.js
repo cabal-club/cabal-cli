@@ -295,7 +295,6 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.cabal.client.scrollback = 0
   self.state.cabal.client.messages = []
   self.neat.render()
-  self.state.latest_date = new Date(0)
 
   // MISSING: mention beeps
 
@@ -314,12 +313,13 @@ NeatScreen.prototype.loadChannel = function (channel) {
       msgs.reverse()
 
       self.state.cabal.client.messages = []
+      var latestTimestamp = new Date(0)
 
       msgs.forEach(function (msg) {
         var msgDate = new Date(msg.value.timestamp)
-        if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
-          self.state.latest_date = msgDate
-          self.state.cabal.client.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+        if (strftime('%F', msgDate) > strftime('%F', latestTimestamp)) {
+          latestTimestamp = msgDate
+          self.state.cabal.client.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', latestTimestamp))}`)
         }
         self.state.cabal.client.messages.push(self.formatMessage(msg))
       })
@@ -353,7 +353,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var author
     if (this.state.cabal.client.users && this.state.cabal.client.users[msg.key]) author = this.state.cabal.client.users[msg.key].name || this.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
-    let localNick = this.state.cabal.client.user.name 
+    let localNick = this.state.cabal.client.user.name
     if (msg.value.content.text.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key)
