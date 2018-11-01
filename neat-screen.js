@@ -319,7 +319,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
         var msgDate = new Date(msg.value.timestamp)
         if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
           self.state.latest_date = msgDate
-          self.state.cabal.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+          self.state.cabal.client.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
           self.state.cabal.client.messages.push(self.formatMessage(msg))
         }
         self.state.cabal.client.messages.push(self.formatMessage(msg))
