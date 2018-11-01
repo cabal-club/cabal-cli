@@ -5,13 +5,14 @@ var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
 var yaml = require('js-yaml')
+var mkdirp = require('mkdirp')
 
 var frontend = require('./neat-screen.js')
 
 var args = minimist(process.argv.slice(2))
 
 var homedir = os.homedir()
-var rootdir = args.dir || (homedir + '/.cabal')
+var rootdir = args.dir || (homedir + `/.cabal/${Cabal.protocolVersion}`)
 var archivesdir = `${rootdir}/archives/`
 
 var usage = `Usage
@@ -42,6 +43,7 @@ try {
   var config
   var configFilename = 'config.yml'
   var currentDirConfigFilename = '.cabal.yml'
+  mkdirp.sync(rootdir)
   if (args.config && fs.existsSync(args.config)) {
     config = yaml.safeLoad(fs.readFileSync(args.config, 'utf8'))
   } else if (fs.existsSync(currentDirConfigFilename)) {

@@ -13,6 +13,7 @@
     "discovery-swarm": "^5.1.2",
     "js-yaml": "^3.12.0",
     "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
     "neat-log": "^3.1.0",
     "strftime": "^0.10.0",
     "through2": "^2.0.3",
