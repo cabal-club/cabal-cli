@@ -26,6 +26,7 @@ var usage = `Usage
 
     --seed    Start a headless seed for the specified cabal key
 
+    --nick    Your nickname
     --message Publish a single message; then quit after \`timeout\`
     --channel Channel name to publish to for \`message\` option; default: "default"
     --timeout Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
@@ -74,7 +75,8 @@ if (cabalKeys.length) {
     start(cabals)
   })
 } else if (args.db) {
-  cabal = Cabal(args.db, null)
+  var cabal = Cabal(args.db, null)
+  cabal.publishNick(args.nick)
   cabal.db.ready(function () {
     cabal.getLocalKey(function (err, key) {
       if (err) throw err
