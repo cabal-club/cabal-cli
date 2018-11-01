@@ -295,9 +295,9 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.cabal.client.scrollback = 0
   self.state.cabal.client.messages = []
   self.neat.render()
+  self.state.latest_date = new Date(0)
 
   // MISSING: mention beeps
-  // MISSING: day change messages
 
   var pending = 0
   function onMessage () {
@@ -316,6 +316,12 @@ NeatScreen.prototype.loadChannel = function (channel) {
       self.state.cabal.client.messages = []
 
       msgs.forEach(function (msg) {
+        var msgDate = new Date(msg.value.timestamp)
+        if (strftime('%F', msgDate) > strftime('%F', self.state.latest_date)) {
+          self.state.latest_date = msgDate
+          self.state.cabal.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', self.state.latest_date))}`)
+          self.state.cabal.client.messages.push(self.formatMessage(msg))
+        }
         self.state.cabal.client.messages.push(self.formatMessage(msg))
       })
 
@@ -343,19 +349,17 @@ NeatScreen.prototype.render = function () {
 NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
   var highlight = false
-  var user = self.state.cabal.username
   if (!msg.value.type) { msg.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
-    if (msg.value.content.text.indexOf(user) > -1 && msg.value.author !== user) { highlight = true }
-
     var author
     if (this.state.cabal.client.users && this.state.cabal.client.users[msg.key]) author = this.state.cabal.client.users[msg.key].name || this.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
+    if (msg.value.content.text.indexOf(this.state.user.name) > -1 && author !== this.state.user.name) { highlight = true }
 
     var color = keyToColour(msg.key)
 
     var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
-    var authorText = `${chalk.gray('<')}${chalk[color](author)}${chalk.gray('>')}`
+    var authorText = `${chalk.gray('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.gray('>')}`
     var content = msg.value.content.text
     var emote = (msg.value.type === 'chat/emote')
 
