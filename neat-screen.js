@@ -34,8 +34,8 @@ function NeatScreen (cabals) {
       }
     } else {
       // nick completion
-      var users = Object.keys(self.state.cabal.client.users)
-        .map(key => self.state.cabal.client.users[key])
+      var users = Object.keys(self.client.users)
+        .map(key => self.client.users[key])
         .map(user => user.name || user.key.substring(0, 8))
         .sort()
       var pattern = (/^(\w+)$/)
@@ -105,10 +105,10 @@ function NeatScreen (cabals) {
         setCabalByIndex(currentIdx)
       }
     } else {
-      currentIdx = self.state.cabal.client.channels.indexOf(self.commander.channel)
+      currentIdx = self.client.channels.indexOf(self.commander.channel)
       if (currentIdx !== -1) {
         currentIdx--
-        if (currentIdx < 0) currentIdx = self.state.cabal.client.channels.length - 1
+        if (currentIdx < 0) currentIdx = self.client.channels.length - 1
         setChannelByIndex(currentIdx)
       }
     }
@@ -123,10 +123,10 @@ function NeatScreen (cabals) {
         setCabalByIndex(currentIdx)
       }
     } else {
-      currentIdx = self.state.cabal.client.channels.indexOf(self.commander.channel)
+      currentIdx = self.client.channels.indexOf(self.commander.channel)
       if (currentIdx !== -1) {
         currentIdx++
-        currentIdx = currentIdx % self.state.cabal.client.channels.length
+        currentIdx = currentIdx % self.client.channels.length
         setChannelByIndex(currentIdx)
       }
     }
@@ -138,9 +138,9 @@ function NeatScreen (cabals) {
   }
 
   function setChannelByIndex (n) {
-    if (n < 0 || n >= self.state.cabal.client.channels.length) return
-    self.commander.channel = self.state.cabal.client.channels[n]
-    self.loadChannel(self.state.cabal.client.channels[n])
+    if (n < 0 || n >= self.client.channels.length) return
+    self.commander.channel = self.client.channels[n]
+    self.loadChannel(self.client.channels[n])
   }
 
   function setSelectedWindowPaneByIndex (n) {
@@ -149,8 +149,8 @@ function NeatScreen (cabals) {
   }
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
-  this.neat.input.on('pageup', () => self.state.cabal.client.scrollback++)
-  this.neat.input.on('pagedown', () => { self.state.cabal.client.scrollback = Math.max(0, self.state.cabal.client.scrollback - 1); return null })
+  this.neat.input.on('pageup', () => self.client.scrollback++)
+  this.neat.input.on('pagedown', () => { self.client.scrollback = Math.max(0, self.client.scrollback - 1); return null })
 
   this.neat.use(function (state, bus) {
     state.neat = self.neat
@@ -158,7 +158,7 @@ function NeatScreen (cabals) {
     self.bus = bus
 
     self.state.cabals = cabals
-    self.state.cabal = self.state.cabals[0]
+    self.state.cabal = cabals[0]
 
     state.selectedWindowPane = 'channels'
     state.windowPanes = [state.selectedWindowPane]
@@ -173,6 +173,7 @@ function NeatScreen (cabals) {
 }
 
 NeatScreen.prototype.initializeCabalClient = function (cabal) {
+  var self = this
   cabal.client = {
     channel: 'default',
     channels: [],
@@ -180,8 +181,8 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
     user: null,
     users: {}
   }
+  self.client = cabal.client
 
-  var self = this
   cabal.db.ready(function () {
     cabal.channels.get((err, channels) => {
       if (err) return
@@ -258,8 +259,9 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
 
 NeatScreen.prototype.showCabal = function (cabal) {
   this.state.cabal = cabal
+  this.client = cabal.client
   this.commander.cabal = cabal
-  this.loadChannel(this.state.cabal.client.channel)
+  this.loadChannel(this.client.channel)
   this.bus.emit('render')
 }
 
@@ -270,30 +272,30 @@ function renderApp (state) {
 
 // use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line) {
-  this.state.cabal.client.messages.push(`${chalk.gray(line)}`)
+  this.client.messages.push(`${chalk.gray(line)}`)
   this.bus.emit('render')
 }
 
 NeatScreen.prototype.clear = function () {
-  this.state.cabal.client.messages = []
+  this.client.messages = []
   this.bus.emit('render')
 }
 
 NeatScreen.prototype.loadChannel = function (channel) {
   var self = this
-  if (self.state.cabal.client.msgListener) {
-    self.state.cabal.messages.events.removeListener(self.state.cabal.client.channel, self.state.cabal.client.msgListener)
-    self.state.cabal.client.msgListener = null
+  if (self.client.msgListener) {
+    self.state.cabal.messages.events.removeListener(self.client.channel, self.client.msgListener)
+    self.client.msgListener = null
   }
 
   // This is really cheap, so we could load many more if we wanted to!
   var MAX_MESSAGES = process.stdout.rows - HEADER_ROWS + 50
 
-  self.state.cabal.client.channel = channel
+  self.client.channel = channel
 
   // clear the old channel state
-  self.state.cabal.client.scrollback = 0
-  self.state.cabal.client.messages = []
+  self.client.scrollback = 0
+  self.client.messages = []
   self.neat.render()
 
   // MISSING: mention beeps
@@ -312,16 +314,16 @@ NeatScreen.prototype.loadChannel = function (channel) {
       if (err) return
       msgs.reverse()
 
-      self.state.cabal.client.messages = []
+      self.client.messages = []
       var latestTimestamp = new Date(0)
 
       msgs.forEach(function (msg) {
         var msgDate = new Date(msg.value.timestamp)
         if (strftime('%F', msgDate) > strftime('%F', latestTimestamp)) {
           latestTimestamp = msgDate
-          self.state.cabal.client.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', latestTimestamp))}`)
+          self.client.messages.push(`${chalk.gray('day changed to ' + strftime('%e %b %Y', latestTimestamp))}`)
         }
-        self.state.cabal.client.messages.push(self.formatMessage(msg))
+        self.client.messages.push(self.formatMessage(msg))
       })
 
       self.neat.render()
@@ -336,7 +338,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   }
 
   self.state.cabal.messages.events.on(channel, onMessage)
-  self.state.cabal.client.msgListener = onMessage
+  self.client.msgListener = onMessage
 
   onMessage()
 }
@@ -351,9 +353,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.value.type) { msg.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
     var author
-    if (this.state.cabal.client.users && this.state.cabal.client.users[msg.key]) author = this.state.cabal.client.users[msg.key].name || this.state.cabal.client.users[msg.key].key.slice(0, 8)
+    if (this.client.users && this.client.users[msg.key]) author = this.client.users[msg.key].name || this.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
-    let localNick = this.state.cabal.client.user.name
+    let localNick = this.client.user.name
     if (msg.value.content.text.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key)
