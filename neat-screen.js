@@ -178,7 +178,7 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
     channel: 'default',
     channels: [],
     messages: [],
-    user: null,
+    user: { local: true, online: true, key: '' },
     users: {}
   }
   self.client = cabal.client
@@ -241,13 +241,15 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
 
       function updateLocalKey () {
         cabal.getLocalKey(function (err, lkey) {
+          // set local key for local user
+          cabal.client.user.key = lkey
           if (err) return self.bus.emit('render')
+          // try to get more data for user
           Object.keys(users).forEach(function (key) {
             if (key === lkey) {
               cabal.client.user = users[key]
               cabal.client.user.local = true
               cabal.client.user.online = true
-              cabal.client.user.key = key
             }
           })
           self.bus.emit('render')
