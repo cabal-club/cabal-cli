@@ -163,6 +163,11 @@ function NeatScreen (cabal) {
           self.state.channels.sort()
           self.bus.emit('render')
         })
+
+        self.cabal.topics.events.on('update', function (msg) {
+          self.state.topic = msg.value.content.topic
+          self.bus.emit('render')
+        })
       })
 
       self.cabal.users.getAll(function (err, users) {
@@ -233,6 +238,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   // clear the old channel state
   self.state.scrollback = 0
   self.state.messages = []
+  self.state.topic = ''
   self.neat.render()
 
   // MISSING: mention beeps
@@ -259,6 +265,14 @@ NeatScreen.prototype.loadChannel = function (channel) {
       })
 
       self.neat.render()
+
+      self.cabal.topics.get(channel, (err, topic) => {
+        if (err) return
+        if (topic) {
+          self.state.topic = topic
+          self.neat.render()
+        }
+      })
 
       if (pending > 1) {
         pending = 0
@@ -301,6 +315,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (emote) {
       authorText = `${chalk.white(author)}`
       content = `${chalk.gray(msg.value.content.text)}`
+    }
+    if (msg.value.type === 'chat/topic') {
+      content = `${chalk.gray(`* ${self.state.channel} MOTD: ${msg.value.content.text}`)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
