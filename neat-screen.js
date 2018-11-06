@@ -84,8 +84,8 @@ function NeatScreen (cabals) {
     this.bus.emit('render')
   })
 
-  // move between window panes with ctrl+w
-  this.neat.input.on('ctrl-w', () => {
+  // move between window panes with ctrl+j
+  this.neat.input.on('ctrl-j', () => {
     var currentIdx = self.state.windowPanes.indexOf(self.state.selectedWindowPane)
     if (currentIdx !== -1) {
       currentIdx++
