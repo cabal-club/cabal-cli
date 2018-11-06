@@ -213,7 +213,7 @@ function renderApp (state) {
 
 // use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line) {
-  this.state.messages.push(`${chalk.gray(line)}`)
+  this.state.messages.push(`${chalk.dim(line)}`)
   this.bus.emit('render')
 }
 
@@ -307,14 +307,14 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var color = keyToColour(msg.key)
 
-    var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
-    var authorText = `${chalk.gray('<')}${chalk[color](author)}${chalk.gray('>')}`
+    var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
+    var authorText = `${chalk.dim('<')}${chalk[color](author)}${chalk.dim('>')}`
     var content = msg.value.content.text
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
       authorText = `${chalk.white(author)}`
-      content = `${chalk.gray(msg.value.content.text)}`
+      content = `${chalk.dim(msg.value.content.text)}`
     }
     if (msg.value.type === 'chat/topic') {
       content = `${chalk.gray(`* ${self.state.channel} MOTD: ${msg.value.content.text}`)}`
@@ -322,7 +322,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
-  return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg.value))
+  return chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value))
 }
 
 function formatTime (t) {
