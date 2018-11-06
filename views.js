@@ -37,17 +37,20 @@ function big (state) {
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 23, 3)
     // chat messages
     blit(screen, renderMessages(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
+    // channel topic description
+    if (state.topic) {
+      blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
+    }
   } else {
     // channels pane
     blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
     // chat messages
     blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
-  }
-
-  // channel topic description
-  if (state.topic) {
-    blit(screen, renderChannelTopic(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 18, 3)
+    // channel topic description
+    if (state.topic) {
+      blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
+    }
   }
 
   // nicks pane
