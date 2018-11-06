@@ -336,7 +336,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
 
       self.neat.render()
 
-      self.cabal.topics.get(channel, (err, topic) => {
+      self.state.cabal.topics.get(channel, (err, topic) => {
         if (err) return
         if (topic) {
           self.state.topic = topic
@@ -385,8 +385,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
       authorText = `${chalk.white(author)}`
       content = `${chalk.dim(msg.value.content.text)}`
     }
+
     if (msg.value.type === 'chat/topic') {
-      content = `${chalk.gray(`* ${self.state.channel} MOTD: ${msg.value.content.text}`)}`
+      content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msg.value.content.text)}`)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
