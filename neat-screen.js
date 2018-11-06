@@ -212,6 +212,11 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
           if (!cabal.client.user) updateLocalKey()
           self.bus.emit('render')
         })
+
+        self.cabal.topics.events.on('update', function (msg) {
+          self.state.topic = msg.value.content.topic
+          self.bus.emit('render')
+        })
       })
 
       cabal.on('peer-added', function (key) {
@@ -274,7 +279,7 @@ function renderApp (state) {
 
 // use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line) {
-  this.client.messages.push(`${chalk.gray(line)}`)
+  this.client.messages.push(`${chalk.dim(line)}`)
   this.bus.emit('render')
 }
 
@@ -298,6 +303,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   // clear the old channel state
   self.client.scrollback = 0
   self.client.messages = []
+  self.state.topic = ''
   self.neat.render()
 
   // MISSING: mention beeps
@@ -329,6 +335,14 @@ NeatScreen.prototype.loadChannel = function (channel) {
       })
 
       self.neat.render()
+
+      self.cabal.topics.get(channel, (err, topic) => {
+        if (err) return
+        if (topic) {
+          self.state.topic = topic
+          self.neat.render()
+        }
+      })
 
       if (pending > 1) {
         pending = 0
@@ -362,19 +376,22 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var color = keyToColour(msg.key)
 
-    var timestamp = `${chalk.gray(formatTime(msg.value.timestamp))}`
-    var authorText = `${chalk.gray('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.gray('>')}`
+    var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
+    var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
     var content = msg.value.content.text
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
       authorText = `${chalk.white(author)}`
-      content = `${chalk.gray(msg.value.content.text)}`
+      content = `${chalk.dim(msg.value.content.text)}`
+    }
+    if (msg.value.type === 'chat/topic') {
+      content = `${chalk.gray(`* ${self.state.channel} MOTD: ${msg.value.content.text}`)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
-  return chalk.cyan('unknown message type: ') + chalk.gray(JSON.stringify(msg.value))
+  return chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value))
 }
 
 function formatTime (t) {

@@ -94,12 +94,19 @@ function Commander (view, cabal) {
       call: (arg) => {
         process.exit(0)
       }
+    },
+    topic: {
+      help: () => 'set the topic/description/`message of the day` for a channel',
+      call: (arg) => {
+        self.cabal.publishChannelTopic(self.channel, arg)
+      }
     }
   }
   // add aliases to commands
   this.alias('join', 'j')
   this.alias('nick', 'n')
   this.alias('emote', 'me')
+  this.alias('topic', 'motd')
 }
 
 Commander.prototype.alias = function (command, alias) {
