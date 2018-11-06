@@ -111,6 +111,7 @@ function start (cabals) {
   if (!args.seed) {
     if (args.key && args.message) {
       publishSingleMessage({
+        key: args.key,
         channel: args.channel,
         message: args.message,
         messageType: args.type,
@@ -132,15 +133,18 @@ function start (cabals) {
   }
 }
 
-function publishSingleMessage ({channel, message, messageType, timeout}) {
-  console.log('Publishing message to channel - ' + channel + ': "' + message + '"...')
-  cabal.publish({
-    type: messageType || 'chat/text',
-    content: {
-      channel: channel || 'default',
-      text: message
-    }
+function publishSingleMessage ({key, channel, message, messageType, timeout}) {
+  console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
+  var cabal = Cabal(archivesdir + key, key)
+  cabal.db.ready(() => {
+    cabal.publish({
+      type: messageType || 'chat/text',
+      content: {
+        channel: channel || 'default',
+        text: message
+      }
+    })
+    swarm(cabal)
+    setTimeout(function () { process.exit(0) }, timeout || 5000)
   })
-  swarm(cabal)
-  setTimeout(function () { process.exit(0) }, timeout || 5000)
 }
