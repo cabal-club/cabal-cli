@@ -28,7 +28,6 @@ function big (state) {
   // title bar
   blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
 
-<<<<<<< HEAD
   if (state.cabals.length > 1) {
     // cabals pane
     blit(screen, renderCabals(state, 6, process.stdout.rows - HEADER_ROWS), 0, 3)
