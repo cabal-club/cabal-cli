@@ -72,9 +72,9 @@ function Commander (view, cabal) {
           self.view.writeLine.bind(self.view)(`  ${self.commands[key].help()}`)
         }
         self.view.writeLine.bind(self.view)(`alt-n`)
-        self.view.writeLine.bind(self.view)(`  move between channels/cabals lists}`)
+        self.view.writeLine.bind(self.view)(`  move between channels/cabals panes`)
         self.view.writeLine.bind(self.view)(`ctrl+{n,p}`)
-        self.view.writeLine.bind(self.view)(`  move up/down channels/cabals}`)
+        self.view.writeLine.bind(self.view)(`  move up/down channels/cabals`)
       }
     },
     debug: {
