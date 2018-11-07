@@ -1,17 +1,28 @@
-var neatLog = require('neat-log')
+var Cabal = require('cabal-core')
 var chalk = require('chalk')
-var strftime = require('strftime')
-var Commander = require('./commands.js')
-var views = require('./views')
 var collect = require('collect-stream')
+var Commander = require('./commands.js')
+var fs = require('fs')
+var neatLog = require('neat-log')
+var os = require('os')
+var strftime = require('strftime')
+var swarm = require('cabal-core/swarm.js')
+var views = require('./views')
+var yaml = require('js-yaml')
 
 const HEADER_ROWS = 6
 
-function NeatScreen (cabals) {
-  if (!(this instanceof NeatScreen)) return new NeatScreen(cabals)
+function NeatScreen (props) {
+  if (!(this instanceof NeatScreen)) return new NeatScreen(props)
   var self = this
 
-  this.commander = Commander(this, cabals[0])
+  this.archivesdir = props.archivesdir
+  this.configFilePath = props.configFilePath
+  this.homedir = props.homedir
+  this.protocolMajorVersion = props.protocolMajorVersion
+  this.rootdir = props.rootdir
+
+  this.commander = Commander(this, props.cabals[0])
 
   this.neat = neatLog(renderApp, {fullscreen: true,
     style: function (start, cursor, end) {
@@ -157,8 +168,8 @@ function NeatScreen (cabals) {
     self.state = state
     self.bus = bus
 
-    self.state.cabals = cabals
-    self.state.cabal = cabals[0]
+    self.state.cabals = props.cabals
+    self.state.cabal = props.cabals[0]
 
     state.selectedWindowPane = 'channels'
     state.windowPanes = [state.selectedWindowPane]
@@ -166,7 +177,7 @@ function NeatScreen (cabals) {
       state.windowPanes.push('cabals')
     }
 
-    cabals.forEach((cabal) => {
+    self.state.cabals.forEach((cabal) => {
       self.initializeCabalClient(cabal)
     })
   })
@@ -213,7 +224,7 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
           self.bus.emit('render')
         })
 
-        self.cabal.topics.events.on('update', function (msg) {
+        cabal.topics.events.on('update', function (msg) {
           self.state.topic = msg.value.content.topic
           self.bus.emit('render')
         })
@@ -261,6 +272,22 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
         })
       }
     })
+  })
+}
+
+NeatScreen.prototype.addCabal = function (key) {
+  var self = this
+  key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+  var db = this.archivesdir + key
+  var cabal = Cabal(db, key)
+  cabal.db.ready(() => {
+    self.state.cabals.push(cabal)
+    swarm(cabal)
+    self.initializeCabalClient(cabal)
+    self.showCabal(cabal)
+    saveConfig({
+      cabals: self.state.cabals.map((cabal) => cabal.key)
+    }, this.configFilePath)
   })
 }
 
@@ -393,6 +420,13 @@ NeatScreen.prototype.formatMessage = function (msg) {
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
   }
   return chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value))
+}
+
+function saveConfig (config, path) {
+  let data = yaml.safeDump(config, {
+    sortKeys: true
+  })
+  fs.writeFileSync(path, data, 'utf8')
 }
 
 function formatTime (t) {

@@ -42,18 +42,22 @@ var cabalKeys = []
 // Attempt to load local or homedir config file
 try {
   var config
+  var configFilePath
   var configFilename = 'config.yml'
   var currentDirConfigFilename = '.cabal.yml'
   mkdirp.sync(rootdir)
   if (args.config && fs.existsSync(args.config)) {
-    config = yaml.safeLoad(fs.readFileSync(args.config, 'utf8'))
+    configFilePath = args.config
   } else if (fs.existsSync(currentDirConfigFilename)) {
-    config = yaml.safeLoad(fs.readFileSync(currentDirConfigFilename, 'utf8'))
+    configFilePath = currentDirConfigFilename
   } else if (fs.existsSync(rootdir + '/' + configFilename)) {
-    config = yaml.safeLoad(fs.readFileSync(rootdir + '/' + configFilename, 'utf8'))
+    configFilePath = rootdir + '/' + configFilename
   }
-  if (config && config.cabals) {
-    cabalKeys = config.cabals
+  if (configFilePath) {
+    config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))
+    if (config && config.cabals) {
+      cabalKeys = config.cabals
+    }
   }
 } catch (e) {
   console.log(e)
@@ -119,7 +123,14 @@ function start (cabals) {
       })
       return
     }
-    frontend(cabals)
+    frontend({
+      archivesdir,
+      cabals,
+      configFilePath,
+      homedir,
+      protocolMajorVersion,
+      rootdir
+    })
     setTimeout(() => {
       cabals.forEach((cabal) => {
         swarm(cabal)
