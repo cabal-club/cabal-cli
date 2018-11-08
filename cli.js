@@ -7,6 +7,7 @@ var fs = require('fs')
 var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
+var crypto = require('hypercore-crypto')
 
 var args = minimist(process.argv.slice(2))
 
@@ -69,30 +70,14 @@ if (args.key) {
 }
 
 if (args.new) {
-  var temp = archivesdir + new Date().getTime()
-  // create cabal at a temporary directory
-  new Promise(function (resolve, reject) {
-    var cabal = Cabal(temp, null)
-    cabal.db.ready(function () {
-      // get the key
-      cabal.getLocalKey(function (err, key) {
-        if (err) return reject(err)
-        resolve(key)
-      })
-    })
-    // todo: shut down the cabal (.close() not implemented in cabal-core)
-  }).then(function (key) {
-    var location = archivesdir + key
-    // move the temp directory to a directory with the key's name
-    fs.renameSync(temp, location)
-    // start the cabal at the new location
-    var cabal = Cabal(location, key)
-    cabal.db.ready(function () {
-      if (!args.seed) {
-        start([cabal])
-      }
-    })
-  }).catch(function (e) { console.error('cabal had a fatal issue', e) })
+  var key = crypto.keyPair().publicKey.toString('hex')
+  var db = archivesdir + key
+  var cabal = Cabal(db, key)
+  cabal.db.ready(function () {
+    if (!args.seed) {
+      start([cabal])
+    }
+  })
 } else if (cabalKeys.length) {
   Promise.all(cabalKeys.map((key) => {
     key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
