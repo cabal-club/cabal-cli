@@ -106,6 +106,12 @@ function Commander (view, cabal) {
         process.exit(0)
       }
     },
+    exit: {
+      help: () => 'exit the cabal process',
+      call: (arg) => {
+        process.exit(0)
+      }
+    },
     topic: {
       help: () => 'set the topic/description/`message of the day` for a channel',
       call: (arg) => {
