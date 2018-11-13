@@ -8,13 +8,13 @@ database & api.
 ![](https://i.cblgh.org/2018-05/2466txd.png)
 
 chat with us:  
-`npx cabal --key cabal://0c6247a6378074257854a66ea5bc90fd6268a0eb5f0d896e55e59e2c3ca6cb1e`
+`npx cabal --key cabal://0b2a6c1c58014fe0da6dff38df6282157c405bc0ed7b550cda5c8c43d8067047`
 
 ## Installation
 
 ```
 $ npm install --global cabal
-$ cabal --key cabal://0c6247a6378074257854a66ea5bc90fd6268a0eb5f0d896e55e59e2c3ca6cb1e
+$ cabal --key cabal://0b2a6c1c58014fe0da6dff38df6282157c405bc0ed7b550cda5c8c43d8067047
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ cabal --key <key>
 ```
 e.g.
 ```
-cabal --key cabal://0c6247a6378074257854a66ea5bc90fd6268a0eb5f0d896e55e59e2c3ca6cb1e
+cabal --key cabal://0b2a6c1c58014fe0da6dff38df6282157c405bc0ed7b550cda5c8c43d8067047
 ```
 
 #### Headless mode
