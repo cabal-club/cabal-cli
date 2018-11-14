@@ -33,6 +33,7 @@ var usage = `Usage
     --new     Start a new cabal
     --nick    Your nickname
     --alias   Save an alias for the specified cabal, use with --key
+    --aliases Print out your saved cabal aliases
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
     --message Publish a single message; then quit after \`timeout\`
@@ -60,6 +61,21 @@ try {
   }
 } catch (e) {
   logError(e)
+}
+
+if (args.aliases) {
+    var aliases = Object.keys(config.aliases)
+    if (aliases.length === 0) {
+        process.stdout.write("You don't have any saved aliases.\n")
+        process.stdout.write(`Save an alias by running\n`)
+        process.stdout.write(`${chalk.magentaBright("cabal: ")} ${chalk.greenBright("--alias cabal://c001..dad")} `)
+        process.stdout.write(`${chalk.blueBright("--key your-alias-name")}\n`)
+    } else {
+        aliases.forEach(function (alias) {
+            process.stdout.write(`${chalk.blueBright(alias)}\t\t ${chalk.greenBright(config.aliases[alias])}\n`)
+        })
+    }
+    process.exit(0)
 }
 
 if (args.alias && !args.key) {
