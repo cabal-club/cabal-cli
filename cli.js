@@ -14,6 +14,7 @@ var args = minimist(process.argv.slice(2))
 
 var homedir = os.homedir()
 var rootdir = args.dir || (homedir + `/.cabal/v${Cabal.databaseVersion}`)
+var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
 var usage = `Usage
@@ -30,15 +31,15 @@ var usage = `Usage
     --seed    Start a headless seed for the specified cabal key
 
     --new     Start a new cabal
-
     --nick    Your nickname
     --alias   Save an alias for the specified cabal, use with --key
     --aliases Print out your saved cabal aliases
     --forget  Forgets the specified alias
-
     --clear   Clears out all aliases
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
+    --config  Specify a full path to a cabal config
+
     --message Publish a single message; then quit after \`timeout\`
     --channel Channel name to publish to for \`message\` option; default: "default"
     --timeout Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
@@ -47,27 +48,33 @@ var usage = `Usage
 Work in progress! Learn more at github.com/cabal-club
 `
 
+var config
 var cabalKeys = []
-var config = {aliases: {}, cabals: []}
 var configFilePath = findConfigPath()
 
-// make sure the config folder exists
+// make sure the .cabal/v<databaseVersion> folder exists
 mkdirp.sync(rootdir)
+
+// create a default config in rootdir if it doesn't exist
+if (!fs.existsSync(rootconfig)) {
+  saveConfig(rootconfig, { cabals: [], aliases: {} })
+}
 
 // Attempt to load local or homedir config file
 try {
   if (configFilePath) {
     config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))
-    if (config && config.cabals) {
-      cabalKeys = config.cabals
-    }
+    if (!config.cabals) { config.cabals = [] }
+    if (!config.aliases) { config.aliases = {} }
+    cabalKeys = config.cabals
   }
 } catch (e) {
-  // there was no config; let's continue with the config free life
+  logError(e)
+  process.exit(1)
 }
 
 if (args.clear) {
-  config.aliases = {}
+  delete config['aliases']
   saveConfig(configFilePath, config)
   process.stdout.write('Aliases cleared\n')
   process.exit(0)
@@ -85,7 +92,7 @@ if (args.aliases) {
   if (aliases.length === 0) {
     process.stdout.write("You don't have any saved aliases.\n\n")
     process.stdout.write(`Save an alias by running\n`)
-    process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--alias cabal://c001..dad')} `)
+    process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--alias cabal://c001..c4b41')} `)
     process.stdout.write(`${chalk.blueBright('--key your-alias-name')}\n`)
   } else {
     aliases.forEach(function (alias) {
@@ -171,6 +178,23 @@ function start (cabals) {
       return
     }
 
+    if (!args.join) {
+      // keep the latest joined cabal at the top
+      // => remembers latest cabal, allows joining latest with `cabal`
+      if (cabals.length === 1) {
+        // find cabal key in config
+        var i = config.cabals.indexOf(cabals[0])
+        // if the key was found and it wasn't at the start
+        if (i > 0) {
+          // move it to the start
+          var tmp = config.cabals.splice(i, 1) // splice returns arr
+          config.cabals.unshift(tmp[0])
+        }
+      }
+      config.cabals = cabals.map((c) => c.key)
+      saveConfig(configFilePath, config)
+    }
+
     var dbVersion = Cabal.databaseVersion
     var isExperimental = (typeof args.experimental !== 'undefined')
     frontend({
@@ -208,19 +232,19 @@ function logError (msg) {
 }
 
 function findConfigPath () {
-  var configFilename = 'config.yml'
   var currentDirConfigFilename = '.cabal.yml'
   if (args.config && fs.existsSync(args.config)) {
     return args.config
   } else if (fs.existsSync(currentDirConfigFilename)) {
     return currentDirConfigFilename
-  } else if (fs.existsSync(rootdir + '/' + configFilename)) {
-    return rootdir + '/' + configFilename
   }
-  return currentDirConfigFilename
+  return rootconfig
 }
 
 function saveConfig (path, config) {
+  // make sure config is well-formatted (contains all config options)
+  if (!config.cabals) { config.cabals = [] }
+  if (!config.aliases) { config.aliases = {} }
   let data = yaml.safeDump(config, {
     sortKeys: true
   })
