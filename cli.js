@@ -89,7 +89,6 @@ if (args.alias && args.key) {
     saveConfig(configFilePath, config)
     console.log(`${chalk.magentaBright("cabal:")} saved ${chalk.greenBright(args.key)} as ${chalk.blueBright(args.alias)}`)
     process.exit(0)
-    return
 }
 
 if (args.key) {
