@@ -8,7 +8,7 @@ var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
-var chalk = require("chalk")
+var chalk = require('chalk')
 
 var args = minimist(process.argv.slice(2))
 
@@ -64,52 +64,52 @@ try {
 }
 
 if (args.aliases) {
-    var aliases = Object.keys(config.aliases)
-    if (aliases.length === 0) {
-        process.stdout.write("You don't have any saved aliases.\n")
-        process.stdout.write(`Save an alias by running\n`)
-        process.stdout.write(`${chalk.magentaBright("cabal: ")} ${chalk.greenBright("--alias cabal://c001..dad")} `)
-        process.stdout.write(`${chalk.blueBright("--key your-alias-name")}\n`)
-    } else {
-        aliases.forEach(function (alias) {
-            process.stdout.write(`${chalk.blueBright(alias)}\t\t ${chalk.greenBright(config.aliases[alias])}\n`)
-        })
-    }
-    process.exit(0)
+  var aliases = Object.keys(config.aliases)
+  if (aliases.length === 0) {
+    process.stdout.write("You don't have any saved aliases.\n")
+    process.stdout.write(`Save an alias by running\n`)
+    process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--alias cabal://c001..dad')} `)
+    process.stdout.write(`${chalk.blueBright('--key your-alias-name')}\n`)
+  } else {
+    aliases.forEach(function (alias) {
+      process.stdout.write(`${chalk.blueBright(alias)}\t\t ${chalk.greenBright(config.aliases[alias])}\n`)
+    })
+  }
+  process.exit(0)
 }
 
 if (args.alias && !args.key) {
-    logError("the --alias option needs to be used together with --key")
-    process.exit(1) 
+  logError('the --alias option needs to be used together with --key')
+  process.exit(1)
 }
 
 // user wants to alias a cabal:// key with a name
 if (args.alias && args.key) {
-    config.aliases[args.alias] = args.key
-    saveConfig(configFilePath, config)
-    console.log(`${chalk.magentaBright("cabal:")} saved ${chalk.greenBright(args.key)} as ${chalk.blueBright(args.alias)}`)
-    process.exit(0)
+  config.aliases[args.alias] = args.key
+  saveConfig(configFilePath, config)
+  console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(args.key)} as ${chalk.blueBright(args.alias)}`)
+  process.exit(0)
 }
 
 if (args.key) {
   // If a key is provided, place it at the top of the list
   cabalKeys.unshift(args.key)
 } else if (args._.length > 0) {
-    // the cli was run as `cabal <alias|key> ... <alias|key>`
-    args._.forEach(function (str) {
-        cabalKeys.unshift(getKey(str))
-    })
+  // the cli was run as `cabal <alias|key> ... <alias|key>`
+  args._.forEach(function (str) {
+    cabalKeys.unshift(getKey(str))
+  })
 }
 
 // disregard config
 if (args.join) {
-    cabalKeys = [getKey(args.join)]
+  cabalKeys = [getKey(args.join)]
 }
 
 // only enable multi-cabal under the --experimental flag
 if (!args.experimental) {
-    var firstKey = cabalKeys[0]
-    cabalKeys = [firstKey]
+  var firstKey = cabalKeys[0]
+  cabalKeys = [firstKey]
 }
 
 // create and join a new cabal
@@ -179,15 +179,15 @@ function start (cabals) {
   }
 }
 
-function getKey(str) {
-    // return key if what was passed in was a saved alias
-    if (str in config.aliases) { return config.aliases[str] }
-    // else assume it's a cabal key
-    return str
+function getKey (str) {
+  // return key if what was passed in was a saved alias
+  if (str in config.aliases) { return config.aliases[str] }
+  // else assume it's a cabal key
+  return str
 }
 
-function logError(msg) {
-    console.error(`${chalk.red("cabal:")} ${msg}`)
+function logError (msg) {
+  console.error(`${chalk.red('cabal:')} ${msg}`)
 }
 
 function findConfigPath () {
@@ -200,14 +200,14 @@ function findConfigPath () {
   } else if (fs.existsSync(rootdir + '/' + configFilename)) {
     return rootdir + '/' + configFilename
   }
-    return currentDirConfigFilename
+  return currentDirConfigFilename
 }
 
-function saveConfig(path, config) {
-    let data = yaml.safeDump(config, {
-        sortKeys: true
-    })
-    fs.writeFileSync(path, data, 'utf8')
+function saveConfig (path, config) {
+  let data = yaml.safeDump(config, {
+    sortKeys: true
+  })
+  fs.writeFileSync(path, data, 'utf8')
 }
 
 function publishSingleMessage ({key, channel, message, messageType, timeout}) {
