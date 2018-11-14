@@ -19,8 +19,9 @@ function NeatScreen (props) {
   this.archivesdir = props.archivesdir
   this.configFilePath = props.configFilePath
   this.homedir = props.homedir
-  this.protocolMajorVersion = props.protocolMajorVersion
+  this.databaseVersion = props.databaseVersion
   this.rootdir = props.rootdir
+  this.config = props.config
 
   this.commander = Commander(this, props.cabals[0])
 
@@ -285,9 +286,8 @@ NeatScreen.prototype.addCabal = function (key) {
     swarm(cabal)
     self.initializeCabalClient(cabal)
     self.showCabal(cabal)
-    saveConfig({
-      cabals: self.state.cabals.map((cabal) => cabal.key)
-    }, this.configFilePath)
+    self.config.cabals = self.state.cabals.map((cabal) => cabal.key)
+    saveConfig(self.config, this.configFilePath)
   })
 }
 
