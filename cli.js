@@ -91,6 +91,12 @@ if (args.join) {
     cabalKeys = [getKey(args.join)]
 }
 
+// only enable multi-cabal under the --experimental flag
+if (!args.experimental) {
+    var firstKey = cabalKeys[0]
+    cabalKeys = [firstKey]
+}
+
 // create and join a new cabal
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
@@ -134,7 +140,9 @@ function start (cabals) {
     }
 
     var dbVersion = Cabal.databaseVersion
+    var isExperimental = (typeof args.experimental !== 'undefined')
     frontend({
+      isExperimental,
       archivesdir,
       cabals,
       configFilePath,

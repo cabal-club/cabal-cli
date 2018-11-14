@@ -4,7 +4,6 @@ var collect = require('collect-stream')
 var Commander = require('./commands.js')
 var fs = require('fs')
 var neatLog = require('neat-log')
-var os = require('os')
 var strftime = require('strftime')
 var swarm = require('cabal-core/swarm.js')
 var views = require('./views')
@@ -22,6 +21,7 @@ function NeatScreen (props) {
   this.databaseVersion = props.databaseVersion
   this.rootdir = props.rootdir
   this.config = props.config
+  this.isExperimental = props.isExperimental
 
   this.commander = Commander(this, props.cabals[0])
 
@@ -278,6 +278,7 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
 
 NeatScreen.prototype.addCabal = function (key) {
   var self = this
+  if (!self.isExperimental) { return }
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var db = this.archivesdir + key
   var cabal = Cabal(db, key)
@@ -396,9 +397,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.value.type) { msg.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
     var author
-    if (this.state.cabal.client.users && this.state.cabal.client.users[msg.key]) author = this.state.cabal.client.users[msg.key].name || this.state.cabal.client.users[msg.key].key.slice(0, 8)
+    if (self.state.cabal.client.users && self.state.cabal.client.users[msg.key]) author = self.state.cabal.client.users[msg.key].name || self.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
-    let localNick = this.state.cabal.client.user.name
+    let localNick = self.state.cabal.client.user.name
     if (msg.value.content.text.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key)

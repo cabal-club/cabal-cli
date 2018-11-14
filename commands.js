@@ -10,17 +10,6 @@ function Commander (view, cabal) {
 
   var self = this
   this.commands = {
-    add: {
-      help: () => 'add a cabal',
-      call: (arg) => {
-        if (arg === '') {
-          self.view.writeLine('* Usage example: /add cabalkey')
-          return
-        }
-        self.channel = arg
-        self.view.addCabal(arg)
-      }
-    },
     nick: {
       help: () => 'change your display name',
       call: (arg) => {
@@ -120,11 +109,26 @@ function Commander (view, cabal) {
     }
   }
   // add aliases to commands
-  this.alias('add', 'cabal')
   this.alias('emote', 'me')
   this.alias('join', 'j')
   this.alias('nick', 'n')
   this.alias('topic', 'motd')
+
+  // add in experimental commands
+  if (self.view.isExperimental) {
+    self.commands['add'] = {
+      help: () => 'add a cabal',
+      call: (arg) => {
+        if (arg === '') {
+          self.view.writeLine('* Usage example: /add cabalkey')
+          return
+        }
+        self.channel = arg
+        self.view.addCabal(arg)
+      }
+    }
+    self.alias('add', 'cabal')
+  }
 }
 
 Commander.prototype.alias = function (command, alias) {
