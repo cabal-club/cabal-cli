@@ -31,9 +31,13 @@ var usage = `Usage
     --seed    Start a headless seed for the specified cabal key
 
     --new     Start a new cabal
+
     --nick    Your nickname
     --alias   Save an alias for the specified cabal, use with --key
     --aliases Print out your saved cabal aliases
+    --forget  Forgets the specified alias
+
+    --clear   Clears out all aliases
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
     --message Publish a single message; then quit after \`timeout\`
@@ -63,10 +67,24 @@ try {
   logError(e)
 }
 
+if (args.clear) {
+  config.aliases = {}
+  saveConfig(configFilePath, config)
+  process.stdout.write('Aliases cleared\n')
+  process.exit(0)
+}
+
+if (args.forget) {
+  delete config.aliases[args.forget]
+  saveConfig(configFilePath, config)
+  process.stdout.write(`${args.forget} has been forgotten`)
+  process.exit(0)
+}
+
 if (args.aliases) {
   var aliases = Object.keys(config.aliases)
   if (aliases.length === 0) {
-    process.stdout.write("You don't have any saved aliases.\n")
+    process.stdout.write("You don't have any saved aliases.\n\n")
     process.stdout.write(`Save an alias by running\n`)
     process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--alias cabal://c001..dad')} `)
     process.stdout.write(`${chalk.blueBright('--key your-alias-name')}\n`)
