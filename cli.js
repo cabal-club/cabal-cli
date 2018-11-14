@@ -18,7 +18,6 @@ var archivesdir = `${rootdir}/archives/`
 
 var usage = `Usage
 
-  cabal 
   cabal cabal://key
   cabal <your saved --alias of a cabal>
 
@@ -64,7 +63,7 @@ try {
     }
   }
 } catch (e) {
-  logError(e)
+  // there was no config; let's continue with the config free life
 }
 
 if (args.clear) {
@@ -125,7 +124,7 @@ if (args.join) {
 }
 
 // only enable multi-cabal under the --experimental flag
-if (!args.experimental) {
+if (!args.experimental && cabalKeys.length) {
   var firstKey = cabalKeys[0]
   cabalKeys = [firstKey]
 }
