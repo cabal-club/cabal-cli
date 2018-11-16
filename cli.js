@@ -178,19 +178,13 @@ function start (cabals) {
       return
     }
 
-    if (!args.join) {
-      // keep the latest joined cabal at the top
-      // => remembers latest cabal, allows joining latest with `cabal`
-      if (cabals.length === 1) {
-        // find cabal key in config
-        var i = config.cabals.indexOf(cabals[0])
-        // if the key was found and it wasn't at the start
-        if (i > 0) {
-          // move it to the start
-          var tmp = config.cabals.splice(i, 1) // splice returns arr
-          config.cabals.unshift(tmp[0])
-        }
-      }
+    // => remembers the latest cabal, allows joining latest with `cabal`
+    // TODO: rewrite this when the multi-cabal functionality comes out from
+    // behind its experimental flag
+    if (!args.join && !args.experimental) {
+      // unsure about this, it effectively removes all of the cabals in the config
+      // but then again we don't have a method to save them either right now so
+      // let's run with it and fix after the bugs
       config.cabals = cabals.map((c) => c.key)
       saveConfig(configFilePath, config)
     }
