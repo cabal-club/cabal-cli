@@ -71,6 +71,10 @@ function Commander (view, cabal) {
           self.view.writeLine.bind(self.view)(`/${key}`)
           self.view.writeLine.bind(self.view)(`  ${self.commands[key].help()}`)
         }
+        self.view.writeLine.bind(self.view)(`alt-n`)
+        self.view.writeLine.bind(self.view)(`  move between channels/cabals panes`)
+        self.view.writeLine.bind(self.view)(`ctrl+{n,p}`)
+        self.view.writeLine.bind(self.view)(`  move up/down channels/cabals`)
       }
     },
     debug: {
@@ -91,6 +95,12 @@ function Commander (view, cabal) {
         process.exit(0)
       }
     },
+    exit: {
+      help: () => 'exit the cabal process',
+      call: (arg) => {
+        process.exit(0)
+      }
+    },
     topic: {
       help: () => 'set the topic/description/`message of the day` for a channel',
       call: (arg) => {
@@ -99,10 +109,26 @@ function Commander (view, cabal) {
     }
   }
   // add aliases to commands
+  this.alias('emote', 'me')
   this.alias('join', 'j')
   this.alias('nick', 'n')
-  this.alias('emote', 'me')
   this.alias('topic', 'motd')
+
+  // add in experimental commands
+  if (self.view.isExperimental) {
+    self.commands['add'] = {
+      help: () => 'add a cabal',
+      call: (arg) => {
+        if (arg === '') {
+          self.view.writeLine('* Usage example: /add cabalkey')
+          return
+        }
+        self.channel = arg
+        self.view.addCabal(arg)
+      }
+    }
+    self.alias('add', 'cabal')
+  }
 }
 
 Commander.prototype.alias = function (command, alias) {

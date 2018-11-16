@@ -20,7 +20,7 @@ $ cabal --key cabal://0b2a6c1c58014fe0da6dff38df6282157c405bc0ed7b550cda5c8c43d8
 ## Usage
 #### Start a new instance:
 ```
-cabal --db <file path>
+cabal --new
 ```
 
 #### Connect to an existing instance:
@@ -90,3 +90,5 @@ cabal --key <key> --seeder
 &nbsp;&nbsp;&nbsp;&nbsp;scroll down through backlog  
 `alt-[1,9]`  
 &nbsp;&nbsp;&nbsp;&nbsp;select channels  1-9  
+`alt-n`
+&nbsp;&nbsp;&nbsp;&nbsp;tab between the cabals & channels panes 

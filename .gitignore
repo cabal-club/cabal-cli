@@ -11,6 +11,9 @@ config.js
 *.pdf
 archives
 
+# Cabal config files
+.cabal.yml
+
 #################
 ## Eclipse
 #################
