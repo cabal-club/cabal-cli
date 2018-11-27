@@ -45,12 +45,15 @@ function big (state) {
     // channels pane
     blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
-    // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
+
+    var chatY = 3
     // channel topic description
     if (state.topic) {
-      blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
+      blit(screen, renderChannelTopic(state, process.stdout.columns - 16 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
+      chatY++
     }
+    // chat messages
+    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, chatY)
   }
 
   // nicks pane
@@ -168,7 +171,7 @@ function renderChannelTopic (state, width, height) {
     line = line.substring(0, line.length - 1) + '…'
   }
   line = line + new Array(width - line.length - 1).fill(' ').join('')
-  return [chalk.bgBlue(chalk.white(line))]
+  return [chalk.whiteBright(chalk.bgBlue(line))]
 }
 
 function renderMessages (state, width, height) {
