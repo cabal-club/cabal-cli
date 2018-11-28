@@ -48,6 +48,11 @@ var usage = `Usage
 Work in progress! Learn more at github.com/cabal-club
 `
 
+if (args.help || args.h) {
+  process.stderr.write(usage)
+  process.exit(1)
+}
+
 var config
 var cabalKeys = []
 var configFilePath = findConfigPath()
