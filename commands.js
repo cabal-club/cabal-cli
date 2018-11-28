@@ -1,5 +1,3 @@
-var through = require('through2')
-
 function Commander (view, cabal) {
   if (!(this instanceof Commander)) return new Commander(view, cabal)
   this.cabal = cabal
