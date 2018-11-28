@@ -59,8 +59,6 @@ cabal --key <key> --seeder
    alias for /emote
 /clear
    clear the current backlog
-/debug <key>
-    debug the underlying hyperdb's keys
 /help
     display a help message of the current commands
 /quit

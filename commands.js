@@ -77,18 +77,6 @@ function Commander (view, cabal) {
         self.view.writeLine.bind(self.view)(`  move up/down channels/cabals`)
       }
     },
-    debug: {
-      help: () => 'debug hyperdb keys',
-      call: (arg) => {
-        var stream = self.cabal.db.createHistoryStream()
-        stream.pipe(through.obj(function (chunk, enc, next) {
-          if (chunk.key.indexOf(arg) > -1) {
-            self.view.writeLine.bind(self.view)(chunk.key + ': ' + JSON.stringify(chunk.value))
-          }
-          next()
-        }))
-      }
-    },
     quit: {
       help: () => 'exit the cabal process',
       call: (arg) => {
