@@ -92,6 +92,12 @@ function Commander (view, cabal) {
       call: (arg) => {
         self.cabal.publishChannelTopic(self.channel, arg)
       }
+    },
+    whoami: {
+      help: () => 'display your local user key',
+      call: (arg) => {
+        self.view.writeLine.bind(self.view)('Local user key: ' + self.cabal.client.user.key)
+      }
     }
   }
   // add aliases to commands
@@ -99,6 +105,7 @@ function Commander (view, cabal) {
   this.alias('join', 'j')
   this.alias('nick', 'n')
   this.alias('topic', 'motd')
+  this.alias('whoami', 'key')
 
   // add in experimental commands
   if (self.view.isExperimental) {
