@@ -4,6 +4,7 @@ var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
+var path = require('path')
 var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
@@ -47,6 +48,11 @@ var usage = `Usage
 
 Work in progress! Learn more at github.com/cabal-club
 `
+
+if (args.version || args.v) {
+  console.log(JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version)
+  process.exit(0)
+}
 
 if (args.help || args.h) {
   process.stderr.write(usage)
