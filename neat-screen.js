@@ -22,6 +22,7 @@ function NeatScreen (props) {
   this.rootdir = props.rootdir
   this.config = props.config
   this.isExperimental = props.isExperimental
+  this.maxFeeds = props.maxFeeds
 
   this.commander = Commander(this, props.cabals[0])
 
@@ -281,7 +282,7 @@ NeatScreen.prototype.addCabal = function (key) {
   if (!self.isExperimental) { return }
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var db = this.archivesdir + key
-  var cabal = Cabal(db, key)
+  var cabal = Cabal(db, key, {maxFeeds: this.maxFeeds})
   cabal.db.ready(() => {
     self.state.cabals.push(cabal)
     swarm(cabal)
