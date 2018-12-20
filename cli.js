@@ -4,6 +4,7 @@ var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
+var path = require('path')
 var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
@@ -48,9 +49,20 @@ var usage = `Usage
 Work in progress! Learn more at github.com/cabal-club
 `
 
+if (args.version || args.v) {
+  console.log(JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version)
+  process.exit(0)
+}
+
+if (args.help || args.h) {
+  process.stderr.write(usage)
+  process.exit(1)
+}
+
 var config
 var cabalKeys = []
 var configFilePath = findConfigPath()
+var maxFeeds = 1000
 
 // make sure the .cabal/v<databaseVersion> folder exists
 mkdirp.sync(rootdir)
@@ -130,6 +142,11 @@ if (args.join) {
   cabalKeys = [getKey(args.join)]
 }
 
+// set maximum number of hypercores to replicate
+if (args.maxFeeds) {
+  maxFeeds = args.maxFeeds
+}
+
 // only enable multi-cabal under the --experimental flag
 if (!args.experimental && cabalKeys.length) {
   var firstKey = cabalKeys[0]
@@ -140,7 +157,7 @@ if (!args.experimental && cabalKeys.length) {
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
   var db = archivesdir + key
-  var cabal = Cabal(db, key)
+  var cabal = Cabal(db, key, {maxFeeds: maxFeeds})
   cabal.db.ready(function () {
     if (!args.seed) {
       start([cabal])
@@ -151,7 +168,7 @@ if (args.new) {
   Promise.all(cabalKeys.map((key) => {
     key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
     var db = archivesdir + key
-    var cabal = Cabal(db, key)
+    var cabal = Cabal(db, key, {maxFeeds: maxFeeds})
     return new Promise((resolve) => {
       cabal.db.ready(() => {
         resolve(cabal)
@@ -198,6 +215,7 @@ function start (cabals) {
       configFilePath,
       homedir,
       dbVersion,
+      maxFeeds,
       config,
       rootdir
     })
@@ -247,7 +265,7 @@ function saveConfig (path, config) {
 
 function publishSingleMessage ({key, channel, message, messageType, timeout}) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
-  var cabal = Cabal(archivesdir + key, key)
+  var cabal = Cabal(archivesdir + key, key, {maxFeeds: maxFeeds})
   cabal.db.ready(() => {
     cabal.publish({
       type: messageType || 'chat/text',

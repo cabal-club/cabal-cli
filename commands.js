@@ -1,5 +1,3 @@
-var through = require('through2')
-
 function Commander (view, cabal) {
   if (!(this instanceof Commander)) return new Commander(view, cabal)
   this.cabal = cabal
@@ -77,18 +75,6 @@ function Commander (view, cabal) {
         self.view.writeLine.bind(self.view)(`  move up/down channels/cabals`)
       }
     },
-    debug: {
-      help: () => 'debug hyperdb keys',
-      call: (arg) => {
-        var stream = self.cabal.db.createHistoryStream()
-        stream.pipe(through.obj(function (chunk, enc, next) {
-          if (chunk.key.indexOf(arg) > -1) {
-            self.view.writeLine.bind(self.view)(chunk.key + ': ' + JSON.stringify(chunk.value))
-          }
-          next()
-        }))
-      }
-    },
     quit: {
       help: () => 'exit the cabal process',
       call: (arg) => {
@@ -106,6 +92,12 @@ function Commander (view, cabal) {
       call: (arg) => {
         self.cabal.publishChannelTopic(self.channel, arg)
       }
+    },
+    whoami: {
+      help: () => 'display your local user key',
+      call: (arg) => {
+        self.view.writeLine.bind(self.view)('Local user key: ' + self.cabal.client.user.key)
+      }
     }
   }
   // add aliases to commands
@@ -113,6 +105,7 @@ function Commander (view, cabal) {
   this.alias('join', 'j')
   this.alias('nick', 'n')
   this.alias('topic', 'motd')
+  this.alias('whoami', 'key')
 
   // add in experimental commands
   if (self.view.isExperimental) {
