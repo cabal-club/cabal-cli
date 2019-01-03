@@ -9,6 +9,8 @@ var swarm = require('cabal-core/swarm.js')
 var views = require('./views')
 var yaml = require('js-yaml')
 
+var markdown = require('./markdown-shim')
+
 const HEADER_ROWS = 6
 
 function NeatScreen (props) {
@@ -26,11 +28,11 @@ function NeatScreen (props) {
 
   this.commander = Commander(this, props.cabals[0])
 
-  this.neat = neatLog(renderApp, {fullscreen: true,
+  this.neat = neatLog(renderApp, { fullscreen: true,
     style: function (start, cursor, end) {
       if (!cursor) cursor = ' '
       return start + chalk.underline(cursor) + end
-    }}
+    } }
   )
   this.neat.input.on('update', () => this.neat.render())
   this.neat.input.on('enter', (line) => this.commander.process(line))
@@ -282,7 +284,7 @@ NeatScreen.prototype.addCabal = function (key) {
   if (!self.isExperimental) { return }
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var db = this.archivesdir + key
-  var cabal = Cabal(db, key, {maxFeeds: this.maxFeeds})
+  var cabal = Cabal(db, key, { maxFeeds: this.maxFeeds })
   cabal.db.ready(() => {
     self.state.cabals.push(cabal)
     swarm(cabal)
@@ -346,7 +348,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
     pending = 1
 
     // TODO: wrap this up in a nice interface and expose it via cabal-client
-    var rs = self.state.cabal.messages.read(channel, {limit: MAX_MESSAGES, lt: '~'})
+    var rs = self.state.cabal.messages.read(channel, { limit: MAX_MESSAGES, lt: '~' })
     collect(rs, function (err, msgs) {
       if (err) return
       msgs.reverse()
@@ -407,7 +409,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
-    var content = msg.value.content.text
+    var content = markdown(msg.value.content.text)
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
