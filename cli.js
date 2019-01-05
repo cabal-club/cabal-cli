@@ -10,6 +10,7 @@ var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
+var ram = require("random-access-memory")
 
 var args = minimist(process.argv.slice(2))
 
@@ -153,11 +154,16 @@ if (!args.experimental && cabalKeys.length) {
   cabalKeys = [firstKey]
 }
 
+function createCabal (key) {
+    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+    var storage = args.temp ? ram : archivesdir + key
+    return Cabal(storage, key, {maxFeeds: maxFeeds})
+}
+
 // create and join a new cabal
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
-  var db = archivesdir + key
-  var cabal = Cabal(db, key, {maxFeeds: maxFeeds})
+  var cabal = createCabal(key)
   cabal.db.ready(function () {
     if (!args.seed) {
       start([cabal])
@@ -166,9 +172,7 @@ if (args.new) {
 } else if (cabalKeys.length) {
   // join the specified list of cabals
   Promise.all(cabalKeys.map((key) => {
-    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-    var db = archivesdir + key
-    var cabal = Cabal(db, key, {maxFeeds: maxFeeds})
+    var cabal = createCabal(key)
     return new Promise((resolve) => {
       cabal.db.ready(() => {
         resolve(cabal)

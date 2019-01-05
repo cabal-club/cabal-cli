@@ -16,6 +16,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "neat-log": "^3.1.0",
+    "random-access-memory": "^3.1.1",
     "strftime": "^0.10.0",
     "terminal-link": "^1.2.0",
     "through2": "^2.0.3",
