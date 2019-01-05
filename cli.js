@@ -41,6 +41,7 @@ var usage = `Usage
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
     --config  Specify a full path to a cabal config
+    --temp    Start the cli with a temporary in-memory database. Useful for debugging
 
     --message Publish a single message; then quit after \`timeout\`
     --channel Channel name to publish to for \`message\` option; default: "default"
