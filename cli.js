@@ -20,7 +20,6 @@ var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
 var usage = `Usage
-
   cabal cabal://key
   cabal <your saved --alias of a cabal>
 
@@ -29,7 +28,6 @@ var usage = `Usage
   cabal --new
 
   Options:
-
     --seed    Start a headless seed for the specified cabal key
 
     --new     Start a new cabal
@@ -41,14 +39,17 @@ var usage = `Usage
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
     --config  Specify a full path to a cabal config
+
     --temp    Start the cli with a temporary in-memory database. Useful for debugging
+    --version Print out which version of cabal you're running
+    --help    Print this help message
 
     --message Publish a single message; then quit after \`timeout\`
     --channel Channel name to publish to for \`message\` option; default: "default"
     --timeout Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
     --type    Message type set to message for \`message\` option; default: "chat/text"
 
-Work in progress! Learn more at github.com/cabal-club
+Work in progress! Learn more at https://github.com/cabal-club
 `
 
 if (args.version || args.v) {
