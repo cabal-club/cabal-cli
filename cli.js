@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-var Cabal = require('cabal-core')
-var swarm = require('cabal-core/swarm.js')
+var CabalClassic = require('cabal-core')
+var CabalHyperswarm = require('cabal-core-hyperswarm')
+var swarmClassic = require('cabal-core/swarm.js')
+var swarmHyper = require('cabal-core-hyperswarm/swarm.js')
 var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
@@ -11,6 +13,9 @@ var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
 var ram = require("random-access-memory")
+
+var Cabal = CabalClassic
+var swarm = swarmClassic
 
 var args = minimist(process.argv.slice(2))
 
@@ -86,6 +91,12 @@ try {
 } catch (e) {
   logError(e)
   process.exit(1)
+}
+
+if (config.hyperswarm || args.hyperswarm) {
+  Cabal = CabalHyperswarm
+  swarm = swarmHyper
+  console.log('>>>>>>>>>> CABAL on HYPERSWARM >>>>>>>>>>')
 }
 
 if (args.clear) {
@@ -223,7 +234,8 @@ function start (cabals) {
       dbVersion,
       maxFeeds,
       config,
-      rootdir
+      rootdir,
+      hyperswarm: !!(config.hyperswarm || args.hyperswarm)
     })
     setTimeout(() => {
       cabals.forEach((cabal) => {

@@ -1,21 +1,32 @@
-var Cabal = require('cabal-core')
+var CabalClassic = require('cabal-core')
+var CabalHyperswarm = require('cabal-core-hyperswarm')
 var chalk = require('chalk')
 var collect = require('collect-stream')
 var Commander = require('./commands.js')
 var fs = require('fs')
 var neatLog = require('neat-log')
 var strftime = require('strftime')
-var swarm = require('cabal-core/swarm.js')
+var swarmClassic = require('cabal-core/swarm.js')
+var swarmHyper = require('cabal-core-hyperswarm/swarm.js')
 var views = require('./views')
 var yaml = require('js-yaml')
 
 var markdown = require('./markdown-shim')
+
+var Cabal = CabalClassic
+var swarm = swarmClassic
 
 const HEADER_ROWS = 6
 
 function NeatScreen (props) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(props)
   var self = this
+
+  if (props.hyperswarm) {
+    Cabal = CabalHyperswarm
+    swarm = swarmHyper
+    console.log('>>>>>>>>>> CABAL on HYPERSWARM >>>>>>>>>>')
+  }
 
   this.archivesdir = props.archivesdir
   this.configFilePath = props.configFilePath
