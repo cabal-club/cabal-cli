@@ -36,7 +36,7 @@ cabal --key cabal://14bc77d788fdaf07b89b28e9d276e47f2e44011f4adb981921056e1b3b40
 
 This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VPS) and make its data more available:
 ```
-cabal --key <key> --seeder
+cabal --key <key> --seed
 ```
 
 ## Commands
