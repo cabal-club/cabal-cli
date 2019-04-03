@@ -2,6 +2,7 @@ var output = require('./output')
 var chalk = require('chalk')
 var blit = require('txt-blit')
 var util = require('./util')
+var version = require('./package.json').version
 
 const HEADER_ROWS = 7
 
@@ -84,7 +85,7 @@ function renderPrompt (state) {
 
 function renderTitlebar (state, width) {
   return [
-    chalk.bgBlue(util.centerText(chalk.white.bold('CABAL'), width)),
+    chalk.bgBlue(util.centerText(chalk.white.bold(`CABAL@${version}`), width)),
     util.rightAlignText(chalk.white(`cabal://${state.cabal.key.toString('hex')}`), width)
   ]
 }
