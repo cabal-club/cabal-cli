@@ -8,6 +8,8 @@ var strftime = require('strftime')
 var swarm = require('cabal-core/swarm.js')
 var views = require('./views')
 var yaml = require('js-yaml')
+var GraphemeSplitter = require('grapheme-splitter')
+var splitter = new GraphemeSplitter()
 
 var markdown = require('./markdown-shim')
 
@@ -410,6 +412,8 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
     var content = markdown(msg.value.content.text)
+    content = splitter.splitGraphemes(content).filter((ch) => ch.codePointAt(0) < 65536).join('') // filter out emojis
+
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {

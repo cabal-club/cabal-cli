@@ -11,6 +11,7 @@
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
     "discovery-swarm": "^5.1.2",
+    "grapheme-splitter": "^1.0.4",
     "hypercore-crypto": "^1.0.0",
     "js-yaml": "^3.12.0",
     "minimist": "^1.2.0",
@@ -21,7 +22,7 @@
     "strftime": "^0.10.0",
     "terminal-link": "^1.2.0",
     "through2": "^2.0.3",
-    "txt-blit": "^1.0.0"
+    "txt-blit": "cblgh/txt-blit"
   },
   "devDependencies": {
     "standard": "^11.0.1"
