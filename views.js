@@ -140,19 +140,25 @@ function renderNicks (state, width, height) {
   var users = Object.keys(state.cabal.client.users)
     .map(key => state.cabal.client.users[key])
     .sort(cmpUser)
+  var onlines = {}
 
   users = users
     .map(function (user) {
       var name = ''
-      var sigil = ''
-      // if (user.online) sigil = chalk.green('+')
       if (user && user.name) name += user.name.slice(0, width)
       else name += user.key.slice(0, Math.min(8, width))
-      if (!user.online) name = chalk.gray(name)
-      return sigil + name
+      if (user.online) { onlines[name] = name in onlines ? onlines[name] + 1 : 1 }
+      return name
     })
-    .slice(0, height)
-  return users
+
+  var nickCount = {}
+  users.forEach((u) => nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1)
+  return users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
+    if (nickCount[u] === 1) return u in onlines ? u : chalk.gray(u)
+    var dupecount = ` (${nickCount[u]})`
+    var name = u.slice(0, 15 - dupecount.length)
+    return (u in onlines ? name : chalk.gray(name)) + chalk.green(dupecount)
+  }).slice(0, height)
 }
 
 function cmpUser (a, b) {
