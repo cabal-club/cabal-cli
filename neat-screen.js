@@ -8,8 +8,8 @@ var strftime = require('strftime')
 var swarm = require('cabal-core/swarm.js')
 var views = require('./views')
 var yaml = require('js-yaml')
-var GraphemeSplitter = require('grapheme-splitter')
-var splitter = new GraphemeSplitter()
+var emojiRegex = require("emoji-regex")
+var emojiPattern = emojiRegex()
 
 var markdown = require('./markdown-shim')
 
@@ -405,24 +405,25 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (self.state.cabal.client.users && self.state.cabal.client.users[msg.key]) author = self.state.cabal.client.users[msg.key].name || self.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
     let localNick = self.state.cabal.client.user.name
-    if (msg.value.content.text.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
+    // emojis.break the cli: replace them with a cabal symbol
+    var msgtxt = msg.value.content.text.replace(emojiPattern, "➤")
+    if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key)
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
-    var content = markdown(msg.value.content.text)
-    content = splitter.splitGraphemes(content).filter((ch) => ch.codePointAt(0) < 65536).join('') // filter out emojis
+    var content = markdown(msgtxt) 
 
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
       authorText = `${chalk.white(author)}`
-      content = `${chalk.dim(msg.value.content.text)}`
+      content = `${chalk.dim(msgtxt)}`
     }
 
     if (msg.value.type === 'chat/topic') {
-      content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msg.value.content.text)}`)}`
+      content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
     }
 
     return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
