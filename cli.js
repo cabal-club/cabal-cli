@@ -166,7 +166,7 @@ function createCabal (key) {
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
   var cabal = createCabal(key)
-  console.error(`created the cabal: cabal://${key}`) // log to terminal output (stdout is occupied by interface)
+  console.error(`created the cabal: ${chalk.greenBright('cabal://'+key)}`) // log to terminal output (stdout is occupied by interface)
   cabal.db.ready(function () {
     if (!args.seed) {
       start([cabal])
