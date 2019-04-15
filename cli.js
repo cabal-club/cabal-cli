@@ -10,7 +10,7 @@ var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
-var ram = require("random-access-memory")
+var ram = require('random-access-memory')
 
 var args = minimist(process.argv.slice(2))
 
@@ -157,15 +157,16 @@ if (!args.experimental && cabalKeys.length) {
 }
 
 function createCabal (key) {
-    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-    var storage = args.temp ? ram : archivesdir + key
-    return Cabal(storage, key, {maxFeeds: maxFeeds})
+  key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+  var storage = args.temp ? ram : archivesdir + key
+  return Cabal(storage, key, {maxFeeds: maxFeeds})
 }
 
 // create and join a new cabal
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
   var cabal = createCabal(key)
+  console.error(`created the cabal: cabal://${key}`) // log to terminal output (stdout is occupied by interface)
   cabal.db.ready(function () {
     if (!args.seed) {
       start([cabal])
