@@ -5,7 +5,7 @@
 See [cabal-core](https://github.com/cabal-club/cabal-core) for the underlying
 database & api.
 
-![](image.png)
+![](cli-2019-04.png)
 
 chat with us:  
 `npx cabal --key cabal://14bc77d788fdaf07b89b28e9d276e47f2e44011f4adb981921056e1b3b40e99e`
