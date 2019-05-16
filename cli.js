@@ -11,6 +11,7 @@ var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
 var ram = require('random-access-memory')
+var cabalDns = require("../cabal-dns/dat-dns")()
 
 var args = minimist(process.argv.slice(2))
 
@@ -131,6 +132,8 @@ if (args.alias && args.key) {
 }
 
 if (args.key) {
+  var resolvedKey = cabalDns(args.key)
+  console.log(resolvedKey)
   // If a key is provided, place it at the top of the list
   cabalKeys.unshift(args.key)
 } else if (args._.length > 0) {
@@ -157,9 +160,13 @@ if (!args.experimental && cabalKeys.length) {
 }
 
 function createCabal (key) {
-  key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-  var storage = args.temp ? ram : archivesdir + key
-  return Cabal(storage, key, {maxFeeds: maxFeeds})
+    return new Promise(function (res, rej) {
+        cabalDns.resolveName(key).then(function (key) {
+            key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+            var storage = args.temp ? ram : archivesdir + key
+            res(Cabal(storage, key, {maxFeeds: maxFeeds}))
+        })
+    })
 }
 
 // create and join a new cabal
@@ -174,20 +181,25 @@ if (args.new) {
   })
 } else if (cabalKeys.length) {
   // join the specified list of cabals
-  Promise.all(cabalKeys.map((key) => {
-    var cabal = createCabal(key)
-    return new Promise((resolve) => {
-      cabal.db.ready(() => {
-        resolve(cabal)
-      })
+  Promise.all(cabalKeys.map(createCabal)).then(function (cabals) {
+      var promisedCabals = cabals.map(function (cabal) {
+        return new Promise((resolve) => {
+          cabal.db.ready(() => {
+            resolve(cabal)
+          })
+        })
     })
-  })).then((cabals) => {
-    start(cabals)
+  Promise.all(promisedCabals)
+      .then((cabals) => {
+        start(cabals)
+      })
   })
 } else {
   process.stderr.write(usage)
   process.exit(1)
 }
+
+  //   .then(function (cabals) {
 
 function start (cabals) {
   if (!args.seed) {
