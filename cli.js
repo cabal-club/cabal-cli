@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var Cabal = require('cabal-core')
-var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
@@ -228,13 +227,13 @@ function start (cabals) {
     })
     setTimeout(() => {
       cabals.forEach((cabal) => {
-        swarm(cabal)
+        cabal.swarm()
       })
     }, 300)
   } else {
     cabals.forEach((cabal) => {
       console.log('Seeding', cabal.key)
-      swarm(cabal)
+      cabal.swarm()
     })
   }
 }
