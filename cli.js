@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var Cabal = require('cabal-core')
-var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
@@ -166,7 +165,7 @@ function createCabal (key) {
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
   var cabal = createCabal(key)
-  console.error(`created the cabal: ${chalk.greenBright('cabal://'+key)}`) // log to terminal output (stdout is occupied by interface)
+  console.error(`created the cabal: ${chalk.greenBright('cabal://' + key)}`) // log to terminal output (stdout is occupied by interface)
   cabal.db.ready(function () {
     if (!args.seed) {
       start([cabal])
@@ -228,13 +227,13 @@ function start (cabals) {
     })
     setTimeout(() => {
       cabals.forEach((cabal) => {
-        swarm(cabal)
+        cabal.swarm()
       })
     }, 300)
   } else {
     cabals.forEach((cabal) => {
       console.log('Seeding', cabal.key)
-      swarm(cabal)
+      cabal.swarm()
     })
   }
 }
@@ -281,7 +280,7 @@ function publishSingleMessage ({key, channel, message, messageType, timeout}) {
         text: message
       }
     })
-    swarm(cabal)
+    cabal.swarm()
     setTimeout(function () { process.exit(0) }, timeout || 5000)
   })
 }

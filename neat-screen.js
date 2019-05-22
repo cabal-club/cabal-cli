@@ -5,10 +5,9 @@ var Commander = require('./commands.js')
 var fs = require('fs')
 var neatLog = require('neat-log')
 var strftime = require('strftime')
-var swarm = require('cabal-core/swarm.js')
 var views = require('./views')
 var yaml = require('js-yaml')
-var emojiRegex = require("emoji-regex")
+var emojiRegex = require('emoji-regex')
 var emojiPattern = emojiRegex()
 
 var markdown = require('./markdown-shim')
@@ -289,7 +288,7 @@ NeatScreen.prototype.addCabal = function (key) {
   var cabal = Cabal(db, key, { maxFeeds: this.maxFeeds })
   cabal.db.ready(() => {
     self.state.cabals.push(cabal)
-    swarm(cabal)
+    cabal.swarm()
     self.initializeCabalClient(cabal)
     self.showCabal(cabal)
     self.config.cabals = self.state.cabals.map((cabal) => cabal.key)
@@ -406,14 +405,14 @@ NeatScreen.prototype.formatMessage = function (msg) {
     else author = msg.key.slice(0, 8)
     let localNick = self.state.cabal.client.user.name
     // emojis.break the cli: replace them with a cabal symbol
-    var msgtxt = msg.value.content.text.replace(emojiPattern, "➤")
+    var msgtxt = msg.value.content.text.replace(emojiPattern, '➤')
     if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key)
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
-    var content = markdown(msgtxt) 
+    var content = markdown(msgtxt)
 
     var emote = (msg.value.type === 'chat/emote')
 
