@@ -10,6 +10,7 @@ var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
 var ram = require('random-access-memory')
+var level = require('level')
 
 var args = minimist(process.argv.slice(2))
 
@@ -158,7 +159,9 @@ if (!args.experimental && cabalKeys.length) {
 function createCabal (key) {
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var storage = args.temp ? ram : archivesdir + key
-  return Cabal(storage, key, {maxFeeds: maxFeeds})
+  if (!args.temp) try { mkdirp.sync(path.join(archivesdir, key, 'views')) } catch (e) {}
+  var db = args.tmp ? memdb() : level(path.join(archivesdir, key, 'views'))
+  return Cabal(storage, key, {db: db, maxFeeds: maxFeeds})
 }
 
 // create and join a new cabal
@@ -271,7 +274,8 @@ function saveConfig (path, config) {
 
 function publishSingleMessage ({key, channel, message, messageType, timeout}) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
-  var cabal = Cabal(archivesdir + key, key, {maxFeeds: maxFeeds})
+  var db = args.tmp ? memdb() : level(path.join(archivesdir, key, 'views'))
+  var cabal = Cabal(archivesdir + key, key, {db: db, maxFeeds: maxFeeds})
   cabal.ready(() => {
     cabal.publish({
       type: messageType || 'chat/text',
