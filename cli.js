@@ -161,7 +161,7 @@ function createCabal (key) {
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var storage = args.temp ? ram : archivesdir + key
   if (!args.temp) try { mkdirp.sync(path.join(archivesdir, key, 'views')) } catch (e) {}
-  var db = args.tmp ? memdb() : level(path.join(archivesdir, key, 'views'))
+  var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
   return Cabal(storage, key, {db: db, maxFeeds: maxFeeds})
 }
 
@@ -275,7 +275,7 @@ function saveConfig (path, config) {
 
 function publishSingleMessage ({key, channel, message, messageType, timeout}) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
-  var db = args.tmp ? memdb() : level(path.join(archivesdir, key, 'views'))
+  var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
   var cabal = Cabal(archivesdir + key, key, {db: db, maxFeeds: maxFeeds})
   cabal.ready(() => {
     cabal.publish({
