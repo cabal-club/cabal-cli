@@ -72,7 +72,7 @@ function big (state) {
 }
 
 function linkSize (state) {
-  if (state.cabal.db.key) return `cabal://${state.cabal.db.key.toString('hex')}`.length
+  if (state.cabal.key) return `cabal://${state.cabal.key.toString('hex')}`.length
   else return 'cabal://...'
 }
 

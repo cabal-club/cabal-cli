@@ -166,7 +166,7 @@ if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
   var cabal = createCabal(key)
   console.error(`created the cabal: ${chalk.greenBright('cabal://' + key)}`) // log to terminal output (stdout is occupied by interface)
-  cabal.db.ready(function () {
+  cabal.ready(function () {
     if (!args.seed) {
       start([cabal])
     }
@@ -176,7 +176,7 @@ if (args.new) {
   Promise.all(cabalKeys.map((key) => {
     var cabal = createCabal(key)
     return new Promise((resolve) => {
-      cabal.db.ready(() => {
+      cabal.ready(() => {
         resolve(cabal)
       })
     })
@@ -272,7 +272,7 @@ function saveConfig (path, config) {
 function publishSingleMessage ({key, channel, message, messageType, timeout}) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
   var cabal = Cabal(archivesdir + key, key, {maxFeeds: maxFeeds})
-  cabal.db.ready(() => {
+  cabal.ready(() => {
     cabal.publish({
       type: messageType || 'chat/text',
       content: {

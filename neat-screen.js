@@ -199,7 +199,7 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
   }
   self.state.cabal.client = cabal.client
 
-  cabal.db.ready(function () {
+  cabal.ready(function () {
     cabal.channels.get((err, channels) => {
       if (err) return
       cabal.client.channels = channels
@@ -286,7 +286,7 @@ NeatScreen.prototype.addCabal = function (key) {
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var db = this.archivesdir + key
   var cabal = Cabal(db, key, { maxFeeds: this.maxFeeds })
-  cabal.db.ready(() => {
+  cabal.ready(() => {
     self.state.cabals.push(cabal)
     cabal.swarm()
     self.initializeCabalClient(cabal)
