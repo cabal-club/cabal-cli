@@ -11,6 +11,7 @@ var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
 var ram = require('random-access-memory')
 var level = require('level')
+var memdb = require('memdb')
 
 var args = minimist(process.argv.slice(2))
 
