@@ -432,7 +432,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     }
     // emojis.break the cli: replace them with a cabal symbol
     var msgtxt = msg.value.content.text.replace(emojiPattern, '➤')
-    if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = false }
+    if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key) || colours[5]
 
