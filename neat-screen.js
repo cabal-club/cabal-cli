@@ -9,7 +9,7 @@ var views = require('./views')
 var yaml = require('js-yaml')
 var emojiRegex = require('emoji-regex')
 var emojiPattern = emojiRegex()
-var util = require("./util")
+var util = require('./util')
 
 var markdown = require('./markdown-shim')
 var statusMessages = ['welcome to cabal', 'for more info visit https://github.com/cabal-club/cabal']

@@ -139,7 +139,7 @@ function renderHorizontalLine (chr, width, chlk) {
 function renderNicks (state, width, height) {
   var users = Object.keys(state.cabal.client.users)
     .map(key => state.cabal.client.users[key])
-    .sort(cmpUser)
+    .sort(util.cmpUser)
   var onlines = {}
 
   users = users
@@ -159,15 +159,6 @@ function renderNicks (state, width, height) {
     var name = u.slice(0, 15 - dupecount.length)
     return (u in onlines ? name : chalk.gray(name)) + chalk.green(dupecount)
   }).slice(0, height)
-}
-
-function cmpUser (a, b) {
-  if (a.online && !b.online) return -1
-  if (b.online && !a.online) return 1
-  if (a.name && !b.name) return -1
-  if (b.name && !a.name) return 1
-  if (a.name && b.name) return a.name < b.name ? -1 : 1
-  return a.key < b.key ? -1 : 1
 }
 
 function renderChannelTopic (state, width, height) {
