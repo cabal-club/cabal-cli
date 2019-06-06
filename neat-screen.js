@@ -194,8 +194,8 @@ function NeatScreen (props) {
 NeatScreen.prototype.initializeCabalClient = function (cabal) {
   var self = this
   cabal.client = {
-    channel: '~status',
-    channels: ['~status'],
+    channel: '!status',
+    channels: ['!status'],
     messages: [],
     user: { local: true, online: true, key: '' },
     users: {}
@@ -345,7 +345,7 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.topic = ''
   self.neat.render()
 
-  if (channel === '~status') {
+  if (channel === '!status') {
     self.state.cabal.client.messages = statusMessages.map(self.formatMessage)
     self.neat.render()
     return
@@ -426,7 +426,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var author
     if (self.state && self.state.cabal.client.users && self.state.cabal.client.users[msg.key]) author = self.state.cabal.client.users[msg.key].name || self.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
-    var localNick = ''
+    var localNick = 'uninitialized'
     if (self.state) {
       localNick = self.state.cabal.client.user.name
     }

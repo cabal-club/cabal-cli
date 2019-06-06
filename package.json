@@ -7,7 +7,7 @@
     "cabal": "cli.js"
   },
   "dependencies": {
-    "cabal-core": "^5.1.1",
+    "cabal-core": "^5.1.2",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
     "discovery-swarm": "^5.1.2",

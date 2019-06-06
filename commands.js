@@ -1,7 +1,7 @@
 function Commander (view, cabal) {
   if (!(this instanceof Commander)) return new Commander(view, cabal)
   this.cabal = cabal
-  this.channel = '~status'
+  this.channel = '!status'
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
@@ -145,7 +145,7 @@ Commander.prototype.process = function (line) {
     self.commands[cmd].call(arg)
   } else if (cmd) {
     self.view.writeLine(`${cmd} is not a command, type /help for commands`)
-  } else if (self.channel === "~status") { 
+  } else if (self.channel === "!status") { 
     self.view.writeLine(line)
   } else {
     line = line.trim()
