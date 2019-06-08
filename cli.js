@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var Cabal = require('cabal-core')
-var swarm = require('cabal-core/swarm.js')
 var minimist = require('minimist')
 var os = require('os')
 var fs = require('fs')
@@ -11,26 +10,28 @@ var frontend = require('./neat-screen.js')
 var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
 var ram = require('random-access-memory')
-var cabalDns = require("cabal-dns")({ 
-    persistentCache: {
-        read: async function (name, err) {
-            if (name in config.cache) {
-                var cache = config.cache[name]
-                if (cache.expiresAt < Date.now()) { // if ttl has expired: warn, but keep using
-                    console.error(`${chalk.redBright('Note:')} the TTL for ${name} has expired`)
-                } 
-                return cache.key       
-            }
-            // dns record wasn't found online and wasn't in the cache
-            throw err
-        },
-        write: async function (name, key, ttl) {
-            var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
-            var expiredTime = Date.now() + expireOffset
-            config.cache[name] = { key: key, expiresAt: expiredTime }
-            saveConfig(configFilePath, config)
+var level = require('level')
+var memdb = require('memdb')
+var cabalDns = require('cabal-dns')({
+  persistentCache: {
+    read: async function (name, err) {
+      if (name in config.cache) {
+        var cache = config.cache[name]
+        if (cache.expiresAt < Date.now()) { // if ttl has expired: warn, but keep using
+          console.error(`${chalk.redBright('Note:')} the TTL for ${name} has expired`)
         }
+        return cache.key
+      }
+      // dns record wasn't found online and wasn't in the cache
+      throw err
+    },
+    write: async function (name, key, ttl) {
+      var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
+      var expiredTime = Date.now() + expireOffset
+      config.cache[name] = { key: key, expiresAt: expiredTime }
+      saveConfig(configFilePath, config)
     }
+  }
 })
 
 var args = minimist(process.argv.slice(2))
@@ -179,25 +180,27 @@ if (!args.experimental && cabalKeys.length) {
 }
 
 function createCabal (key) {
-    return cabalDns.resolveName(key).then(function (key) {
-        key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-        var storage = args.temp ? ram : archivesdir + key
-        return Cabal(storage, key, {maxFeeds: maxFeeds})
-    }).catch(function (err) {
-        // try to get from local cache
-        // if record was found, was the ttl within bounds? (i.e. does the key still have time to live)
-        // wasn't any entry in the cache; assume record just wasn't found
-        console.error(`${chalk.redBright('Record not found')}\nHave you created a file containing the cabal:// key at ${chalk.greenBright(key+'/.well-known/cabal')}?`)
-        process.exit(1)
-    })
+  return cabalDns.resolveName(key).then(function (key) {
+    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+    var storage = args.temp ? ram : archivesdir + key
+    if (!args.temp) try { mkdirp.sync(path.join(archivesdir, key, 'views')) } catch (e) {}
+    var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
+    return Cabal(storage, key, { db: db, maxFeeds: maxFeeds })
+  }).catch(function () {
+    // try to get from local cache
+    // if record was found, was the ttl within bounds? (i.e. does the key still have time to live)
+    // wasn't any entry in the cache; assume record just wasn't found
+    console.error(`${chalk.redBright('Record not found')}\nHave you created a file containing the cabal:// key at ${chalk.greenBright(key + '/.well-known/cabal')}?`)
+    process.exit(1)
+  })
 }
 
 // create and join a new cabal
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
   var cabal = createCabal(key)
-  console.error(`created the cabal: ${chalk.greenBright('cabal://'+key)}`) // log to terminal output (stdout is occupied by interface)
-  cabal.db.ready(function () {
+  console.error(`created the cabal: ${chalk.greenBright('cabal://' + key)}`) // log to terminal output (stdout is occupied by interface)
+  cabal.ready(function () {
     if (!args.seed) {
       start([cabal])
     }
@@ -205,14 +208,14 @@ if (args.new) {
 } else if (cabalKeys.length) {
   // join the specified list of cabals
   Promise.all(cabalKeys.map(createCabal)).then(function (cabals) {
-      var promisedCabals = cabals.map(function (cabal) {
-        return new Promise((resolve) => {
-          cabal.db.ready(() => {
-            resolve(cabal)
-          })
+    var promisedCabals = cabals.map(function (cabal) {
+      return new Promise((resolve) => {
+        cabal.ready(() => {
+          resolve(cabal)
         })
+      })
     })
-  Promise.all(promisedCabals)
+    Promise.all(promisedCabals)
       .then((cabals) => {
         start(cabals)
       })
@@ -261,13 +264,13 @@ function start (cabals) {
     })
     setTimeout(() => {
       cabals.forEach((cabal) => {
-        swarm(cabal)
+        cabal.swarm()
       })
     }, 300)
   } else {
     cabals.forEach((cabal) => {
       console.log('Seeding', cabal.key)
-      swarm(cabal)
+      cabal.swarm()
     })
   }
 }
@@ -303,10 +306,11 @@ function saveConfig (path, config) {
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function publishSingleMessage ({key, channel, message, messageType, timeout}) {
+function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
-  var cabal = Cabal(archivesdir + key, key, {maxFeeds: maxFeeds})
-  cabal.db.ready(() => {
+  var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
+  var cabal = Cabal(archivesdir + key, key, { db: db, maxFeeds: maxFeeds })
+  cabal.ready(() => {
     cabal.publish({
       type: messageType || 'chat/text',
       content: {
@@ -314,7 +318,7 @@ function publishSingleMessage ({key, channel, message, messageType, timeout}) {
         text: message
       }
     })
-    swarm(cabal)
+    cabal.swarm()
     setTimeout(function () { process.exit(0) }, timeout || 5000)
   })
 }

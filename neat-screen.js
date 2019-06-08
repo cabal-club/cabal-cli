@@ -5,13 +5,15 @@ var Commander = require('./commands.js')
 var fs = require('fs')
 var neatLog = require('neat-log')
 var strftime = require('strftime')
-var swarm = require('cabal-core/swarm.js')
 var views = require('./views')
 var yaml = require('js-yaml')
-var emojiRegex = require("emoji-regex")
+var emojiRegex = require('emoji-regex')
 var emojiPattern = emojiRegex()
+var util = require('./util')
 
 var markdown = require('./markdown-shim')
+var statusMessages = ['welcome to cabal', 'for more info visit https://github.com/cabal-club/cabal']
+statusMessages = statusMessages.map(util.wrapStatusMsg)
 
 const HEADER_ROWS = 6
 
@@ -192,19 +194,21 @@ function NeatScreen (props) {
 NeatScreen.prototype.initializeCabalClient = function (cabal) {
   var self = this
   cabal.client = {
-    channel: 'default',
-    channels: [],
+    channel: '!status',
+    channels: ['!status'],
     messages: [],
     user: { local: true, online: true, key: '' },
     users: {}
   }
+
+  this.commander.commands.help.call()
   self.state.cabal.client = cabal.client
 
-  cabal.db.ready(function () {
+  cabal.ready(function () {
     cabal.channels.get((err, channels) => {
       if (err) return
-      cabal.client.channels = channels
-      self.loadChannel('default')
+      cabal.client.channels = cabal.client.channels.concat(channels)
+      self.loadChannel(cabal.client.channel)
       self.bus.emit('render')
 
       cabal.channels.events.on('add', function (channel) {
@@ -287,9 +291,9 @@ NeatScreen.prototype.addCabal = function (key) {
   key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
   var db = this.archivesdir + key
   var cabal = Cabal(db, key, { maxFeeds: this.maxFeeds })
-  cabal.db.ready(() => {
+  cabal.ready(() => {
     self.state.cabals.push(cabal)
-    swarm(cabal)
+    cabal.swarm()
     self.initializeCabalClient(cabal)
     self.showCabal(cabal)
     self.config.cabals = self.state.cabals.map((cabal) => cabal.key)
@@ -310,9 +314,11 @@ function renderApp (state) {
   else return views.small(state)
 }
 
-// use to write anything else to the screen, e.g. info messages or emotes
+// use to write anything else to the screen, e.g. info iessages or emotes
 NeatScreen.prototype.writeLine = function (line) {
-  this.state.cabal.client.messages.push(`${chalk.dim(line)}`)
+  var msg = `${chalk.dim(line)}`
+  this.state.cabal.client.messages.push(msg)
+  statusMessages.push(util.wrapStatusMsg(msg))
   this.bus.emit('render')
 }
 
@@ -339,7 +345,11 @@ NeatScreen.prototype.loadChannel = function (channel) {
   self.state.topic = ''
   self.neat.render()
 
-  // MISSING: mention beeps
+  if (channel === '!status') {
+    self.state.cabal.client.messages = statusMessages.map(self.formatMessage)
+    self.neat.render()
+    return
+  }
 
   var pending = 0
   function onMessage () {
@@ -399,21 +409,36 @@ NeatScreen.prototype.render = function () {
 NeatScreen.prototype.formatMessage = function (msg) {
   var self = this
   var highlight = false
-  if (!msg.value.type) { msg.type = 'chat/text' }
+  /*
+   msg = {
+     key: ''
+     value: {
+       timestamp: ''
+       type: ''
+       content: {
+         text: ''
+       }
+     }
+   }
+  */
+  if (!msg.value.type) { msg.value.type = 'chat/text' }
   if (msg.value.content && msg.value.timestamp) {
     var author
-    if (self.state.cabal.client.users && self.state.cabal.client.users[msg.key]) author = self.state.cabal.client.users[msg.key].name || self.state.cabal.client.users[msg.key].key.slice(0, 8)
+    if (self.state && self.state.cabal.client.users && self.state.cabal.client.users[msg.key]) author = self.state.cabal.client.users[msg.key].name || self.state.cabal.client.users[msg.key].key.slice(0, 8)
     else author = msg.key.slice(0, 8)
-    let localNick = self.state.cabal.client.user.name
+    var localNick = 'uninitialized'
+    if (self.state) {
+      localNick = self.state.cabal.client.user.name
+    }
     // emojis.break the cli: replace them with a cabal symbol
-    var msgtxt = msg.value.content.text.replace(emojiPattern, "➤")
+    var msgtxt = msg.value.content.text.replace(emojiPattern, '➤')
     if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
-    var color = keyToColour(msg.key)
+    var color = keyToColour(msg.key) || colours[5]
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
-    var content = markdown(msgtxt) 
+    var content = markdown(msgtxt)
 
     var emote = (msg.value.type === 'chat/emote')
 

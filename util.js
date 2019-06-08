@@ -1,4 +1,4 @@
-function logResult (err, result) {
+function log (err, result) {
   if (err) { console.error('hyperdb failed with', err) }
   if (arguments.length >= 2) { console.log(result) }
 }
@@ -78,4 +78,26 @@ function rightAlignText (text, width) {
   return lspace + text
 }
 
-module.exports = {log: logResult, wrapAnsi: wrapAnsi, strlenAnsi: strlenAnsi, centerText, rightAlignText}
+function wrapStatusMsg (m) {
+  return {
+    key: 'status',
+    value: {
+      timestamp: Date.now(),
+      type: 'chat/text',
+      content: {
+        text: m
+      }
+    }
+  }
+}
+
+function cmpUser (a, b) {
+  if (a.online && !b.online) return -1
+  if (b.online && !a.online) return 1
+  if (a.name && !b.name) return -1
+  if (b.name && !a.name) return 1
+  if (a.name && b.name) return a.name < b.name ? -1 : 1
+  return a.key < b.key ? -1 : 1
+}
+
+module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg }

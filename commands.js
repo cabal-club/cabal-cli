@@ -1,7 +1,9 @@
+var util = require('./util')
+
 function Commander (view, cabal) {
   if (!(this instanceof Commander)) return new Commander(view, cabal)
   this.cabal = cabal
-  this.channel = 'default'
+  this.channel = '!status'
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
@@ -29,11 +31,19 @@ function Commander (view, cabal) {
       }
     },
     names: {
-      help: () => 'display the names of the currently logged in users',
+      help: () => 'display the names of the currently online peers',
       call: (arg) => {
-        var users = Object.keys(self.cabal.users)
-        self.view.writeLine('* currently connected users:')
-        users.map((u) => self.view.writeLine.bind(self.view)(`  ${u}`))
+        self.cabal.users.getAll(function (err, users) {
+          if (err) { return }
+          var userkeys = Object.keys(users).map((key) => users[key]).sort(util.cmpUser)
+          self.view.writeLine('* history of peers in this cabal:')
+          userkeys.map((u) => {
+            var username = u.name || 'conspirator'
+            var spaces = ' '.repeat(15)
+            var paddedName = (username + spaces).slice(0, spaces.length)
+            self.view.writeLine.bind(self.view)(`  ${paddedName} ${u.key}`)
+          })
+        })
       }
     },
     channels: {
@@ -145,6 +155,8 @@ Commander.prototype.process = function (line) {
     self.commands[cmd].call(arg)
   } else if (cmd) {
     self.view.writeLine(`${cmd} is not a command, type /help for commands`)
+  } else if (self.channel === '!status') {
+    self.view.writeLine(line)
   } else {
     line = line.trim()
     if (line !== '') {

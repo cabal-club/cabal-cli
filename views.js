@@ -72,7 +72,7 @@ function big (state) {
 }
 
 function linkSize (state) {
-  if (state.cabal.db.key) return `cabal://${state.cabal.db.key.toString('hex')}`.length
+  if (state.cabal.key) return `cabal://${state.cabal.key.toString('hex')}`.length
   else return 'cabal://...'
 }
 
@@ -139,7 +139,7 @@ function renderHorizontalLine (chr, width, chlk) {
 function renderNicks (state, width, height) {
   var users = Object.keys(state.cabal.client.users)
     .map(key => state.cabal.client.users[key])
-    .sort(cmpUser)
+    .sort(util.cmpUser)
   var onlines = {}
 
   users = users
@@ -152,22 +152,13 @@ function renderNicks (state, width, height) {
     })
 
   var nickCount = {}
-  users.forEach((u) => nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1)
+  users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
   return users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
     if (nickCount[u] === 1) return u in onlines ? u : chalk.gray(u)
     var dupecount = ` (${nickCount[u]})`
     var name = u.slice(0, 15 - dupecount.length)
     return (u in onlines ? name : chalk.gray(name)) + chalk.green(dupecount)
   }).slice(0, height)
-}
-
-function cmpUser (a, b) {
-  if (a.online && !b.online) return -1
-  if (b.online && !a.online) return 1
-  if (a.name && !b.name) return -1
-  if (b.name && !a.name) return 1
-  if (a.name && b.name) return a.name < b.name ? -1 : 1
-  return a.key < b.key ? -1 : 1
 }
 
 function renderChannelTopic (state, width, height) {
