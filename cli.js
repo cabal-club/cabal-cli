@@ -12,6 +12,27 @@ var chalk = require('chalk')
 var ram = require('random-access-memory')
 var level = require('level')
 var memdb = require('memdb')
+var cabalDns = require('cabal-dns')({
+  persistentCache: {
+    read: async function (name, err) {
+      if (name in config.cache) {
+        var cache = config.cache[name]
+        if (cache.expiresAt < Date.now()) { // if ttl has expired: warn, but keep using
+          console.error(`${chalk.redBright('Note:')} the TTL for ${name} has expired`)
+        }
+        return cache.key
+      }
+      // dns record wasn't found online and wasn't in the cache
+      throw err
+    },
+    write: async function (name, key, ttl) {
+      var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
+      var expiredTime = Date.now() + expireOffset
+      config.cache[name] = { key: key, expiresAt: expiredTime }
+      saveConfig(configFilePath, config)
+    }
+  }
+})
 
 var args = minimist(process.argv.slice(2))
 
@@ -73,7 +94,7 @@ mkdirp.sync(rootdir)
 
 // create a default config in rootdir if it doesn't exist
 if (!fs.existsSync(rootconfig)) {
-  saveConfig(rootconfig, { cabals: [], aliases: {} })
+  saveConfig(rootconfig, { cabals: [], aliases: {}, cache: {} })
 }
 
 // Attempt to load local or homedir config file
@@ -82,6 +103,7 @@ try {
     config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))
     if (!config.cabals) { config.cabals = [] }
     if (!config.aliases) { config.aliases = {} }
+    if (!config.cache) { config.cache = {} }
     cabalKeys = config.cabals
   }
 } catch (e) {
@@ -158,11 +180,19 @@ if (!args.experimental && cabalKeys.length) {
 }
 
 function createCabal (key) {
-  key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-  var storage = args.temp ? ram : archivesdir + key
-  if (!args.temp) try { mkdirp.sync(path.join(archivesdir, key, 'views')) } catch (e) {}
-  var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
-  return Cabal(storage, key, {db: db, maxFeeds: maxFeeds})
+  return cabalDns.resolveName(key).then(function (key) {
+    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
+    var storage = args.temp ? ram : archivesdir + key
+    if (!args.temp) try { mkdirp.sync(path.join(archivesdir, key, 'views')) } catch (e) {}
+    var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
+    return Cabal(storage, key, { db: db, maxFeeds: maxFeeds })
+  }).catch(function () {
+    // try to get from local cache
+    // if record was found, was the ttl within bounds? (i.e. does the key still have time to live)
+    // wasn't any entry in the cache; assume record just wasn't found
+    console.error(`${chalk.redBright('Record not found')}\nHave you created a file containing the cabal:// key at ${chalk.greenBright(key + '/.well-known/cabal')}?`)
+    process.exit(1)
+  })
 }
 
 // create and join a new cabal
@@ -177,15 +207,18 @@ if (args.new) {
   })
 } else if (cabalKeys.length) {
   // join the specified list of cabals
-  Promise.all(cabalKeys.map((key) => {
-    var cabal = createCabal(key)
-    return new Promise((resolve) => {
-      cabal.ready(() => {
-        resolve(cabal)
+  Promise.all(cabalKeys.map(createCabal)).then(function (cabals) {
+    var promisedCabals = cabals.map(function (cabal) {
+      return new Promise((resolve) => {
+        cabal.ready(() => {
+          resolve(cabal)
+        })
       })
     })
-  })).then((cabals) => {
-    start(cabals)
+    Promise.all(promisedCabals)
+      .then((cabals) => {
+        start(cabals)
+      })
   })
 } else {
   process.stderr.write(usage)
@@ -273,10 +306,10 @@ function saveConfig (path, config) {
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function publishSingleMessage ({key, channel, message, messageType, timeout}) {
+function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
   var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
-  var cabal = Cabal(archivesdir + key, key, {db: db, maxFeeds: maxFeeds})
+  var cabal = Cabal(archivesdir + key, key, { db: db, maxFeeds: maxFeeds })
   cabal.ready(() => {
     cabal.publish({
       type: messageType || 'chat/text',
