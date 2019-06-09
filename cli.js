@@ -161,6 +161,9 @@ if (args.key) {
   args._.forEach(function (str) {
     cabalKeys.unshift(getKey(str))
   })
+} else if (args.temp) {
+    // the cli was run as `cabal --temp cabal://asdasd..` which accidentally consume the key and puts it into --temp
+    cabalKeys.unshift(getKey(args.temp))
 }
 
 // disregard config
