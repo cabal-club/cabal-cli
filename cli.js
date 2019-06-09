@@ -198,12 +198,13 @@ function createCabal (key) {
 // create and join a new cabal
 if (args.new) {
   var key = crypto.keyPair().publicKey.toString('hex')
-  var cabal = createCabal(key)
-  console.error(`created the cabal: ${chalk.greenBright('cabal://' + key)}`) // log to terminal output (stdout is occupied by interface)
-  cabal.ready(function () {
-    if (!args.seed) {
-      start([cabal])
-    }
+  createCabal(key).then(function (cabal) {
+    console.error(`created the cabal: ${chalk.greenBright('cabal://' + key)}`) // log to terminal output (stdout is occupied by interface)
+    cabal.ready(function () {
+      if (!args.seed) {
+        start([cabal])
+      }
+    })
   })
 } else if (cabalKeys.length) {
   // join the specified list of cabals
