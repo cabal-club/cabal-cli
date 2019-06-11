@@ -12,7 +12,11 @@ var chalk = require('chalk')
 var ram = require('random-access-memory')
 var level = require('level')
 var memdb = require('memdb')
-var cabalDns = require('cabal-dns')({
+var cabalDns = require('dat-dns')({
+  hashRegex: /^[0-9a-f]{64}?$/i,
+  recordName: 'cabal',
+  protocolRegex: /^cabal:\/\/([0-9a-f]{64})/i,
+  txtRegex: /^"?cabalkey=([0-9a-f]{64})"?$/i,
   persistentCache: {
     read: async function (name, err) {
       if (name in config.cache) {
