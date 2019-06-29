@@ -233,11 +233,11 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
           if (!cabal.client.user) updateLocalKey()
           self.bus.emit('render')
         })
+      })
 
-        cabal.topics.events.on('update', function (msg) {
-          self.state.topic = msg.value.content.topic
-          self.bus.emit('render')
-        })
+      cabal.topics.events.on('update', function (msg) {
+        self.state.topic = msg.value.content.topic
+        self.bus.emit('render')
       })
 
       cabal.on('peer-added', function (key) {
