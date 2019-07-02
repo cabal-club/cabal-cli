@@ -68,7 +68,8 @@
     "assets": [
       "./node_modules/utp-native/prebuilds/**",
       "./node_modules/blake2b-wasm/blake2b.wasm",
-      "./node_modules/siphash24/siphash24.wasm"
+      "./node_modules/siphash24/siphash24.wasm",
+      "./node_modules/leveldown/prebuilds/**"
     ],
     "targets": [
       "node10-linux-x64",
