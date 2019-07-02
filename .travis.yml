@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+- '10'
+
+before_deploy: npm run package
+deploy:
+  provider: releases
+  api_key:
+    secure: wOslsvqZcp2q0OPTm1oi83zijA8BLWUnU2480K324PqZdvq6aed7JX/pEAZd4qowXuFiAQHlE2+Awwav0dPFu4dQw0pyaarxKxYs7Js7iP4wbWO0cm9E/jesM1PVV0bQKYZfjJaEZsYYJA6WYoUab0Y6xKIdKuDxSlqmclip0rduTJ/Txe80BucM7EDDDL6QXA8BrEp0AhPuicECny4mWAsiq9rsG9T01fQ7bLtEgU1Yior0n3wXbwZyYaBS77q/e5jiVs3GF670KG9bghQ/HB7+BTlHjY5VuvW84WH+SDYFFaZbGJbhQr5nCJHNltf/6tmRbA6x/9RqrjRREYFoqKFe45pG2Sz6OkXsmKwacg8Llk/KeU+nXZaVFdPlfOpAexyYt/wqX+MM/5V2GLjXR9/mhcp7G/x6OtAvlIGkbqtjWeIuOpVecQHGp9LoH6+PqQbdsvujJ8wqbJ2tO+rTyWbEle2UD25C5erhhBh5Nd75IId26peeGDnORtAI6dC1SMyrVpP2Eksd55n6GiD4JTFdeu5QYUpGt5LZUsrAWT1mNLtmAq9wbpBabeBzBOP2VXfbwuecC4maZb1LaLeuLYW8loHnqUulyrgKF8GqIYkr5AaeAWFPVizIhqRDetpEJb7unJu0eUq3FTmXLoPNnZsKgLxk9LXKovcpvaPrd7g=
+  skip_cleanup: true
+  file_glob: true
+  file: dist/*
+  on:
+    repo: cabal-club/cabal-cli
+    node: '10'
+    tags: false
