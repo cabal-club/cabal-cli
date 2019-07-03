@@ -30,14 +30,18 @@
     "txt-blit": "github:cblgh/txt-blit"
   },
   "devDependencies": {
+    "cross-zip-cli": "^1.0.0",
+    "pkg": "^4.3.8",
     "standard": "^11.0.1"
   },
   "scripts": {
-    "test": "standard --fix"
+    "test": "standard --fix",
+    "package": "rm -rf builds && npm run pkg && ./package.sh",
+    "pkg": "pkg package.json -o builds/cabal"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cabal-club/cabal.git"
+    "url": "git+https://github.com/cabal-club/cabal-cli.git"
   },
   "keywords": [
     "hyperdb",
@@ -57,7 +61,20 @@
   ],
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/cabal-club/cabal/issues"
+    "url": "https://github.com/cabal-club/cabal-cli/issues"
   },
-  "homepage": "https://github.com/cabal-club/cabal#readme"
+  "homepage": "https://github.com/cabal-club/cabal-cli#readme",
+  "pkg": {
+    "assets": [
+      "./node_modules/utp-native/prebuilds/**",
+      "./node_modules/blake2b-wasm/blake2b.wasm",
+      "./node_modules/siphash24/siphash24.wasm",
+      "./node_modules/leveldown/prebuilds/**"
+    ],
+    "targets": [
+      "node10-linux-x64",
+      "node10-macos-x64",
+      "node10-win-x64"
+    ]
+  }
 }
