@@ -13,4 +13,5 @@ deploy:
   on:
     repo: cabal-club/cabal-cli
     node: '10'
-    tags: true
+    tags: false
+    all_branches: true
