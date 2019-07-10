@@ -8,35 +8,35 @@ database & api.
 ![](cli-2019-04.png)
 
 chat with us:  
-`npx cabal-cli cabal.chat`
+`npx cabal cabal://cabal-club.github.io`
 
 ## Installation
 
 ```
-$ npm install --global cabal-cli
-$ cabal-cli --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+$ npm install --global cabal
+$ cabal --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
 ```
 
 ## Usage
 #### Start a new instance:
 ```
-cabal-cli --new
+cabal --new
 ```
 
 #### Connect to an existing instance:
 ```
-cabal-cli --key <key>
+cabal --key <key>
 ```
 e.g.
 ```
-cabal-cli --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+cabal --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
 ```
 
 #### Headless mode
 
 This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VPS) and make its data more available:
 ```
-cabal-cli --key <key> --seed
+cabal --key <key> --seed
 ```
 
 ## Commands
