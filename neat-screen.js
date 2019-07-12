@@ -206,12 +206,14 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
 
   cabal.ready(function () {
     cabal.channels.get((err, channels) => {
+      channels = channels.filter((ch) => ch !== "!status")
       if (err) return
       cabal.client.channels = cabal.client.channels.concat(channels)
       self.loadChannel(cabal.client.channel)
       self.bus.emit('render')
 
       cabal.channels.events.on('add', function (channel) {
+        if (channel === "!status") return 
         cabal.client.channels.push(channel)
         cabal.client.channels.sort()
         self.bus.emit('render')

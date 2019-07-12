@@ -151,12 +151,12 @@ Commander.prototype.process = function (line) {
   var cmd = match ? match[1] : ''
   var arg = match ? match[2] : ''
   arg = arg.trim()
-  if (cmd in self.commands) {
+  if (self.channel === '!status') {
+    self.view.writeLine(line)
+  } else if (cmd in self.commands) {
     self.commands[cmd].call(arg)
   } else if (cmd) {
     self.view.writeLine(`${cmd} is not a command, type /help for commands`)
-  } else if (self.channel === '!status') {
-    self.view.writeLine(line)
   } else {
     line = line.trim()
     if (line !== '') {
