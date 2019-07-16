@@ -31,7 +31,7 @@ function wrapAnsi (text, width) {
         lineLen = 0
       }
       if (chr === '\n') {
-        line = ['            ']
+        line = [' ']
         lineLen = line.length
       }
     }

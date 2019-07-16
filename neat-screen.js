@@ -1,5 +1,6 @@
 var Cabal = require('cabal-core')
 var chalk = require('chalk')
+var stripAnsi = require('strip-ansi')
 var collect = require('collect-stream')
 var Commander = require('./commands.js')
 var fs = require('fs')
@@ -206,14 +207,14 @@ NeatScreen.prototype.initializeCabalClient = function (cabal) {
 
   cabal.ready(function () {
     cabal.channels.get((err, channels) => {
-      channels = channels.filter((ch) => ch !== "!status")
+      channels = channels.filter((ch) => ch !== '!status')
       if (err) return
       cabal.client.channels = cabal.client.channels.concat(channels)
       self.loadChannel(cabal.client.channel)
       self.bus.emit('render')
 
       cabal.channels.events.on('add', function (channel) {
-        if (channel === "!status") return 
+        if (channel === '!status') return
         cabal.client.channels.push(channel)
         cabal.client.channels.sort()
         self.bus.emit('render')
@@ -432,8 +433,15 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (self.state) {
       localNick = self.state.cabal.client.user.name
     }
+
+    /* sanitize input to prevent interface from breaking */
     // emojis.break the cli: replace them with a cabal symbol
     var msgtxt = msg.value.content.text.replace(emojiPattern, '➤')
+    if (msg.key !== 'status') {
+      msgtxt = stripAnsi(msgtxt) // strip non-visible sequences
+      msgtxt = msgtxt.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
+    }
+
     if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
     var color = keyToColour(msg.key) || colours[5]
