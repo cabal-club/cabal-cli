@@ -7,6 +7,7 @@
     "cabal": "cli.js"
   },
   "dependencies": {
+    "ansi-escapes": "^4.2.0",
     "cabal-core": "^6.0.0",
     "cabal-dns": "^1.0.1",
     "chalk": "^2.4.1",
@@ -26,7 +27,7 @@
     "random-access-memory": "^3.1.1",
     "strftime": "^0.10.0",
     "strip-ansi": "^5.2.0",
-    "terminal-link": "^1.2.0",
+    "supports-hyperlinks": "^2.0.0",
     "through2": "^3.0.1",
     "txt-blit": "github:cblgh/txt-blit"
   },
@@ -49,7 +50,7 @@
     "decent",
     "dat",
     "chat",
-    "cabal-cli",
+    "cabal",
     "decentralize",
     "p2p"
   ],
