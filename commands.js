@@ -157,7 +157,7 @@ Commander.prototype.process = function (line) {
     self.view.writeLine(`${cmd} is not a command, type /help for commands`)
   } else {
     line = line.trim()
-    if (line !== '' && channel !== "!status") {
+    if (line !== '' && self.channel !== "!status") {
       self.cabal.publish({
         type: 'chat/text',
         content: {
