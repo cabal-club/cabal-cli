@@ -123,7 +123,7 @@ function renderChannels (state, width, height) {
       } else {
         return ' ' + chalk.white(channelTruncated)
       }
-    })
+    }).slice(0, height)
 }
 
 function renderVerticalLine (chr, height, chlk) {
