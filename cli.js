@@ -54,26 +54,27 @@ var usage = `Usage
   cabal --new
 
   Options:
-    --seed    Start a headless seed for the specified cabal key
+    --seed     Start a headless seed for the specified cabal key
 
-    --new     Start a new cabal
-    --nick    Your nickname
-    --alias   Save an alias for the specified cabal, use with --key
-    --aliases Print out your saved cabal aliases
-    --forget  Forgets the specified alias
-    --clear   Clears out all aliases
-    --key     Specify a cabal key. Used with --alias
-    --join    Only join the specified cabal, disregarding whatever is in the config
-    --config  Specify a full path to a cabal config
+    --new      Start a new cabal
+    --nick     Your nickname
+    --alias    Save an alias for the specified cabal, use with --key
+    --aliases  Print out your saved cabal aliases
+    --forget   Forgets the specified alias
+    --clear    Clears out all aliases
+    --key      Specify a cabal key. Used with --alias
+    --join     Only join the specified cabal, disregarding whatever is in the config
+    --config   Specify a full path to a cabal config
 
-    --temp    Start the cli with a temporary in-memory database. Useful for debugging
-    --version Print out which version of cabal you're running
-    --help    Print this help message
+    --temp     Start the cli with a temporary in-memory database. Useful for debugging
+    --version  Print out which version of cabal you're running
+    --help     Print this help message
 
-    --message Publish a single message; then quit after \`timeout\`
-    --channel Channel name to publish to for \`message\` option; default: "default"
-    --timeout Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
-    --type    Message type set to message for \`message\` option; default: "chat/text"
+    --message  Publish a single message; then quit after \`timeout\`
+    --channel  Channel name to publish to for \`message\` option; default: "default"
+    --timeout  Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
+    --type     Message type set to message for \`message\` option; default: "chat/text"
+    --offline  Disable networking
 
 Work in progress! Learn more at https://github.com/cabal-club
 `
@@ -270,16 +271,20 @@ function start (cabals) {
       config,
       rootdir
     })
-    setTimeout(() => {
+    if (!args.offline) {
+      setTimeout(() => {
+        cabals.forEach((cabal) => {
+          cabal.swarm()
+        })
+      }, 300)
+    }
+  } else {
+    if (!args.offline) {
       cabals.forEach((cabal) => {
+        console.log('Seeding', cabal.key)
         cabal.swarm()
       })
-    }, 300)
-  } else {
-    cabals.forEach((cabal) => {
-      console.log('Seeding', cabal.key)
-      cabal.swarm()
-    })
+    }
   }
 }
 
@@ -326,7 +331,7 @@ function publishSingleMessage ({ key, channel, message, messageType, timeout }) 
         text: message
       }
     })
-    cabal.swarm()
+    if (!args.offline) cabal.swarm()
     setTimeout(function () { process.exit(0) }, timeout || 5000)
   })
 }
