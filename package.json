@@ -1,6 +1,6 @@
 {
   "name": "cabal",
-  "version": "7.1.5",
+  "version": "7.1.6",
   "description": "p2p chat",
   "main": "index.js",
   "bin": {
