@@ -434,7 +434,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     /* sanitize input to prevent interface from breaking */
     var msgtxt = msg.value.content.text
     if (msg.key !== 'status') {
-        msgtxt = util.sanitizeString(msgtxt)
+      msgtxt = util.sanitizeString(msgtxt)
     }
 
     if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }

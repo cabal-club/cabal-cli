@@ -1,4 +1,4 @@
-var stripAnsi = require("strip-ansi")
+var stripAnsi = require('strip-ansi')
 var emojiRegex = require('emoji-regex')
 var emojiPattern = emojiRegex()
 
@@ -7,11 +7,11 @@ function log (err, result) {
   if (arguments.length >= 2) { console.log(result) }
 }
 
-function sanitizeString(str) {
-    // emojis.break the cli: replace them with a cabal symbol
-      str = str.replace(emojiPattern, '➤')
-      str = stripAnsi(str) // strip non-visible sequences
-      return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
+function sanitizeString (str) {
+  // emojis.break the cli: replace them with a cabal symbol
+  str = str.replace(emojiPattern, '➤')
+  str = stripAnsi(str) // strip non-visible sequences
+  return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
 }
 // Character-wrap text containing ANSI escape codes.
 // String, Int -> [String]
