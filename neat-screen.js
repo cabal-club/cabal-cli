@@ -1,6 +1,5 @@
 var Cabal = require('cabal-core')
 var chalk = require('chalk')
-var stripAnsi = require('strip-ansi')
 var collect = require('collect-stream')
 var Commander = require('./commands.js')
 var fs = require('fs')
@@ -8,8 +7,6 @@ var neatLog = require('neat-log')
 var strftime = require('strftime')
 var views = require('./views')
 var yaml = require('js-yaml')
-var emojiRegex = require('emoji-regex')
-var emojiPattern = emojiRegex()
 var util = require('./util')
 
 var markdown = require('./markdown-shim')
@@ -435,11 +432,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
     }
 
     /* sanitize input to prevent interface from breaking */
-    // emojis.break the cli: replace them with a cabal symbol
-    var msgtxt = msg.value.content.text.replace(emojiPattern, '➤')
+    var msgtxt = msg.value.content.text
     if (msg.key !== 'status') {
-      msgtxt = stripAnsi(msgtxt) // strip non-visible sequences
-      msgtxt = msgtxt.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
+        msgtxt = util.sanitizeString(msgtxt)
     }
 
     if (msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }

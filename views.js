@@ -163,7 +163,7 @@ function renderNicks (state, width, height) {
 
 function renderChannelTopic (state, width, height) {
   var topic = state.topic || state.channel
-  var line = '➤ ' + topic
+  var line = '➤ ' + util.sanitizeString(topic)
   line = line.substring(0, width - 1)
   if (line.length === width - 1) {
     line = line.substring(0, line.length - 1) + '…'

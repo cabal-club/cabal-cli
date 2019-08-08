@@ -1,8 +1,18 @@
+var stripAnsi = require("strip-ansi")
+var emojiRegex = require('emoji-regex')
+var emojiPattern = emojiRegex()
+
 function log (err, result) {
   if (err) { console.error('hyperdb failed with', err) }
   if (arguments.length >= 2) { console.log(result) }
 }
 
+function sanitizeString(str) {
+    // emojis.break the cli: replace them with a cabal symbol
+      str = str.replace(emojiPattern, '➤')
+      str = stripAnsi(str) // strip non-visible sequences
+      return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
+}
 // Character-wrap text containing ANSI escape codes.
 // String, Int -> [String]
 function wrapAnsi (text, width) {
@@ -100,4 +110,4 @@ function cmpUser (a, b) {
   return a.key < b.key ? -1 : 1
 }
 
-module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg }
+module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString }
