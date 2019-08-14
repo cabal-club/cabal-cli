@@ -1,49 +1,42 @@
 {
   "name": "cabal",
-  "version": "8.0.3",
+  "version": "6.2.2",
   "description": "p2p chat",
   "main": "index.js",
   "bin": {
     "cabal": "cli.js"
   },
   "dependencies": {
-    "ansi-escapes": "^4.2.0",
-    "cabal-core": "^7.0.0",
-    "cabal-dns": "^1.0.1",
+    "cabal-core": "^5.1.2",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
-    "dat-dns": "^4.0.0",
-    "discovery-swarm": "^6.0.0",
+    "discovery-swarm": "^5.1.2",
     "emoji-regex": "^8.0.0",
     "grapheme-splitter": "^1.0.4",
     "hypercore-crypto": "^1.0.0",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^3.12.0",
     "level": "^5.0.1",
     "memdb": "^1.3.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "neat-input": "^1.10.0",
+    "neat-input": "^1.9.0",
     "neat-log": "^3.1.0",
     "random-access-memory": "^3.1.1",
     "strftime": "^0.10.0",
     "strip-ansi": "^5.2.0",
-    "supports-hyperlinks": "^2.0.0",
-    "through2": "^3.0.1",
+    "terminal-link": "^1.2.0",
+    "through2": "^2.0.3",
     "txt-blit": "github:cblgh/txt-blit"
   },
   "devDependencies": {
-    "cross-zip-cli": "^1.0.0",
-    "pkg": "^4.3.8",
     "standard": "^11.0.1"
   },
   "scripts": {
-    "test": "standard --fix",
-    "package": "rm -rf builds && npm run pkg && ./package.sh",
-    "pkg": "pkg package.json -o builds/cabal"
+    "test": "standard --fix"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cabal-club/cabal-cli.git"
+    "url": "git+https://github.com/cabal-club/cabal.git"
   },
   "keywords": [
     "hyperdb",
@@ -63,20 +56,7 @@
   ],
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/cabal-club/cabal-cli/issues"
+    "url": "https://github.com/cabal-club/cabal/issues"
   },
-  "homepage": "https://github.com/cabal-club/cabal-cli#readme",
-  "pkg": {
-    "assets": [
-      "./node_modules/utp-native/prebuilds/**",
-      "./node_modules/blake2b-wasm/blake2b.wasm",
-      "./node_modules/siphash24/siphash24.wasm",
-      "./node_modules/leveldown/prebuilds/**"
-    ],
-    "targets": [
-      "node10-linux-x64",
-      "node10-macos-x64",
-      "node10-win-x64"
-    ]
-  }
+  "homepage": "https://github.com/cabal-club/cabal#readme"
 }

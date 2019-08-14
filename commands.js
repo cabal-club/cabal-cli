@@ -1,30 +1,47 @@
 var util = require('./util')
+var chalk = require("chalk")
 
-function Commander (view, cabal) {
-  if (!(this instanceof Commander)) return new Commander(view, cabal)
-  this.cabal = cabal
+function Commander (view, client) {
+  if (!(this instanceof Commander)) return new Commander(view, client)
+  this.client = client
+  this.cabal = client.getCurrentCabal()
   this.channel = '!status'
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
 
-  var self = this
   this.commands = {
+    add: {
+      help: () => 'add a cabal',
+      call: (arg) => {
+        if (arg === '') {
+          this.view.writeLine('* Usage example: /add <cabalkey>')
+          return
+        }
+        this.client.addCabal(arg)
+      }
+    },
+    new: {
+      help: () => 'create a new cabal',
+      call: (arg) => {
+        this.client.createCabal()
+      }
+    },
     nick: {
       help: () => 'change your display name',
       call: (arg) => {
         if (arg === '') return
-        self.cabal.publishNick(arg)
-        self.view.writeLine("* you're now known as " + arg)
+        this.cabal.publishNick(arg)
+        this.view.writeLine("* you're now known as " + arg)
       }
     },
     emote: {
       help: () => 'write an old-school text emote',
       call: (arg) => {
-        self.cabal.publish({
+        this.cabal.publishMessage({
           type: 'chat/emote',
           content: {
-            channel: self.channel,
+            channel: this.channel,
             text: arg
           }
         })
@@ -33,56 +50,82 @@ function Commander (view, cabal) {
     names: {
       help: () => 'display the names of the currently online peers',
       call: (arg) => {
-        self.cabal.users.getAll(function (err, users) {
-          if (err) { return }
-          var userkeys = Object.keys(users).map((key) => users[key]).sort(util.cmpUser)
-          self.view.writeLine('* history of peers in this cabal:')
-          userkeys.map((u) => {
-            var username = u.name || 'conspirator'
-            var spaces = ' '.repeat(15)
-            var paddedName = (username + spaces).slice(0, spaces.length)
-            self.view.writeLine.bind(self.view)(`  ${paddedName} ${u.key}`)
-          })
+        var logToView = this.logger()
+        var users = this.cabal.getUsers()
+        var userkeys = Object.keys(users).map((key) => users[key]).sort(util.cmpUser)
+        logToView('* history of peers in this cabal')
+        userkeys.map((u) => {
+          var username = u.name || 'conspirator'
+          var spaces = ' '.repeat(15)
+          var paddedName = (username + spaces).slice(0, spaces.length)
+          logToView(`  ${paddedName} ${u.key}`)
         })
       }
     },
     channels: {
       help: () => "display the cabal's channels",
       call: (arg) => {
-        self.cabal.channels.get((err, channels) => {
-          if (err) return
-          self.view.writeLine('* channels:')
-          channels.map((m) => {
-            self.view.writeLine.bind(self.view)(`  ${m}`)
-          })
+        var logToView = this.logger()
+        var joinedChannels = this.cabal.getJoinedChannels()
+        var channels = this.cabal.getChannels()
+        logToView(`there are currently ${channels.length} channels `)
+        channels.map((c) => {
+          var topic = this.cabal.getTopic(c)
+          if (topic.length > 0 && topic.length > 20) topic = topic.slice(0,40) + ".."
+          var count = this.cabal.getChannelMembers(c).length
+          var userPart = count ? `: ${count} ${count  === 1 ? 'person' : 'people'}` : ''
+          var topicPart = topic.length > 0 ? ` ${chalk.cyan(topic)}` : '' 
+          logToView(`  ${joinedChannels.includes(c) ? '*' : ' '} ${c}${userPart}${topicPart}`)
         })
+      }
+    },
+    panes: {
+      help: () => 'set pane to navigate up and down in. panes: channels, cabals',
+      call: (arg) => {
+        if (arg === '' || !["channels", "cabals"].includes(arg)) return
+        this.view.setPane(arg)
       }
     },
     join: {
       help: () => 'join a new channel',
       call: (arg) => {
         if (arg === '') arg = 'default'
-        self.channel = arg
-        self.view.loadChannel(arg)
+        this.channel = arg
+        this.cabal.joinChannel(arg)
+        this.view.loadChannel(arg)
+        console.error("-".repeat(30))
+        console.error("open", arg)
+      }
+    },
+    leave: {
+      help: () => 'leave a channel',
+      call: (arg) => {
+        if (arg === '!status') return
+        /* TODO: update `this.channel` with next channel */
+        this.cabal.leaveChannel(arg)
+        console.error("-".repeat(30))
+        console.error("leave", arg)
       }
     },
     clear: {
       help: () => 'clear the current backscroll',
       call: (arg) => {
-        self.view.clear()
+        this.view.clear()
+        this.client.clearStatusMessages()
       }
     },
     help: {
       help: () => 'display this help message',
       call: (arg) => {
-        for (var key in self.commands) {
-          self.view.writeLine.bind(self.view)(`/${key}`)
-          self.view.writeLine.bind(self.view)(`  ${self.commands[key].help()}`)
+        var logToView = this.logger()
+        for (var key in this.commands) {
+          logToView(`/${key}`)
+          logToView(`  ${this.commands[key].help()}`)
         }
-        self.view.writeLine.bind(self.view)(`alt-n`)
-        self.view.writeLine.bind(self.view)(`  move between channels/cabals panes`)
-        self.view.writeLine.bind(self.view)(`ctrl+{n,p}`)
-        self.view.writeLine.bind(self.view)(`  move up/down channels/cabals`)
+        logToView(`alt-n`)
+        logToView(`  move between channels/cabals panes`)
+        logToView(`ctrl+{n,p}`)
+        logToView(`  move up/down channels/cabals`)
       }
     },
     quit: {
@@ -100,71 +143,70 @@ function Commander (view, cabal) {
     topic: {
       help: () => 'set the topic/description/`message of the day` for a channel',
       call: (arg) => {
-        self.cabal.publishChannelTopic(self.channel, arg)
+        this.cabal.publishChannelTopic(this.channel, arg)
       }
     },
     whoami: {
       help: () => 'display your local user key',
       call: (arg) => {
-        self.view.writeLine.bind(self.view)('Local user key: ' + self.cabal.client.user.key)
+        this.view.writeLine.bind(this.view)('Local user key: ' + this.cabal.getLocalUser().key)
       }
     }
   }
   // add aliases to commands
   this.alias('emote', 'me')
   this.alias('join', 'j')
+  this.alias('leave', 'l')
   this.alias('nick', 'n')
   this.alias('topic', 'motd')
   this.alias('whoami', 'key')
+  this.alias('add', 'cabal')
+}
 
-  // add in experimental commands
-  if (self.view.isExperimental) {
-    self.commands['add'] = {
-      help: () => 'add a cabal',
-      call: (arg) => {
-        if (arg === '') {
-          self.view.writeLine('* Usage example: /add cabalkey')
-          return
-        }
-        self.channel = arg
-        self.view.addCabal(arg)
-      }
-    }
-    self.alias('add', 'cabal')
+// for use when writing multiple logs within short intervals
+// to keep timestamp ordering correct. see usage for the `help` command above
+Commander.prototype.logger = function () {
+  var counter = 0
+  function ts () {
+    return Date.now() + counter++
   }
+  var logToView = (msg) => {
+    this.view.writeLine.bind(this.view)(msg, ts())
+  }
+  return logToView
 }
 
 Commander.prototype.alias = function (command, alias) {
-  var self = this
-  self.commands[alias] = {
-    help: self.commands[command].help,
-    call: self.commands[command].call
+  this.commands[alias] = {
+    help: this.commands[command].help,
+    call: this.commands[command].call
   }
 }
 
 Commander.prototype.process = function (line) {
-  var self = this
   line = line.trim()
-  self.history.push(line)
-  if (self.history.length > 1000) self.history.shift()
-  var match = self.pattern.exec(line)
+  this.history.push(line)
+  if (this.history.length > 1000) this.history.shift()
+  var match = this.pattern.exec(line)
   var cmd = match ? match[1] : ''
   var arg = match ? match[2] : ''
   arg = arg.trim()
-  if (cmd in self.commands) {
-    self.commands[cmd].call(arg)
+  if (cmd in this.commands) {
+    this.commands[cmd].call(arg)
   } else if (cmd) {
-    self.view.writeLine(`${cmd} is not a command, type /help for commands`)
+    this.view.writeLine(`${cmd} is not a command, type /help for commands`)
   } else {
+    if (this.channel === '!status') { return } // disallow typing to !status
     line = line.trim()
-    if (line !== '' && self.channel !== '!status') {
-      self.cabal.publish({
+    if (line !== '') {
+      this.cabal.publishMessage({
         type: 'chat/text',
         content: {
-          channel: self.channel,
+          channel: this.channel,
           text: line
         }
       })
+      this.client.markChannelRead()
     }
   }
 }

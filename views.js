@@ -5,8 +5,14 @@ var util = require('./util')
 var version = require('./package.json').version
 
 const HEADER_ROWS = 7
+const NICK_COLS = 15
+const CHAN_COLS = 16
 
-module.exports = { big, small }
+module.exports = { big, small, getPageSize }
+
+function getPageSize () {
+    return process.stdout.rows - HEADER_ROWS 
+}
 
 function small (state) {
   var screen = []
@@ -44,7 +50,7 @@ function big (state) {
     }
   } else {
     // channels pane
-    blit(screen, renderChannels(state, 16, process.stdout.rows - HEADER_ROWS), 0, 3)
+    blit(screen, renderChannels(state, CHAN_COLS, process.stdout.rows - HEADER_ROWS), 0, 3)
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
 
     var chatY = 3
@@ -59,7 +65,7 @@ function big (state) {
 
   // nicks pane
   blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
-  blit(screen, renderNicks(state, 15, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
+  blit(screen, renderNicks(state, NICK_COLS, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
 
   // horizontal dividers
   blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
@@ -77,9 +83,9 @@ function linkSize (state) {
 }
 
 function renderPrompt (state) {
-  var name = state.cabal.client.user ? (state.cabal.client.user.name || state.cabal.client.user.key.substring(0, 8)) : 'unknown'
+  var name = state.cabal ? state.cabal.getLocalName() : 'unknown'
   return [
-    `[${chalk.cyan(name)}:${state.cabal.client.channel}] ${state.neat.input.line()}`
+    `[${chalk.cyan(name)}:${state.cabal.getCurrentChannel()}] ${state.neat.input.line()}`
   ]
 }
 
@@ -93,7 +99,7 @@ function renderTitlebar (state, width) {
 function renderCabals (state, width, height) {
   return state.cabals
     .map(function (cabal, idx) {
-      var key = cabal.key
+      var key = cabal
       var keyTruncated = key.substring(0, 4)
       if (state.cabal.key === key) {
         var fill = ' '
@@ -109,19 +115,24 @@ function renderCabals (state, width, height) {
 }
 
 function renderChannels (state, width, height) {
-  return state.cabal.client.channels
-    .map(function (channel, idx) {
+  return state.cabal.getJoinedChannels()
+    .map((channel, idx) => {
       var channelTruncated = channel.substring(0, width - 3)
-      if (state.cabal.client.channel === channel) {
+      var unread = channel in state.unreadChannels
+      var mentioned = channel in state.mentions
+      if (state.cabal.getCurrentChannel() === channel) {
         var fillWidth = width - channelTruncated.length - 3
         var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
+        channelText = chalk.bgBlue(channelTruncated + fill)
         if (state.selectedWindowPane === 'channels') {
           return '>' + chalk.bgBlue(channelTruncated + fill)
         } else {
           return ' ' + chalk.bgBlue(channelTruncated + fill)
         }
       } else {
-        return ' ' + chalk.white(channelTruncated)
+        var glyph = unread ? '*' : ' '
+        glyph = mentioned ? '@' : glyph
+        return glyph + chalk.white(channelTruncated)
       }
     }).slice(0, height)
 }
@@ -137,8 +148,9 @@ function renderHorizontalLine (chr, width, chlk) {
 }
 
 function renderNicks (state, width, height) {
-  var users = Object.keys(state.cabal.client.users)
-    .map(key => state.cabal.client.users[key])
+  var users = state.cabal.getChannelMembers()
+  users = Object.keys(users)
+    .map(key => users[key])
     .sort(util.cmpUser)
   var onlines = {}
 
@@ -163,7 +175,7 @@ function renderNicks (state, width, height) {
 
 function renderChannelTopic (state, width, height) {
   var topic = state.topic || state.channel
-  var line = '➤ ' + util.sanitizeString(topic)
+  var line = '➤ ' + topic
   line = line.substring(0, width - 1)
   if (line.length === width - 1) {
     line = line.substring(0, line.length - 1) + '…'
@@ -173,7 +185,7 @@ function renderChannelTopic (state, width, height) {
 }
 
 function renderMessages (state, width, height) {
-  var msgs = state.cabal.client.messages
+  var msgs = state.messages
 
   // Character-wrap to area edge
   var allLines = msgs.reduce(function (accum, msg) {
@@ -181,19 +193,21 @@ function renderMessages (state, width, height) {
     return accum
   }, [])
 
-  state.cabal.client.scrollback = Math.min(state.cabal.client.scrollback, allLines.length - height)
-  if (allLines.length < height) {
-    state.cabal.client.scrollback = 0
+  var from = Math.max(0, allLines.length - height - getPageSize())
+  var to = Math.min(allLines.length, allLines.length - getPageSize())
+  // we're showing first message in backlog
+  if (from === 0) { 
+      // show remaining messages
+      to = height 
   }
-
+  var croppedCount = allLines.length >= height ? allLines.length - to + 1 : 0
+  // keep track of how many we tracked so that neat screen can adjust the output
+  state.croppedCount = croppedCount
   var lines = (allLines.length < height)
     ? allLines.concat(Array(height - allLines.length).fill(''))
-    : allLines.slice(
-      allLines.length - height - state.cabal.client.scrollback,
-      allLines.length - state.cabal.client.scrollback
-    )
-  if (state.cabal.client.scrollback > 0) {
-    lines = lines.slice(0, lines.length - 2).concat(['', 'More messages below . . .'])
+    : allLines.slice(from, to)
+  if (state.hasScrollback()) {
+    lines = lines.slice(0, lines.length - 1).concat(['More messages below...'])
   }
   return lines
 }

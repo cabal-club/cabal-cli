@@ -8,13 +8,13 @@ database & api.
 ![](cli-2019-04.png)
 
 chat with us:  
-`npx cabal cabal://cabal-club.github.io`
+`npx cabal --key cabal://14bc77d788fdaf07b89b28e9d276e47f2e44011f4adb981921056e1b3b40e99e`
 
 ## Installation
 
 ```
 $ npm install --global cabal
-$ cabal --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+$ cabal --key cabal://14bc77d788fdaf07b89b28e9d276e47f2e44011f4adb981921056e1b3b40e99e
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ cabal --key <key>
 ```
 e.g.
 ```
-cabal --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+cabal --key cabal://14bc77d788fdaf07b89b28e9d276e47f2e44011f4adb981921056e1b3b40e99e
 ```
 
 #### Headless mode
