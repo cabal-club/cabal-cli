@@ -1,6 +1,12 @@
-var linkify = require('terminal-link')
+var ansiEscapes = require('ansi-escapes')
+var supportsHyperlinks = require('supports-hyperlinks')
 var linkPattern = /(\[(.+?)\]\((\S+)\))/
 // naively parse markdown and return it as a terminal friendly formatting
+
+function linkify (text, url) {
+  return supportsHyperlinks.stdout ? ansiEscapes.link(text, url) : `${text} (${url})`
+}
+
 module.exports = function (line) {
   var match
   // handle links
