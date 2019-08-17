@@ -282,6 +282,7 @@ function start (cabals) {
     if (!args.offline) {
       cabals.forEach((cabal) => {
         console.log('Seeding', cabal.key)
+        trackAndPrintEvents(cabal)
         cabal.swarm()
       })
     }
@@ -333,5 +334,27 @@ function publishSingleMessage ({ key, channel, message, messageType, timeout }) 
     })
     if (!args.offline) cabal.swarm()
     setTimeout(function () { process.exit(0) }, timeout || 5000)
+  })
+}
+
+function trackAndPrintEvents (cabal) {
+  // Listen for feeds
+  cabal.kcore._logs.feeds().forEach(listen)
+  cabal.kcore._logs.on('feed', listen)
+
+  function listen (feed) {
+    feed.on('download', idx => {
+      process.stdout.write('.')
+    })
+    feed.on('upload', idx => {
+      process.stdout.write('^')
+    })
+  }
+
+  cabal.on('peer-added', () => {
+    process.stdout.write('@')
+  })
+  cabal.on('peer-dropped', () => {
+    process.stdout.write('x')
   })
 }
