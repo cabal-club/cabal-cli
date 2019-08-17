@@ -324,7 +324,18 @@ NeatScreen.prototype.renderApp = function (state) {
   }
   // adjust the displayed page using pager's cache
   var pageSlice = this.state.messages.slice(index)
-  var cacheSlice = this.pager.cache.slice(-index)
+  var cacheSlice = this.pager.cache.slice(-index).map(this.formatMessage.bind(this))
+  function p (m) { console.error(m) }
+  console.error("v".repeat(30))
+  console.error("entireSlice")
+  this.state.messages.forEach(p)
+  console.error("offendingSlice")
+  this.state.messages.slice(0, index).forEach(p)
+  console.error("pageSlice")
+  pageSlice.forEach(p)
+  console.error("cacheSlice")
+  cacheSlice.forEach(p)
+  console.error("^".repeat(30))
   this.state.messages = pageSlice.concat(cacheSlice)
 
   return screen
@@ -366,6 +377,7 @@ NeatScreen.prototype.render = function () {
 }
 
 NeatScreen.prototype.formatMessage = function (msg) {
+  console.error(msg)
   var highlight = false
   /*
    msg = {

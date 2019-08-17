@@ -105,6 +105,7 @@ const client = new Client({
     write: async function (name, key, ttl) {
       var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
       var expiredTime = Date.now() + expireOffset
+      if (!config.cache) config.cache = {}
       config.cache[name] = { key: key, expiresAt: expiredTime }
       saveConfig(configFilePath, config)
     }
@@ -208,6 +209,9 @@ function start (keys) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface) */
     }
     if (!args.seed) { frontend({ client }) }
+  }).catch((e) => {
+      console.error(e)
+      process.exit(1)
   })
 }
 
