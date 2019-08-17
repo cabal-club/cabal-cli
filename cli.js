@@ -282,6 +282,12 @@ function start (cabals) {
     if (!args.offline) {
       cabals.forEach((cabal) => {
         console.log('Seeding', cabal.key)
+        console.log()
+        console.log('@: new peer')
+        console.log('x: peer left')
+        console.log('^: uploaded a chunk')
+        console.log('.: downloaded a chunk')
+        console.log()
         trackAndPrintEvents(cabal)
         cabal.swarm()
       })
