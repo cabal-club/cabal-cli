@@ -145,20 +145,22 @@ function NeatScreen (props) {
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('pageup', () => {
-    var window = this.pager.pageup(this.state.oldest)
-    this.state.window = window
-    this.processMessages({ olderThan: window.start.ts }) 
+    this.state.window = this.pager.pageup(this.state.oldest)
+      console.error("yo i'm page up handler, this is my oldest", this.state.window.start)
+    this.processMessages({ olderThan: this.state.window.start.ts }) 
   })
 
   this.neat.input.on('pagedown', () => {
-    var window = this.pager.pagedown()
-    this.state.window = window
+    this.state.window = this.pager.pagedown()
     // we have -1 to window.start because we're using the window of messages we had last time.
     // so: if we try to get what's newer than the first message of the last chat window, we'll leave out that first
     // message!
     var opts = {}
-    if (window.start.ts) opts.newerThan = window.start.ts - 1
-    if (window.end.ts) opts.olderThan = window.end.ts 
+    if (this.state.window.start.ts) opts.newerThan = this.state.window.start.ts - 1
+    if (this.state.window.end.ts) opts.olderThan = this.state.window.end.ts 
+        console.error("pdown handler")
+        console.error("newerThan", this.state.window.start)
+        console.error("olderThan", this.state.window.end)
     this.processMessages(opts) 
   })
 
@@ -258,10 +260,10 @@ NeatScreen.prototype._pagesize = function () {
 NeatScreen.prototype.processMessages = function (opts, cb) {
   opts = opts || {}
   if (!cb) cb = function () {}
-    //console.error("opts.newerThan", opts.newerThan)
   opts.newerThan = opts.newerThan 
   opts.olderThan = opts.olderThan || Date.now()
   opts.amount = opts.amount || this._pagesize()
+
   // val is purely there for debugging, trust me it's v useful lol
   this.state.oldest = { ts: Date.now(), val: null }
   var unreadCount = this.client.getNumberUnreadMessages()
@@ -271,8 +273,6 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
     olderThan: opts.olderThan,
     newerThan: opts.newerThan
   }, (msgs) => {
-    this.state.timestamps = msgs.map((m) => m.value.timestamp).sort((a,b) => parseInt(a) - parseInt(b))
-    //console.error("get messages older than", new Date(opts.olderThan), "and newer than", new Date(opts.newerThan))
     this.state.messages = []
     //debug.print("recv messages", debug.simplify(msgs), true)
     var pagedMessages = this.pager.page(msgs)
@@ -284,10 +284,10 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
 
     // crop messages to view
     this.state.messages = this.state.messages.slice(-this._pagesize())
-    const val = pagedMessages[0].value
-    const content = val.content
-    this.state.oldest = { ts: val.timestamp, val:  content && content.text }
-    this.neat.render()
+    let val = pagedMessages[0].value
+    let t = null
+    if (val.content && val.content.text) t = val.content.text
+    this.state.oldest = { ts: val.timestamp, val: t }
     this.bus.emit('render')
     cb.bind(this)()
   })
@@ -304,44 +304,11 @@ NeatScreen.prototype.showCabal = function (cabal) {
 }
 
 NeatScreen.prototype.renderApp = function (state) {
-  var screen
-  if (process.stdout.columns > 80) screen = views.big(state)
-  else screen = views.small(state)
-  // we don't need to adjust `state.messages` in the following cases
-  if (state.croppedCount === 0 || this.pager._hitTopBoundary || !this.pager.paging ||  this.pager._dir === "down") return screen
-  var index = this.state.croppedCount
-  // adjust oldest using the index
-  this.state.oldest = { ts: this.state.timestamps[index], val: null }
-  // adjust neat screen's window
-  if (this.state.window) {
-    this.state.window.start = this.state.oldest
-  }
-  // adjust the last pushed window using the index
-  var stackVal = this.pager.stack.pop()
-  if (stackVal) {
-    stackVal.start = this.state.oldest
-    this.pager.stack.push(stackVal)
-  }
-  // adjust the displayed page using pager's cache
-  var pageSlice = this.state.messages.slice(index)
-  var cacheSlice = this.pager.cache.slice(-index).map(this.formatMessage.bind(this))
-  function p (m) { console.error(m) }
-  console.error("v".repeat(30))
-  console.error("entireSlice")
-  this.state.messages.forEach(p)
-  console.error("offendingSlice")
-  this.state.messages.slice(0, index).forEach(p)
-  console.error("pageSlice")
-  pageSlice.forEach(p)
-  console.error("cacheSlice")
-  cacheSlice.forEach(p)
-  console.error("^".repeat(30))
-  this.state.messages = pageSlice.concat(cacheSlice)
-
-  return screen
+  if (process.stdout.columns > 80) return views.big(state)
+  else screen = return views.small(state)
 }
 
-// use to write anything else to the screen, e.g. info iessages or emotes
+// use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line, timestamp) {
   this.client.addStatusMessage({ timestamp: timestamp || Date.now(), text: line })
   this.bus.emit('render')
@@ -377,7 +344,6 @@ NeatScreen.prototype.render = function () {
 }
 
 NeatScreen.prototype.formatMessage = function (msg) {
-  console.error(msg)
   var highlight = false
   /*
    msg = {

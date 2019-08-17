@@ -4,14 +4,14 @@ var blit = require('txt-blit')
 var util = require('./util')
 var version = require('./package.json').version
 
-const HEADER_ROWS = 7
+const HEADER_ROWS = 8
 const NICK_COLS = 15
 const CHAN_COLS = 16
 
 module.exports = { big, small, getPageSize }
 
 function getPageSize () {
-    return process.stdout.rows - HEADER_ROWS 
+    return process.stdout.rows - HEADER_ROWS - 1
 }
 
 function small (state) {
@@ -200,14 +200,11 @@ function renderMessages (state, width, height) {
       // show remaining messages
       to = height 
   }
-  var croppedCount = allLines.length >= height ? allLines.length - to + 1 : 0
-  // keep track of how many we tracked so that neat screen can adjust the output
-  state.croppedCount = croppedCount
   var lines = (allLines.length < height)
     ? allLines.concat(Array(height - allLines.length).fill(''))
     : allLines.slice(from, to)
   if (state.hasScrollback()) {
-    lines = lines.slice(0, lines.length - 1).concat(['More messages below...'])
+    lines = lines.concat(['More messages below...'])
   }
   return lines
 }
