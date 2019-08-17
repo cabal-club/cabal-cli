@@ -69,7 +69,7 @@ mkdirp.sync(rootdir)
 
 // create a default config in rootdir if it doesn't exist
 if (!fs.existsSync(rootconfig)) {
-  saveConfig(rootconfig, { cabals: [], aliases: {} })
+  saveConfig(rootconfig, { cabals: [], aliases: {}, cache: {} })
 }
 
 // Attempt to load local or homedir config file
@@ -77,6 +77,8 @@ try {
   if (configFilePath) {
     config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))
     if (!config.cabals) { config.cabals = [] }
+    if (!config.aliases) { config.aliases = {} }
+    if (!config.cache) { config.cache = {} }
     cabalKeys = config.cabals
   }
 } catch (e) {
@@ -193,12 +195,7 @@ function start (keys) {
   keys = Array.from(new Set(keys)) // remove duplicates
 
   // => remembers the latest cabal, allows joining latest with `cabal`
-  // TODO: rewrite this when the multi-cabal functionality comes out from
-  // behind its experimental flag
   if (!args.join || !args.new) {
-    // unsure about this, it effectively removes all of the cabals in the config
-    // but then again we don't have a method to save them either right now so
-    // let's run with it and fix after the bugs
     config.cabals = keys
     saveConfig(configFilePath, config)
   }
@@ -206,7 +203,7 @@ function start (keys) {
   var pendingCabals = args.new ? [ client.createCabal() ] : keys.map(client.addCabal.bind(client))
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
-      console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface) */
+      console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface) 
     }
     if (!args.seed) { frontend({ client }) }
   }).catch((e) => {
