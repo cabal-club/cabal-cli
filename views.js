@@ -11,7 +11,7 @@ const CHAN_COLS = 16
 module.exports = { big, small, getPageSize }
 
 function getPageSize () {
-    return process.stdout.rows - HEADER_ROWS - 1
+    return process.stdout.rows - HEADER_ROWS
 }
 
 function small (state) {

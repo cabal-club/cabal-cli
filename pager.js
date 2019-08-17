@@ -112,5 +112,4 @@ Pager.prototype.page = function (arr) {
     this._hitTopBoundary = false
 }
 
-
 module.exports = Pager

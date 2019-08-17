@@ -146,7 +146,6 @@ function NeatScreen (props) {
   this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('pageup', () => {
     this.state.window = this.pager.pageup(this.state.oldest)
-      console.error("yo i'm page up handler, this is my oldest", this.state.window.start)
     this.processMessages({ olderThan: this.state.window.start.ts }) 
   })
 
@@ -158,9 +157,6 @@ function NeatScreen (props) {
     var opts = {}
     if (this.state.window.start.ts) opts.newerThan = this.state.window.start.ts - 1
     if (this.state.window.end.ts) opts.olderThan = this.state.window.end.ts 
-        console.error("pdown handler")
-        console.error("newerThan", this.state.window.start)
-        console.error("olderThan", this.state.window.end)
     this.processMessages(opts) 
   })
 
@@ -305,7 +301,7 @@ NeatScreen.prototype.showCabal = function (cabal) {
 
 NeatScreen.prototype.renderApp = function (state) {
   if (process.stdout.columns > 80) return views.big(state)
-  else screen = return views.small(state)
+  else return views.small(state)
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
@@ -326,14 +322,12 @@ NeatScreen.prototype.setPane = function (pane) {
 
 NeatScreen.prototype.loadChannel = function (channel) {
   this.client.openChannel(channel)
-
-    //console.error("-".repeat(30))
-    //console.error("open", channel)
   // clear the old channel state
   this.pager.clear()
   this.state.messages = []
   this.state.window = null
   this.state.topic = ''
+
   this.processMessages()
   // load the topic
   this.state.topic = this.state.cabal.getTopic()
@@ -358,6 +352,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
    }
    */
   if (!msg.value.type) { msg.value.type = 'chat/text' }
+  // virtual message type, handled by cabal-client
   if (msg.value.type === "status/date-changed") {
     return `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`
   }
