@@ -294,7 +294,7 @@ NeatScreen.prototype.showCabal = function (cabal) {
   this.state.cabal = this.client.focusCabal(cabal)
   this.registerUpdateHandler(this.state.cabal, oldCabal)
   this.commander.cabal = this.state.cabal
-  this.client.openChannel()
+  this.client.focusChannel()
   this.pager.clear()
   this.bus.emit('render')
 }
@@ -321,7 +321,7 @@ NeatScreen.prototype.setPane = function (pane) {
 }
 
 NeatScreen.prototype.loadChannel = function (channel) {
-  this.client.openChannel(channel)
+  this.client.focusChannel(channel)
   // clear the old channel state
   this.pager.clear()
   this.state.messages = []
