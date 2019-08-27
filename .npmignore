@@ -4,3 +4,7 @@ todo
 todo.json
 builds
 dist
+*.png
+package.sh
+publish.sh
+.travis.yml
