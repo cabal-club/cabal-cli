@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "ansi-escapes": "^4.2.0",
+    "cabal-client": "^1.0.0",
     "cabal-core": "^7.1.0",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
@@ -63,16 +64,16 @@
   },
   "homepage": "https://github.com/cabal-club/cabal-cli#readme",
   "pkg": {
-      "assets": [
-          "./node_modules/utp-native/prebuilds/**",
-          "./node_modules/blake2b-wasm/blake2b.wasm",
-          "./node_modules/siphash24/siphash24.wasm",
-          "./node_modules/leveldown/prebuilds/**"
-      ],
-      "targets": [
-          "node10-linux-x64",
-          "node10-macos-x64",
-          "node10-win-x64"
-      ]
+    "assets": [
+      "./node_modules/utp-native/prebuilds/**",
+      "./node_modules/blake2b-wasm/blake2b.wasm",
+      "./node_modules/siphash24/siphash24.wasm",
+      "./node_modules/leveldown/prebuilds/**"
+    ],
+    "targets": [
+      "node10-linux-x64",
+      "node10-macos-x64",
+      "node10-win-x64"
+    ]
   }
 }
