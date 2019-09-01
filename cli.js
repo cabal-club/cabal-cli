@@ -241,6 +241,7 @@ function trackAndPrintEvents (cabal) {
         cabal.on('peer-added', () => {
             process.stdout.write('@')
         })
+
         cabal.on('peer-dropped', () => {
             process.stdout.write('x')
         })
