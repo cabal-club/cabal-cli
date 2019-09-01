@@ -185,26 +185,27 @@ function renderChannelTopic (state, width, height) {
 }
 
 function renderMessages (state, width, height) {
-  var msgs = state.messages
+    var msgs = state.messages
 
-  // Character-wrap to area edge
-  var allLines = msgs.reduce(function (accum, msg) {
-    accum.push.apply(accum, util.wrapAnsi(msg, width))
-    return accum
-  }, [])
+    // Character-wrap to area edge
+    var allLines = msgs.reduce(function (accum, msg) {
+        accum.push.apply(accum, util.wrapAnsi(msg, width))
+        return accum
+    }, [])
 
-  var from = Math.max(0, allLines.length - height - getPageSize())
-  var to = Math.min(allLines.length, allLines.length - getPageSize())
-  // we're showing first message in backlog
-  if (from === 0) { 
-      // show remaining messages
-      to = height 
-  }
-  var lines = (allLines.length < height)
+    state.scrollback = Math.min(state.scrollback, allLines.length - height)
+    if (allLines.length < height) {
+        state.scrollback = 0
+    }
+
+    var lines = (allLines.length < height)
     ? allLines.concat(Array(height - allLines.length).fill(''))
-    : allLines.slice(from, to)
-  if (state.hasScrollback()) {
-    lines = lines.concat(['More messages below...'])
-  }
-  return lines
+    : allLines.slice(
+        allLines.length - height - state.scrollback,
+        allLines.length - state.scrollback
+    )
+    if (state.scrollback > 0) {
+        lines = lines.slice(0, lines.length - 1).concat(['More messages below...'])
+    }
+    return lines
 }

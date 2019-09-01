@@ -4,7 +4,6 @@ var neatLog = require('neat-log')
 var strftime = require('strftime')
 var views = require('./views')
 var util = require('./util')
-var Pager = require('./pager')
 var debug = require("./debug")
 var markdown = require('./markdown-shim')
 var welcomeMessage = ['welcome to cabal', 
@@ -13,11 +12,6 @@ var welcomeMessage = ['welcome to cabal',
 
 function NeatScreen (props) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(props)
-  this.pager = new Pager({
-    pagesize: this._pagesize.bind(this),
-    startpoint: {ts: null, val: 'NULL'},
-    endpoint: {ts: null, val: 'NULL'}
-  })
   this.client = props.client
   this.commander = Commander(this, this.client)
   var self = this
@@ -144,21 +138,14 @@ function NeatScreen (props) {
   }
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
-  this.neat.input.on('pageup', () => {
-    this.state.window = this.pager.pageup(this.state.oldest)
-    this.processMessages({ olderThan: this.state.window.start.ts }) 
+  this.neat.input.on('pageup', () =>  {
+      console.error("scrollback before", this.state.scrollback)
+      this.state.scrollback++
+      console.error("scrollback after", this.state.scrollback)
   })
-
-  this.neat.input.on('pagedown', () => {
-    this.state.window = this.pager.pagedown()
-    // we have -1 to window.start because we're using the window of messages we had last time.
-    // so: if we try to get what's newer than the first message of the last chat window, we'll leave out that first
-    // message!
-    var opts = {}
-    if (this.state.window.start.ts) opts.newerThan = this.state.window.start.ts - 1
-    if (this.state.window.end.ts) opts.olderThan = this.state.window.end.ts 
-    this.processMessages(opts) 
-  })
+  this.neat.input.on('pagedown', () => { this.state.scrollback = Math.max(0, this.state.scrollback - 1); 
+                     /* TODO: remove return null (old artifact) */ 
+                     return null })
 
   this.neat.use((state, bus) => {
     state.neat = this.neat
@@ -168,8 +155,6 @@ function NeatScreen (props) {
     state.topic = ''
     state.unreadChannels = {}
     state.mentions = {}
-    state.hasScrollback = () => { return this.pager.paging }
-    state.oldest = Date.now()
     state.selectedWindowPane = 'channels'
     state.windowPanes = [state.selectedWindowPane]
     this.state = state
@@ -206,17 +191,7 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
   })
   this.state.topic = this.state.cabal.getTopic()
   var opts = {}
-  if (this.state.window) {
-    // we're grabbing an entire window
-    if (this.state.window.end) {
-      opts.newerThan = this.state.window.start.ts
-      opts.olderThan = this.state.window.end.ts
-      // we're not viewing a particular window, get everything that's older than the oldest
-    } else {
-      opts.olderThan = this.state.window.start.ts
-    }
-  }
-  if (!this.pager.paging) { // only update view with messages if we're at the bottom i.e. not paging up
+  if (!this.scrollback > 0) { // only update view with messages if we're at the bottom i.e. not paging up
     this.processMessages(opts)
   }
   this.bus.emit('render')
@@ -226,6 +201,8 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
 NeatScreen.prototype.initializeCabalClient = function () {
   var details = this.client.getCurrentCabal()
   this.state.cabal = details
+  console.error("initialize cabal client")
+  this.state.scrollback = 0
   var counter = 0
   welcomeMessage.map((m) => this.client.addStatusMessage({ timestamp: Date.now() + counter++, text: m }))
   this.registerUpdateHandler(details)
@@ -256,34 +233,16 @@ NeatScreen.prototype._pagesize = function () {
 NeatScreen.prototype.processMessages = function (opts, cb) {
   opts = opts || {}
   if (!cb) cb = function () {}
-  opts.newerThan = opts.newerThan 
+  opts.newerThan = opts.newerThan || null
   opts.olderThan = opts.olderThan || Date.now()
-  opts.amount = opts.amount || this._pagesize()
+  opts.amount = opts.amount || this._pagesize() * 1.5
 
-  // val is purely there for debugging, trust me it's v useful lol
-  this.state.oldest = { ts: Date.now(), val: null }
-  var unreadCount = this.client.getNumberUnreadMessages()
-
-  this.client.getMessages({
-    amount: opts.amount,
-    olderThan: opts.olderThan,
-    newerThan: opts.newerThan
-  }, (msgs) => {
+  // var unreadCount = this.client.getNumberUnreadMessages()
+  this.client.getMessages(opts, (msgs) => {
     this.state.messages = []
-    //debug.print("recv messages", debug.simplify(msgs), true)
-    var pagedMessages = this.pager.page(msgs)
-    //debug.print("paged messages", debug.simplify(pagedMessages), true)
-    if (pagedMessages.length === 0) { this.bus.emit('render'); return } // basically only happens when we've started a new cabal
-    pagedMessages.forEach((msg, i) => {
+    msgs.forEach((msg, i) => {
       this.state.messages.push(this.formatMessage(msg))
     })
-
-    // crop messages to view
-    this.state.messages = this.state.messages.slice(-this._pagesize())
-    let val = pagedMessages[0].value
-    let t = null
-    if (val.content && val.content.text) t = val.content.text
-    this.state.oldest = { ts: val.timestamp, val: t }
     this.bus.emit('render')
     cb.bind(this)()
   })
@@ -295,7 +254,6 @@ NeatScreen.prototype.showCabal = function (cabal) {
   this.registerUpdateHandler(this.state.cabal, oldCabal)
   this.commander.cabal = this.state.cabal
   this.client.focusChannel()
-  this.pager.clear()
   this.bus.emit('render')
 }
 
@@ -323,9 +281,7 @@ NeatScreen.prototype.setPane = function (pane) {
 NeatScreen.prototype.loadChannel = function (channel) {
   this.client.focusChannel(channel)
   // clear the old channel state
-  this.pager.clear()
   this.state.messages = []
-  this.state.window = null
   this.state.topic = ''
 
   this.processMessages()
