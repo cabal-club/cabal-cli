@@ -288,7 +288,7 @@ NeatScreen.prototype.render = function () {
 
 NeatScreen.prototype.formatMessage = function (msg) {
   var highlight = false
-  /*
+  /* legend for `msg` below
    msg = {
      key: ''
      value: {
@@ -363,10 +363,10 @@ var colours = [
   'red',
   'green',
   'yellow',
-  'blue',
+  // 'blue',
   'magenta',
   'cyan',
-  'white',
+  // 'white',
   // 'gray',
   'redBright',
   'greenBright',
