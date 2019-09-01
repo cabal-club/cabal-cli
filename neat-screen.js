@@ -138,14 +138,8 @@ function NeatScreen (props) {
   }
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
-  this.neat.input.on('pageup', () =>  {
-      console.error("scrollback before", this.state.scrollback)
-      this.state.scrollback++
-      console.error("scrollback after", this.state.scrollback)
-  })
-  this.neat.input.on('pagedown', () => { this.state.scrollback = Math.max(0, this.state.scrollback - 1); 
-                     /* TODO: remove return null (old artifact) */ 
-                     return null })
+  this.neat.input.on('pageup', () =>  { this.state.scrollback++ })
+  this.neat.input.on('pagedown', () => { this.state.scrollback = Math.max(0, this.state.scrollback - 1) })
 
   this.neat.use((state, bus) => {
     state.neat = this.neat
@@ -201,7 +195,6 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
 NeatScreen.prototype.initializeCabalClient = function () {
   var details = this.client.getCurrentCabal()
   this.state.cabal = details
-  console.error("initialize cabal client")
   this.state.scrollback = 0
   var counter = 0
   welcomeMessage.map((m) => this.client.addStatusMessage({ timestamp: Date.now() + counter++, text: m }))
