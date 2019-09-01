@@ -100,7 +100,7 @@ const client = new Client({
         return cache.key
       }
       // dns record wasn't found online and wasn't in the cache
-      throw err
+      return null
     },
     write: async function (name, key, ttl) {
       var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
@@ -217,7 +217,8 @@ function start (keys) {
         })
     }
   }).catch((e) => {
-      console.error(e)
+      if (e) { console.error(e) }
+      else { console.error("Error: Couldn't resolve one of the following cabal keys:", chalk.yellow(keys.join(" "))) }
       process.exit(1)
   })
 }
