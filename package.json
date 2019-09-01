@@ -1,12 +1,13 @@
 {
   "name": "cabal",
-  "version": "6.2.2",
+  "version": "8.0.3",
   "description": "p2p chat",
   "main": "index.js",
   "bin": {
     "cabal": "cli.js"
   },
   "dependencies": {
+    "ansi-escapes": "^4.2.0",
     "cabal-core": "^7.0.1",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
@@ -22,11 +23,13 @@
     "random-access-memory": "^3.1.1",
     "strftime": "^0.10.0",
     "strip-ansi": "^5.2.0",
-    "terminal-link": "^1.2.0",
-    "through2": "^2.0.3",
+    "supports-hyperlinks": "^2.0.0",
+    "through2": "^3.0.1",
     "txt-blit": "github:cblgh/txt-blit"
   },
   "devDependencies": {
+    "cross-zip-cli": "^1.0.0",
+    "pkg": "^4.3.8",
     "standard": "^11.0.1"
   },
   "scripts": {
@@ -36,7 +39,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cabal-club/cabal.git"
+    "url": "git+https://github.com/cabal-club/cabal-cli.git"
   },
   "keywords": [
     "hyperdb",
