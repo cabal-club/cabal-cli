@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 var Client = require('cabal-client')
 var minimist = require('minimist')
-var os = require('os')
 var fs = require('fs')
 var path = require('path')
 var yaml = require('js-yaml')
@@ -11,8 +10,7 @@ var chalk = require('chalk')
 
 var args = minimist(process.argv.slice(2))
 
-var homedir = os.homedir()
-var rootdir = args.dir || (homedir + `/.cabal/v${Client.getDatabaseVersion()}`)
+var rootdir = Client.getCabalDirectory()
 var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
