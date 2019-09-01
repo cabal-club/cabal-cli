@@ -93,8 +93,6 @@ function Commander (view, client) {
         this.channel = arg
         this.cabal.joinChannel(arg)
         this.view.loadChannel(arg)
-        console.error("-".repeat(30))
-        console.error("open", arg)
       }
     },
     leave: {
@@ -103,8 +101,6 @@ function Commander (view, client) {
         if (arg === '!status') return
         /* TODO: update `this.channel` with next channel */
         this.cabal.leaveChannel(arg)
-        console.error("-".repeat(30))
-        console.error("leave", arg)
       }
     },
     clear: {
