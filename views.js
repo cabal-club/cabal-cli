@@ -130,9 +130,9 @@ function renderChannels (state, width, height) {
           return ' ' + chalk.bgBlue(channelTruncated + fill)
         }
       } else {
-        var glyph = unread ? '*' : ' '
-        glyph = mentioned ? '@' : glyph
-        return glyph + chalk.white(channelTruncated)
+        if (mentioned) return '@' + chalk.magenta(channelTruncated)
+        else if (unread) return '*' + chalk.green(channelTruncated)
+        else return ' ' + chalk.white(channelTruncated)
       }
     }).slice(0, height)
 }
