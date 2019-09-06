@@ -123,7 +123,6 @@ function renderChannels (state, width, height) {
       if (state.cabal.getCurrentChannel() === channel) {
         var fillWidth = width - channelTruncated.length - 3
         var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
-        channelText = chalk.bgBlue(channelTruncated + fill)
         if (state.selectedWindowPane === 'channels') {
           return '>' + chalk.bgBlue(channelTruncated + fill)
         } else {
