@@ -1,47 +1,16 @@
 #!/usr/bin/env node
-var Cabal = require('cabal-core')
+var Client = require('cabal-client')
 var minimist = require('minimist')
-var os = require('os')
 var fs = require('fs')
 var path = require('path')
 var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
-var crypto = require('hypercore-crypto')
 var chalk = require('chalk')
-var ram = require('random-access-memory')
-var level = require('level')
-var memdb = require('memdb')
-var cabalDns = require('dat-dns')({
-  hashRegex: /^[0-9a-f]{64}?$/i,
-  recordName: 'cabal',
-  protocolRegex: /^cabal:\/\/([0-9a-f]{64})/i,
-  txtRegex: /^"?cabalkey=([0-9a-f]{64})"?$/i,
-  persistentCache: {
-    read: async function (name, err) {
-      if (name in config.cache) {
-        var cache = config.cache[name]
-        if (cache.expiresAt < Date.now()) { // if ttl has expired: warn, but keep using
-          console.error(`${chalk.redBright('Note:')} the TTL for ${name} has expired`)
-        }
-        return cache.key
-      }
-      // dns record wasn't found online and wasn't in the cache
-      throw err
-    },
-    write: async function (name, key, ttl) {
-      var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
-      var expiredTime = Date.now() + expireOffset
-      config.cache[name] = { key: key, expiresAt: expiredTime }
-      saveConfig(configFilePath, config)
-    }
-  }
-})
 
 var args = minimist(process.argv.slice(2))
 
-var homedir = os.homedir()
-var rootdir = args.dir || (homedir + `/.cabal/v${Cabal.databaseVersion}`)
+var rootdir = Client.getCabalDirectory()
 var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
@@ -54,27 +23,26 @@ var usage = `Usage
   cabal --new
 
   Options:
-    --seed     Start a headless seed for the specified cabal key
+    --seed    Start a headless seed for the specified cabal key
 
-    --new      Start a new cabal
-    --nick     Your nickname
-    --alias    Save an alias for the specified cabal, use with --key
-    --aliases  Print out your saved cabal aliases
-    --forget   Forgets the specified alias
-    --clear    Clears out all aliases
-    --key      Specify a cabal key. Used with --alias
-    --join     Only join the specified cabal, disregarding whatever is in the config
-    --config   Specify a full path to a cabal config
+    --new     Start a new cabal
+    --nick    Your nickname
+    --alias   Save an alias for the specified cabal, use with --key
+    --aliases Print out your saved cabal aliases
+    --forget  Forgets the specified alias
+    --clear   Clears out all aliases
+    --key     Specify a cabal key. Used with --alias
+    --join    Only join the specified cabal, disregarding whatever is in the config
+    --config  Specify a full path to a cabal config
 
-    --temp     Start the cli with a temporary in-memory database. Useful for debugging
-    --version  Print out which version of cabal you're running
-    --help     Print this help message
+    --temp    Start the cli with a temporary in-memory database. Useful for debugging
+    --version Print out which version of cabal you're running
+    --help    Print this help message
 
-    --message  Publish a single message; then quit after \`timeout\`
-    --channel  Channel name to publish to for \`message\` option; default: "default"
-    --timeout  Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
-    --type     Message type set to message for \`message\` option; default: "chat/text"
-    --offline  Disable networking
+    --message Publish a single message; then quit after \`timeout\`
+    --channel Channel name to publish to for \`message\` option; default: "default"
+    --timeout Delay in milliseconds to wait on swarm before quitting for \`message\` option; default: 5000
+    --type    Message type set to message for \`message\` option; default: "chat/text"
 
 Work in progress! Learn more at https://github.com/cabal-club
 `
@@ -115,6 +83,35 @@ try {
   logError(e)
   process.exit(1)
 }
+
+const client = new Client({
+  maxFeeds: maxFeeds,
+  config: {
+    dbdir: archivesdir,
+    temp: args.temp
+  },
+  persistentCache: {
+    read: async function (name, err) {
+      if (name in config.cache) {
+        var cache = config.cache[name]
+        if (cache.expiresAt < Date.now()) { // if ttl has expired: warn, but keep using
+          console.error(`${chalk.redBright('Note:')} the TTL for ${name} has expired`)
+        }
+        return cache.key
+      }
+      // dns record wasn't found online and wasn't in the cache
+      return null
+    },
+    write: async function (name, key, ttl) {
+      var expireOffset = +(new Date(ttl * 1000)) // convert to epoch time
+      var expiredTime = Date.now() + expireOffset
+      if (!config.cache) config.cache = {}
+      config.cache[name] = { key: key, expiresAt: expiredTime }
+      saveConfig(configFilePath, config)
+    }
+  }
+})
+
 
 if (args.clear) {
   delete config['aliases']
@@ -159,16 +156,15 @@ if (args.alias && args.key) {
 }
 
 if (args.key) {
-  // If a key is provided, place it at the top of the list
+  // If a key is provided, place it at the top of the keys provided from the config
   cabalKeys.unshift(args.key)
+} else if (args.temp && args.temp.length > 0) {
+  // don't eat the key if it was passed in as `cabal --temp <key>`
+  cabalKeys = [args.temp]
 } else if (args._.length > 0) {
   // the cli was run as `cabal <alias|key> ... <alias|key>`
-  args._.forEach(function (str) {
-    cabalKeys.unshift(getKey(str))
-  })
-} else if (args.temp) {
-  // the cli was run as `cabal --temp cabal://asdasd..` which accidentally consume the key and puts it into --temp
-  cabalKeys.unshift(getKey(args.temp))
+  // replace keys from config with the keys from the args
+  cabalKeys = args._.map(getKey)
 }
 
 // disregard config
@@ -176,123 +172,80 @@ if (args.join) {
   cabalKeys = [getKey(args.join)]
 }
 
-// set maximum number of hypercores to replicate
-if (args.maxFeeds) {
-  maxFeeds = args.maxFeeds
-}
-
-// only enable multi-cabal under the --experimental flag
-if (!args.experimental && cabalKeys.length) {
-  var firstKey = cabalKeys[0]
-  cabalKeys = [firstKey]
-}
-
-function createCabal (key) {
-  return cabalDns.resolveName(key).then(function (key) {
-    key = key.replace('cabal://', '').replace('cbl://', '').replace('dat://', '').replace(/\//g, '')
-    var storage = args.temp ? ram : archivesdir + key
-    if (!args.temp) try { mkdirp.sync(path.join(archivesdir, key, 'views')) } catch (e) {}
-    var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
-    return Cabal(storage, key, { db: db, maxFeeds: maxFeeds })
-  }).catch(function () {
-    // try to get from local cache
-    // if record was found, was the ttl within bounds? (i.e. does the key still have time to live)
-    // wasn't any entry in the cache; assume record just wasn't found
-    console.error(`${chalk.redBright('Record not found')}\nHave you created a file containing the cabal:// key at ${chalk.greenBright(key + '/.well-known/cabal')}?`)
-    process.exit(1)
-  })
-}
-
-// create and join a new cabal
-if (args.new) {
-  var key = crypto.keyPair().publicKey.toString('hex')
-  createCabal(key).then(function (cabal) {
-    console.error(`created the cabal: ${chalk.greenBright('cabal://' + key)}`) // log to terminal output (stdout is occupied by interface)
-    cabal.ready(function () {
-      if (!args.seed) {
-        start([cabal])
-      }
-    })
-  })
-} else if (cabalKeys.length) {
-  // join the specified list of cabals
-  Promise.all(cabalKeys.map(createCabal)).then(function (cabals) {
-    var promisedCabals = cabals.map(function (cabal) {
-      return new Promise((resolve) => {
-        cabal.ready(() => {
-          resolve(cabal)
-        })
-      })
-    })
-    Promise.all(promisedCabals)
-      .then((cabals) => {
-        start(cabals)
-      })
-  })
-} else {
+if (!cabalKeys.length) {
   process.stderr.write(usage)
   process.exit(1)
+} else {
+  start(cabalKeys)
 }
 
-function start (cabals) {
-  if (!args.seed) {
-    if (args.key && args.message) {
-      publishSingleMessage({
-        key: args.key,
-        channel: args.channel,
-        message: args.message,
-        messageType: args.type,
-        timeout: args.timeout
-      })
-      return
-    }
-
-    // => remembers the latest cabal, allows joining latest with `cabal`
-    // TODO: rewrite this when the multi-cabal functionality comes out from
-    // behind its experimental flag
-    if (!args.join && !args.experimental) {
-      // unsure about this, it effectively removes all of the cabals in the config
-      // but then again we don't have a method to save them either right now so
-      // let's run with it and fix after the bugs
-      config.cabals = cabals.map((c) => c.key)
-      saveConfig(configFilePath, config)
-    }
-
-    var dbVersion = Cabal.databaseVersion
-    var isExperimental = (typeof args.experimental !== 'undefined')
-    frontend({
-      isExperimental,
-      archivesdir,
-      cabals,
-      configFilePath,
-      homedir,
-      dbVersion,
-      maxFeeds,
-      config,
-      rootdir
+function start (keys) {
+  if (args.key && args.message) {
+    publishSingleMessage({
+      key: args.key,
+      channel: args.channel,
+      message: args.message,
+      messageType: args.type,
+      timeout: args.timeout
     })
-    if (!args.offline) {
-      setTimeout(() => {
-        cabals.forEach((cabal) => {
-          cabal.swarm()
-        })
-      }, 300)
-    }
-  } else {
-    if (!args.offline) {
-      cabals.forEach((cabal) => {
-        console.log('Seeding', cabal.key)
-        console.log()
-        console.log('@: new peer')
-        console.log('x: peer left')
-        console.log('^: uploaded a chunk')
-        console.log('.: downloaded a chunk')
-        console.log()
-        trackAndPrintEvents(cabal)
-        cabal.swarm()
-      })
-    }
+    return
   }
+  keys = Array.from(new Set(keys)) // remove duplicates
+
+  // => remembers the latest cabal, allows joining latest with `cabal`
+  if (!args.join || !args.new) {
+    config.cabals = keys
+    saveConfig(configFilePath, config)
+  }
+
+  var pendingCabals = args.new ? [ client.createCabal() ] : keys.map(client.addCabal.bind(client))
+  Promise.all(pendingCabals).then(() => {
+    if (args.new) {
+      console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface) 
+    }
+    if (!args.seed) { frontend({ client }) } 
+    else {
+        keys.forEach((k) => {
+            console.log('Seeding', k)
+            console.log()
+            console.log('@: new peer')
+            console.log('x: peer left')
+            console.log('^: uploaded a chunk')
+            console.log('.: downloaded a chunk')
+            console.log()
+            trackAndPrintEvents(client._getCabalByKey(k))
+        })
+    }
+  }).catch((e) => {
+      if (e) { console.error(e) }
+      else { console.error("Error: Couldn't resolve one of the following cabal keys:", chalk.yellow(keys.join(" "))) }
+      process.exit(1)
+  })
+}
+
+function trackAndPrintEvents (cabal) {
+    cabal.ready(() => {
+        // Listen for feeds
+        cabal.kcore._logs.feeds().forEach(listen)
+        cabal.kcore._logs.on('feed', listen)
+
+        function listen (feed) {
+            feed.on('download', idx => {
+                process.stdout.write('.')
+            })
+            feed.on('upload', idx => {
+                process.stdout.write('^')
+            })
+        }
+
+        cabal.on('peer-added', () => {
+            process.stdout.write('@')
+        })
+
+        cabal.on('peer-dropped', () => {
+            process.stdout.write('x')
+        })
+    })
 }
 
 function getKey (str) {
@@ -326,41 +279,15 @@ function saveConfig (path, config) {
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
+function publishSingleMessage ({key, channel, message, messageType, timeout}) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
-  var db = args.temp ? memdb() : level(path.join(archivesdir, key, 'views'))
-  var cabal = Cabal(archivesdir + key, key, { db: db, maxFeeds: maxFeeds })
-  cabal.ready(() => {
-    cabal.publish({
-      type: messageType || 'chat/text',
-      content: {
-        channel: channel || 'default',
-        text: message
-      }
-    })
-    if (!args.offline) cabal.swarm()
-    setTimeout(function () { process.exit(0) }, timeout || 5000)
+  client.addCabal(key).then(cabal => cabal.publishMessage({
+    type: messageType || 'chat/text',
+    content: {
+      channel: channel || 'default',
+      text: message
+    }
   })
-}
-
-function trackAndPrintEvents (cabal) {
-  // Listen for feeds
-  cabal.kcore._logs.feeds().forEach(listen)
-  cabal.kcore._logs.on('feed', listen)
-
-  function listen (feed) {
-    feed.on('download', idx => {
-      process.stdout.write('.')
-    })
-    feed.on('upload', idx => {
-      process.stdout.write('^')
-    })
-  }
-
-  cabal.on('peer-added', () => {
-    process.stdout.write('@')
-  })
-  cabal.on('peer-dropped', () => {
-    process.stdout.write('x')
-  })
+  )
+  setTimeout(function () { process.exit(0) }, timeout || 5000)
 }
