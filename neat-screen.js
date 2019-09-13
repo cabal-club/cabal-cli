@@ -169,6 +169,10 @@ function NeatScreen (props) {
 }
 
 NeatScreen.prototype._handleUpdate = function (updatedDetails) {
+  if (updatedDetails && updatedDetails.key !== this.client.getCurrentCabal().key) {
+    // an unfocused cabal sent an update, don't render its changes
+    return
+  }
   this.state.cabal = updatedDetails
   var channels = this.client.getJoinedChannels()
   this.commander.channel = this.state.cabal.getCurrentChannel()
