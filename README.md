@@ -101,5 +101,5 @@ ctrl+{n,p}
 &nbsp;&nbsp;&nbsp;&nbsp;scroll down through backlog  
 `alt-[1,9]`  
 &nbsp;&nbsp;&nbsp;&nbsp;select channels  1-9  
-`alt-n`
+`alt-n`  
 &nbsp;&nbsp;&nbsp;&nbsp;tab between the cabals & channels panes 
