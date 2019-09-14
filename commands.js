@@ -175,7 +175,7 @@ function Commander (view, client) {
 // for use when writing multiple logs within short intervals
 // to keep timestamp ordering correct. see usage for the `help` command above
 Commander.prototype.logger = function () {
-  var counter = 0
+  var counter = -1000 // set counter 1000 ms in the past to prevent status messages from being purged due to being in the future
   function ts () {
     return Date.now() + counter++
   }
