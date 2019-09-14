@@ -119,9 +119,9 @@ function Commander (view, client) {
         for (var key in this.commands) {
           if (foundAliases[key]) { continue }
           let command = key
-          if (this.aliases[key]) { 
+          if (this.aliases[key]) {
             foundAliases[this.aliases[key]] = true
-            command += `, /${this.aliases[key]}` 
+            command += `, /${this.aliases[key]}`
           }
           logToView(`/${command}`)
           logToView(`  ${this.commands[key].help()}`)
