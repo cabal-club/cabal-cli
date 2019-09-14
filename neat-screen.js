@@ -261,7 +261,6 @@ NeatScreen.prototype.renderApp = function (state) {
 // use to write anything else to the screen, e.g. info messages or emotes
 NeatScreen.prototype.writeLine = function (line, timestamp) {
   this.client.addStatusMessage({ timestamp: timestamp || Date.now(), text: line })
-  console.error(line)
   this.bus.emit('render')
 }
 

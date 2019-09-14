@@ -9,6 +9,7 @@ function Commander (view, client) {
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
+  this.aliases = {}
 
   this.commands = {
     add: {
@@ -114,8 +115,15 @@ function Commander (view, client) {
       help: () => 'display this help message',
       call: (arg) => {
         var logToView = this.logger()
+        var foundAliases = {}
         for (var key in this.commands) {
-          logToView(`/${key}`)
+          if (foundAliases[key]) { continue }
+          let command = key
+          if (this.aliases[key]) { 
+            foundAliases[this.aliases[key]] = true
+            command += `, /${this.aliases[key]}` 
+          }
+          logToView(`/${command}`)
           logToView(`  ${this.commands[key].help()}`)
         }
         logToView(`alt-n`)
@@ -186,6 +194,7 @@ Commander.prototype.logger = function () {
 }
 
 Commander.prototype.alias = function (command, alias) {
+  this.aliases[command] = alias
   this.commands[alias] = {
     help: this.commands[command].help,
     call: this.commands[command].call
