@@ -1,5 +1,5 @@
 var util = require('./util')
-var chalk = require("chalk")
+var chalk = require('chalk')
 
 function Commander (view, client) {
   if (!(this instanceof Commander)) return new Commander(view, client)
@@ -71,10 +71,10 @@ function Commander (view, client) {
         logToView(`there are currently ${channels.length} channels `)
         channels.map((c) => {
           var topic = this.cabal.getTopic(c)
-          if (topic.length > 0 && topic.length > 20) topic = topic.slice(0,40) + ".."
+          if (topic.length > 0 && topic.length > 20) topic = topic.slice(0, 40) + '..'
           var count = this.cabal.getChannelMembers(c).length
-          var userPart = count ? `: ${count} ${count  === 1 ? 'person' : 'people'}` : ''
-          var topicPart = topic.length > 0 ? ` ${chalk.cyan(topic)}` : '' 
+          var userPart = count ? `: ${count} ${count === 1 ? 'person' : 'people'}` : ''
+          var topicPart = topic.length > 0 ? ` ${chalk.cyan(topic)}` : ''
           logToView(`  ${joinedChannels.includes(c) ? '*' : ' '} ${c}${userPart}${topicPart}`)
         })
       }
@@ -82,7 +82,7 @@ function Commander (view, client) {
     panes: {
       help: () => 'set pane to navigate up and down in. panes: channels, cabals',
       call: (arg) => {
-        if (arg === '' || !["channels", "cabals"].includes(arg)) return
+        if (arg === '' || !['channels', 'cabals'].includes(arg)) return
         this.view.setPane(arg)
       }
     },

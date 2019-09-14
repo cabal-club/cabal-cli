@@ -11,7 +11,7 @@ const CHAN_COLS = 16
 module.exports = { big, small, getPageSize }
 
 function getPageSize () {
-    return process.stdout.rows - HEADER_ROWS
+  return process.stdout.rows - HEADER_ROWS
 }
 
 function small (state) {
@@ -184,27 +184,27 @@ function renderChannelTopic (state, width, height) {
 }
 
 function renderMessages (state, width, height) {
-    var msgs = state.messages
+  var msgs = state.messages
 
-    // Character-wrap to area edge
-    var allLines = msgs.reduce(function (accum, msg) {
-        accum.push.apply(accum, util.wrapAnsi(msg, width))
-        return accum
-    }, [])
+  // Character-wrap to area edge
+  var allLines = msgs.reduce(function (accum, msg) {
+    accum.push.apply(accum, util.wrapAnsi(msg, width))
+    return accum
+  }, [])
 
-    state.scrollback = Math.min(state.scrollback, allLines.length - height)
-    if (allLines.length < height) {
-        state.scrollback = 0
-    }
+  state.scrollback = Math.min(state.scrollback, allLines.length - height)
+  if (allLines.length < height) {
+    state.scrollback = 0
+  }
 
-    var lines = (allLines.length < height)
+  var lines = (allLines.length < height)
     ? allLines.concat(Array(height - allLines.length).fill(''))
     : allLines.slice(
-        allLines.length - height - state.scrollback,
-        allLines.length - state.scrollback
+      allLines.length - height - state.scrollback,
+      allLines.length - state.scrollback
     )
-    if (state.scrollback > 0) {
-        lines = lines.slice(0, lines.length - 1).concat(['More messages below...'])
-    }
-    return lines
+  if (state.scrollback > 0) {
+    lines = lines.slice(0, lines.length - 1).concat(['More messages below...'])
+  }
+  return lines
 }

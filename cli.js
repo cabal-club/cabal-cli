@@ -112,7 +112,6 @@ const client = new Client({
   }
 })
 
-
 if (args.clear) {
   delete config['aliases']
   saveConfig(configFilePath, config)
@@ -201,51 +200,49 @@ function start (keys) {
   var pendingCabals = args.new ? [ client.createCabal() ] : keys.map(client.addCabal.bind(client))
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
-      console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface) 
+      console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
     }
-    if (!args.seed) { frontend({ client }) } 
-    else {
-        keys.forEach((k) => {
-            console.log('Seeding', k)
-            console.log()
-            console.log('@: new peer')
-            console.log('x: peer left')
-            console.log('^: uploaded a chunk')
-            console.log('.: downloaded a chunk')
-            console.log()
-            trackAndPrintEvents(client._getCabalByKey(k))
-        })
+    if (!args.seed) { frontend({ client }) } else {
+      keys.forEach((k) => {
+        console.log('Seeding', k)
+        console.log()
+        console.log('@: new peer')
+        console.log('x: peer left')
+        console.log('^: uploaded a chunk')
+        console.log('.: downloaded a chunk')
+        console.log()
+        trackAndPrintEvents(client._getCabalByKey(k))
+      })
     }
   }).catch((e) => {
-      if (e) { console.error(e) }
-      else { console.error("Error: Couldn't resolve one of the following cabal keys:", chalk.yellow(keys.join(" "))) }
-      process.exit(1)
+    if (e) { console.error(e) } else { console.error("Error: Couldn't resolve one of the following cabal keys:", chalk.yellow(keys.join(' '))) }
+    process.exit(1)
   })
 }
 
 function trackAndPrintEvents (cabal) {
-    cabal.ready(() => {
-        // Listen for feeds
-        cabal.kcore._logs.feeds().forEach(listen)
-        cabal.kcore._logs.on('feed', listen)
+  cabal.ready(() => {
+    // Listen for feeds
+    cabal.kcore._logs.feeds().forEach(listen)
+    cabal.kcore._logs.on('feed', listen)
 
-        function listen (feed) {
-            feed.on('download', idx => {
-                process.stdout.write('.')
-            })
-            feed.on('upload', idx => {
-                process.stdout.write('^')
-            })
-        }
+    function listen (feed) {
+      feed.on('download', idx => {
+        process.stdout.write('.')
+      })
+      feed.on('upload', idx => {
+        process.stdout.write('^')
+      })
+    }
 
-        cabal.on('peer-added', () => {
-            process.stdout.write('@')
-        })
-
-        cabal.on('peer-dropped', () => {
-            process.stdout.write('x')
-        })
+    cabal.on('peer-added', () => {
+      process.stdout.write('@')
     })
+
+    cabal.on('peer-dropped', () => {
+      process.stdout.write('x')
+    })
+  })
 }
 
 function getKey (str) {

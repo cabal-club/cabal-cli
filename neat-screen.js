@@ -4,10 +4,10 @@ var neatLog = require('neat-log')
 var strftime = require('strftime')
 var views = require('./views')
 var util = require('./util')
-var debug = require("./debug")
+var debug = require('./debug')
 var markdown = require('./markdown-shim')
-var welcomeMessage = ['welcome to cabal', 
-  'type /channels to see which channels to join, and /help for more commands', 
+var welcomeMessage = ['welcome to cabal',
+  'type /channels to see which channels to join, and /help for more commands',
   'for more info visit https://github.com/cabal-club/cabal']
 
 function NeatScreen (props) {
@@ -138,7 +138,7 @@ function NeatScreen (props) {
   }
 
   this.neat.input.on('ctrl-d', () => process.exit(0))
-  this.neat.input.on('pageup', () =>  { this.state.scrollback++ })
+  this.neat.input.on('pageup', () => { this.state.scrollback++ })
   this.neat.input.on('pagedown', () => { this.state.scrollback = Math.max(0, this.state.scrollback - 1) })
 
   this.neat.use((state, bus) => {
@@ -271,8 +271,8 @@ NeatScreen.prototype.clear = function () {
 }
 
 NeatScreen.prototype.setPane = function (pane) {
-    this.state.selectedWindowPane = pane
-    this.bus.emit("render")
+  this.state.selectedWindowPane = pane
+  this.bus.emit('render')
 }
 
 NeatScreen.prototype.loadChannel = function (channel) {
@@ -306,7 +306,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
    */
   if (!msg.value.type) { msg.value.type = 'chat/text' }
   // virtual message type, handled by cabal-client
-  if (msg.value.type === "status/date-changed") {
+  if (msg.value.type === 'status/date-changed') {
     return `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`
   }
   if (msg.value.content && msg.value.timestamp) {
@@ -328,9 +328,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
-    if (msg.value.type === "status") {
+    if (msg.value.type === 'status') {
       highlight = false // never highlight from status
-      authorText = `${chalk.dim('-')}${highlight ? chalk.whiteBright(author) : chalk.cyan("status")}${chalk.dim('-')}`
+      authorText = `${chalk.dim('-')}${highlight ? chalk.whiteBright(author) : chalk.cyan('status')}${chalk.dim('-')}`
     }
     var content = markdown(msgtxt)
 
