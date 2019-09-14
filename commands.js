@@ -118,12 +118,13 @@ function Commander (view, client) {
         var foundAliases = {}
         for (var key in this.commands) {
           if (foundAliases[key]) { continue }
+          const slash = chalk.gray('/')
           let command = key
           if (this.aliases[key]) {
             foundAliases[this.aliases[key]] = true
-            command += `, /${this.aliases[key]}`
+            command += `, ${slash}${this.aliases[key]}`
           }
-          logToView(`/${command}`)
+          logToView(`${slash}${command}`)
           logToView(`  ${this.commands[key].help()}`)
         }
         logToView(`alt-n`)
