@@ -147,6 +147,19 @@ function Commander (view, client) {
       call: (arg) => {
         this.view.writeLine.bind(this.view)('Local user key: ' + this.cabal.getLocalUser().key)
       }
+    },
+    whois: {
+      help: () => 'display the public keys associated with the passed in nick',
+      call: (arg) => {
+        const users = this.cabal.getUsers()
+        let whoisKeys = Object.keys(users).filter((k) => users[k].name && users[k].name === arg)
+        const logToView = this.logger()
+        logToView(`* ${arg}'s public keys:`)
+        // list all of arg's public keys in list
+        for (var key of whoisKeys) {
+          logToView(`  ${key}`)
+        }
+      }
     }
   }
   // add aliases to commands
