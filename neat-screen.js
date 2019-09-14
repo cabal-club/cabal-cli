@@ -4,7 +4,6 @@ var neatLog = require('neat-log')
 var strftime = require('strftime')
 var views = require('./views')
 var util = require('./util')
-var debug = require('./debug')
 var markdown = require('./markdown-shim')
 var welcomeMessage = ['welcome to cabal',
   'type /channels to see which channels to join, and /help for more commands',
