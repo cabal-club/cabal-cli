@@ -232,7 +232,7 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
   if (!cb) cb = function () {}
   opts.newerThan = opts.newerThan || null
   opts.olderThan = opts.olderThan || Date.now()
-  opts.amount = opts.amount || this._pagesize() * 1.5
+  opts.amount = opts.amount || this._pagesize() * 2.5
 
   // var unreadCount = this.client.getNumberUnreadMessages()
   this.client.getMessages(opts, (msgs) => {
