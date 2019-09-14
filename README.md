@@ -40,7 +40,7 @@ cabal --key <key> --seed
 ```
 
 ## Commands
-```sh
+```py
 /add, /cabal
   add a cabal
 /new
@@ -54,7 +54,7 @@ cabal --key <key> --seed
 /channels
   display the cabal's channels
 /panes
-  set pane to navigate up and down in. panes: channels, cabals
+  set pane to navigate up and down in panes: channels, cabals
 /join, /j
   join a new channel
 /leave, /l
@@ -66,7 +66,7 @@ cabal --key <key> --seed
 /quit, /exit
   exit the cabal process
 /topic, /motd
-  set the topic/description/`message of the day` for a channel
+  set the topic/description/message of the day for a channel
 /whoami, /key
   display your local user key
 /whois
