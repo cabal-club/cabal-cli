@@ -30,11 +30,12 @@
   },
   "devDependencies": {
     "cross-zip-cli": "^1.0.0",
+    "mocha": "^6.2.1",
     "pkg": "^4.3.8",
     "standard": "^11.0.1"
   },
   "scripts": {
-    "test": "standard --fix",
+    "test": "standard --fix ./*.js && mocha",
     "package": "rm -rf builds && npm run pkg && ./package.sh",
     "pkg": "pkg package.json -o builds/cabal"
   },
