@@ -1,6 +1,6 @@
 var stripAnsi = require('strip-ansi')
-var emojiRegex = require('emoji-regex')
-var emojiPattern = emojiRegex()
+var EmojiConverter = require('neato-emoji-converter')
+var emojiConverter = new EmojiConverter()
 
 function log (err, result) {
   if (err) { console.error('failed with', err) }
@@ -8,8 +8,8 @@ function log (err, result) {
 }
 
 function sanitizeString (str) {
-  // emojis.break the cli: replace them with a cabal symbol
-  str = str.replace(emojiPattern, '➤')
+  // emojis break the cli: replace them with shortcodes
+  str = emojiConverter.replaceUnicode(str)
   str = stripAnsi(str) // strip non-visible sequences
   return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
 }

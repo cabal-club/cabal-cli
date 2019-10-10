@@ -12,7 +12,6 @@
     "cabal-core": "^7.1.0",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
-    "emoji-regex": "^8.0.0",
     "grapheme-splitter": "^1.0.4",
     "js-yaml": "^3.13.1",
     "level": "^5.0.1",
@@ -21,6 +20,7 @@
     "mkdirp": "^0.5.1",
     "neat-input": "^1.10.0",
     "neat-log": "^3.1.0",
+    "neato-emoji-converter": "^1.1.2",
     "random-access-memory": "^3.1.1",
     "strftime": "^0.10.0",
     "strip-ansi": "^5.2.0",
@@ -30,11 +30,12 @@
   },
   "devDependencies": {
     "cross-zip-cli": "^1.0.0",
+    "mocha": "^6.2.1",
     "pkg": "^4.3.8",
     "standard": "^11.0.1"
   },
   "scripts": {
-    "test": "standard --fix",
+    "test": "standard --fix ./*.js && mocha",
     "package": "rm -rf builds && npm run pkg && ./package.sh",
     "pkg": "pkg package.json -o builds/cabal"
   },
