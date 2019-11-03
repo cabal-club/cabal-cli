@@ -15,7 +15,7 @@ function sanitizeString (str) {
 }
 // Character-wrap text containing ANSI escape codes.
 // String, Int -> [String]
-function wrapAnsi (text, width) {
+function wrapAnsi (text, width, padding=11) {
   if (!text) return []
 
   var res = []
@@ -37,11 +37,11 @@ function wrapAnsi (text, width) {
       lineLen++
       if (lineLen >= width - 1 || chr === '\n') {
         res.push(line.join(''))
-        line = []
+        line = new Array(padding).fill(" ")
         lineLen = 0
       }
       if (chr === '\n') {
-        line = ['            ']
+        line = new Array(padding).fill(" ")
         lineLen = line.length
       }
     }
