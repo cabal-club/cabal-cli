@@ -43,7 +43,7 @@ function big (state) {
     blit(screen, renderChannels(state, 18, process.stdout.rows - HEADER_ROWS), 7, 3)
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 23, 3)
     // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
+    blit(screen, renderMessages(state, process.stdout.columns - (CHAN_COLS+2) - (NICK_COLS+2), process.stdout.rows - HEADER_ROWS), 24, 3)
     // channel topic description
     if (state.topic) {
       blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
@@ -188,7 +188,8 @@ function renderMessages (state, width, height) {
 
   // Character-wrap to area edge
   var allLines = msgs.reduce(function (accum, msg) {
-    accum.push.apply(accum, util.wrapAnsi(msg, width))
+    let nickLength = msg.raw.author ? msg.raw.author.length : 0
+    accum.push.apply(accum, util.wrapAnsi(msg.formatted, width, nickLength + 8 /* ti:me:msg */ + 4 /* spacing + <> */))
     return accum
   }, [])
 

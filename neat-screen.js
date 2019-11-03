@@ -306,13 +306,18 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.value.type) { msg.value.type = 'chat/text' }
   // virtual message type, handled by cabal-client
   if (msg.value.type === 'status/date-changed') {
-    return `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`
+      return { 
+          formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`,
+          raw: msg
+      }
   }
   if (msg.value.content && msg.value.timestamp) {
     const users = this.client.getUsers()
     const authorSource = users[msg.key] || msg
 
     const author = authorSource.name || authorSource.key.slice(0, 8)
+    // add author field for later use in calculating the left-padding of multi-line messages
+    msg.author = author
     var localNick = 'uninitialized'
     if (this.state) { localNick = this.state.cabal.getLocalName() }
     /* sanitize input to prevent interface from breaking */
@@ -344,9 +349,15 @@ NeatScreen.prototype.formatMessage = function (msg) {
       content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
     }
 
-    return timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content
+    return { 
+        formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
+        raw: msg 
+    }
   }
-  return chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value))
+  return {
+      formatted: chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value)),
+      raw: msg
+  }
 }
 
 function formatTime (t) {
