@@ -37,11 +37,11 @@ function wrapAnsi (text, width, padding=11) {
       lineLen++
       if (lineLen >= width - 1 || chr === '\n') {
         res.push(line.join(''))
-        line = new Array(padding).fill(" ")
+        line = [" ".repeat(padding)]
         lineLen = 0
       }
       if (chr === '\n') {
-        line = new Array(padding).fill(" ")
+        line = [" ".repeat(padding)]
         lineLen = line.length
       }
     }
