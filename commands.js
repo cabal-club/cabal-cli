@@ -141,7 +141,7 @@ function Commander (view, client) {
         const cabalKey = `cabal://${this.cabal.key}`
         qr.toString(cabalKey, { type: 'terminal' }, (err, qrcode) => {
           if (err) return
-          logToView(`QR code for ${cabalKey}\n${qrcode}`)
+          logToView(`QR code for ${cabalKey}\n\n${qrcode}`)
         })
       }
     },
