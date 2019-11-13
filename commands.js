@@ -1,5 +1,6 @@
 var util = require('./util')
 var chalk = require('chalk')
+var qr = require("qrcode")
 
 function Commander (view, client) {
   if (!(this instanceof Commander)) return new Commander(view, client)
@@ -131,6 +132,16 @@ function Commander (view, client) {
         logToView(`  move between channels/cabals panes`)
         logToView(`ctrl+{n,p}`)
         logToView(`  move up/down channels/cabals`)
+      }
+    },
+    qr: {
+      help: () => "generate a qr code with the current cabal's address",
+      call: () => {
+          const logToView = this.logger()
+          const cabalKey = `cabal://${this.cabal.key}`
+          qr.toString(cabalKey, { type: "terminal" }, (err, qrcode) => {
+              logToView(`QR code for ${cabalKey}\n${qrcode}`)
+          })
       }
     },
     quit: {
