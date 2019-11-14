@@ -7,6 +7,7 @@ var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
+var captureQrCode = require('node-camera-qr-reader')
 
 var args = minimist(process.argv.slice(2))
 
@@ -34,6 +35,7 @@ var usage = `Usage
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
     --config  Specify a full path to a cabal config
+    --qr      Capture a frame from a connected camera to read a cabal key from a QR code
 
     --temp    Start the cli with a temporary in-memory database. Useful for debugging
     --version Print out which version of cabal you're running
@@ -175,7 +177,18 @@ if (!cabalKeys.length) {
   process.stderr.write(usage)
   process.exit(1)
 } else {
-  start(cabalKeys)
+  if (args.qr) {
+    captureQrCode().then((key) => {
+      if (key) {
+        start([key])
+      } else {
+        console.log('No QR code detected.')
+        process.exit(0)
+      }
+    })
+  } else {
+    start(cabalKeys)
+  }
 }
 
 function start (keys) {

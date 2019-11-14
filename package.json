@@ -21,6 +21,7 @@
     "neat-input": "^1.10.0",
     "neat-log": "^3.1.0",
     "neato-emoji-converter": "^1.1.2",
+    "node-camera-qr-reader": "1.0.0",
     "qrcode": "^1.4.4",
     "random-access-memory": "^3.1.1",
     "strftime": "^0.10.0",
