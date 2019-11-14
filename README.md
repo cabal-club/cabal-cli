@@ -63,6 +63,8 @@ cabal --key <key> --seed
   clear the current backscroll
 /help
   display this help message
+/qr
+  generate a qr code with the current cabal's address
 /quit, /exit
   exit the cabal process
 /topic, /motd
