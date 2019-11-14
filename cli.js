@@ -35,6 +35,7 @@ var usage = `Usage
     --key     Specify a cabal key. Used with --alias
     --join    Only join the specified cabal, disregarding whatever is in the config
     --config  Specify a full path to a cabal config
+    --qr      Capture a frame from a connected camera to read a cabal key from a QR code
 
     --temp    Start the cli with a temporary in-memory database. Useful for debugging
     --version Print out which version of cabal you're running
