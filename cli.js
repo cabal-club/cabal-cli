@@ -16,12 +16,18 @@ var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
 var usage = `Usage
-  cabal cabal://key
-  cabal <your saved --alias of a cabal>
 
-  OR
+  Create a new cabal:
+    cabal --new
 
-  cabal --new
+  Join a cabal by its key:
+    cabal cabal://key
+
+  Join a cabal by an alias:
+    cabal <your saved --alias of a cabal>
+
+  Join a cabal by a QR code:
+    cabal --qr
 
   Options:
     --seed    Start a headless seed for the specified cabal key

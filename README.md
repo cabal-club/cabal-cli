@@ -25,20 +25,20 @@ cabal --new
 
 #### Connect to an existing instance:
 ```
-cabal --key <key>
+cabal <key>
 ```
 e.g.
 ```
-cabal --key cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+cabal cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
 ```
 
 #### Scan a QR code to join a cabal:
-Cabal-cli can use a webcam connected to your computer to read a cabal key from a QR code.
+Cabal can use a webcam connected to your computer to read a cabal key from a QR code.
 For this to work, you'll need to install an additional system dependency:
 - Linux: `sudo apt-get install fswebcam`
 - MacOS: `brew install imagesnap`
 ```
-# Hold up your QR code in front of the webcam and then do:
+# Hold up your QR code in front of the webcam and then run:
 cabal --qr
 ```
 
@@ -46,7 +46,7 @@ cabal --qr
 
 This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VPS) and make its data more available:
 ```
-cabal --key <key> --seed
+cabal <key> --seed
 ```
 
 ## Commands
