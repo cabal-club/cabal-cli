@@ -7,6 +7,7 @@ var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
+var captureQrCode = require('node-camera-qr-reader')
 
 var args = minimist(process.argv.slice(2))
 
@@ -175,7 +176,18 @@ if (!cabalKeys.length) {
   process.stderr.write(usage)
   process.exit(1)
 } else {
-  start(cabalKeys)
+  if (args.qr) {
+    captureQrCode().then((key) => {
+      if (key) {
+        start([key])
+      } else {
+        console.log('No QR code detected.')
+        process.exit(0)
+      }
+    })
+  } else {
+    start(cabalKeys)
+  }
 }
 
 function start (keys) {
