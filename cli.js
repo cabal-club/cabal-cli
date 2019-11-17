@@ -192,6 +192,9 @@ if (!cabalKeys.length) {
         process.exit(0)
       }
     })
+    .catch((e) => {
+        console.error("Webcam capture failed. Have you installed the appropriate drivers? See the documentation for more information.")
+    })
   } else {
     start(cabalKeys)
   }
