@@ -194,6 +194,8 @@ if (!cabalKeys.length) {
     })
     .catch((e) => {
         console.error("Webcam capture failed. Have you installed the appropriate drivers? See the documentation for more information.")
+        console.error("Mac OSX: brew install imagesnap")
+        console.error("Linux: sudo apt-get install fswebcam")
     })
   } else {
     start(cabalKeys)
