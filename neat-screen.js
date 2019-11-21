@@ -306,10 +306,10 @@ NeatScreen.prototype.formatMessage = function (msg) {
   if (!msg.value.type) { msg.value.type = 'chat/text' }
   // virtual message type, handled by cabal-client
   if (msg.value.type === 'status/date-changed') {
-      return { 
-          formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`,
-          raw: msg
-      }
+    return {
+      formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`,
+      raw: msg
+    }
   }
   if (msg.value.content && msg.value.timestamp) {
     const users = this.client.getUsers()
@@ -349,14 +349,14 @@ NeatScreen.prototype.formatMessage = function (msg) {
       content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
     }
 
-    return { 
-        formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
-        raw: msg 
+    return {
+      formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
+      raw: msg
     }
   }
   return {
-      formatted: chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value)),
-      raw: msg
+    formatted: chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value)),
+    raw: msg
   }
 }
 
