@@ -185,6 +185,7 @@ if (!cabalKeys.length) {
 } else {
   if (args.qr) {
     console.log('Cabal is looking for a QR code...')
+    console.log('Press ctrl-c to stop.')
     captureQrCode({ retry: true }).then((key) => {
       if (key) {
         console.log('\u0007') // system bell
