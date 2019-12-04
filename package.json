@@ -9,7 +9,7 @@
   "dependencies": {
     "ansi-escapes": "^4.3.0",
     "cabal-client": "^2.0.0",
-    "cabal-core": "^9.0.0",
+    "cabal-core": "^9.0.1",
     "chalk": "^2.4.1",
     "collect-stream": "^1.2.1",
     "grapheme-splitter": "^1.0.4",
