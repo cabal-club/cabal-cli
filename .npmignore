@@ -8,3 +8,5 @@ dist
 package.sh
 publish.sh
 .travis.yml
+test/
+.cabal.yml-example
