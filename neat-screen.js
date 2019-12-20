@@ -5,8 +5,10 @@ var strftime = require('strftime')
 var views = require('./views')
 var util = require('./util')
 var markdown = require('./markdown-shim')
-var fs = require("fs")
-var welcomeMessage = fs.readFileSync("welcome.txt").toString().split("\n")
+var fs = require('fs')
+var path = require('path')
+var welcomePath = path.join(__dirname, 'welcome.txt')
+var welcomeMessage = fs.readFileSync(welcomePath).toString().split("\n")
     
 function NeatScreen (props) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(props)
