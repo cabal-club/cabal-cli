@@ -5,10 +5,11 @@ var strftime = require('strftime')
 var views = require('./views')
 var util = require('./util')
 var markdown = require('./markdown-shim')
-var welcomeMessage = ['welcome to cabal',
-  'type /channels to see which channels to join, and /help for more commands',
-  'for more info visit https://github.com/cabal-club/cabal']
-
+var fs = require('fs')
+var path = require('path')
+var welcomePath = path.join(__dirname, 'welcome.txt')
+var welcomeMessage = fs.readFileSync(welcomePath).toString().split("\n")
+    
 function NeatScreen (props) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(props)
   this.client = props.client
