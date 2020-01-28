@@ -37,16 +37,52 @@ function NeatScreen (props) {
     } else {
       const cabalUsers = this.client.getUsers()
       // nick completion
-      var users = Object.keys(cabalUsers)
+      const users = Object.keys(cabalUsers)
         .map(key => cabalUsers[key])
         .map(user => user.name || user.key.substring(0, 8))
         .sort()
-      var pattern = (/^(\w+)$/)
-      var match = pattern.exec(line)
+      const pattern = (/(\S+)/g) // all nicknames without space in them are valid for autocomplete
+      let match = line.split(/\s+/g).slice(-1)[0].match(pattern) // usual case is to only autocomplete last word on line
+      const cursor = this.neat.input.cursor
+      let lindex = -1
+      let rindex = -1
+      const wanderingCursor = cursor !== line.length
+      // we're trying to autocomplete something in the middle of the line; i.e the cursor has wandered away from the end
+      if (wanderingCursor) {
+        // find left-most boundary of potential nickname fragment to autocomplete
+        for (let i = cursor - 1; i > 0; i--) {
+          if (line.charAt(i) === ' ') {
+            lindex = i
+            break
+          }
+        }
+        // find right-most boundary of nickname
+        for (let i = cursor; i <= line.length; i++) {
+          if (line.charAt(i) === ' ') {
+            rindex = i
+            break
+          }
+        }
+        match = [line.slice(lindex, rindex).trim()]
+      }
 
-      if (match) {
-        users = users.filter(user => user.startsWith(match[0]))
-        if (users.length > 0) this.neat.input.set(users[0] + ': ')
+      for (let word of match) {
+        let filteredUsers = users.filter(user => user.startsWith(word))
+        if (filteredUsers.length > 0) {
+          // only autocomplete first match, for now
+          const filteredUser = filteredUsers[0]
+          let currentInput = this.neat.input.rawLine()
+          let completedInput = currentInput.slice(0, currentInput.length - word.length) + filteredUser
+          if (wanderingCursor) {
+            completedInput = currentInput.slice(0, lindex + 1) + filteredUser + currentInput.slice(rindex)
+          }
+          if (completedInput === filteredUser) { completedInput += ': ' } // we only autcompleted a single nick, add a colon and space
+          this.neat.input.set(completedInput)
+          console.error(lindex, rindex, currentInput.slice(lindex, rindex))
+          // move cursor to right after the completed nickname
+          this.neat.input.cursor = cursor + (filteredUser.length - currentInput.slice(lindex, rindex).trim().length) // if cursor is not wandering => .slice(-1,-1) will give us an empty string => ""
+          return
+        }
       }
     }
   })
