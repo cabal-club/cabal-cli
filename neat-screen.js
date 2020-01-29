@@ -8,8 +8,8 @@ var markdown = require('./markdown-shim')
 var fs = require('fs')
 var path = require('path')
 var welcomePath = path.join(__dirname, 'welcome.txt')
-var welcomeMessage = fs.readFileSync(welcomePath).toString().split("\n")
-    
+var welcomeMessage = fs.readFileSync(welcomePath).toString().split('\n')
+
 function NeatScreen (props) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(props)
   this.client = props.client
@@ -80,7 +80,7 @@ function NeatScreen (props) {
       }
 
       // proceed to figure out the closest match
-      const filteredUsers = Array.from(new Set(users.filter(user => user.search(/\s+/) === -1 && user.toLowerCase().startsWith(match.toLowerCase())))) // filter out duplicate nicks and people with spaces in their nicks, fuck that 
+      const filteredUsers = Array.from(new Set(users.filter(user => user.search(/\s+/) === -1 && user.toLowerCase().startsWith(match.toLowerCase())))) // filter out duplicate nicks and people with spaces in their nicks, fuck that
       if (filteredUsers.length > 0) {
         const userIndex = cyclingNicks ? (this.state.prevNickIndex + 1) % filteredUsers.length : 0
         const filteredUser = filteredUsers[userIndex]
