@@ -46,9 +46,9 @@ function NeatScreen (props) {
       const cursor = this.neat.input.cursor
       let lindex = -1
       let rindex = -1
-      const wanderingCursor = cursor !== line.length
+      const cursorWandering = cursor !== line.length
       // we're trying to autocomplete something in the middle of the line; i.e the cursor has wandered away from the end
-      if (wanderingCursor) {
+      if (cursorWandering) {
         // find left-most boundary of potential nickname fragment to autocomplete
         for (let i = cursor - 1; i > 0; i--) {
           if (line.charAt(i) === ' ') {
@@ -73,14 +73,15 @@ function NeatScreen (props) {
           const filteredUser = filteredUsers[0]
           let currentInput = this.neat.input.rawLine()
           let completedInput = currentInput.slice(0, currentInput.length - word.length) + filteredUser
-          if (wanderingCursor) {
+          if (cursorWandering) {
             completedInput = currentInput.slice(0, lindex + 1) + filteredUser + currentInput.slice(rindex)
           }
           if (completedInput === filteredUser) { completedInput += ': ' } // we only autcompleted a single nick, add a colon and space
           this.neat.input.set(completedInput)
-          console.error(lindex, rindex, currentInput.slice(lindex, rindex))
-          // move cursor to right after the completed nickname
-          this.neat.input.cursor = cursor + (filteredUser.length - currentInput.slice(lindex, rindex).trim().length) // if cursor is not wandering => .slice(-1,-1) will give us an empty string => ""
+          // when neat-input.set() is used the cursor is automatically moved to the end of the line, if the cursor is wandering we instead want the cursor to be just after the autocompleted name
+          if (cursorWandering) {
+            this.neat.input.cursor = cursor + (filteredUser.length - currentInput.slice(lindex, rindex).trim().length) 
+          }
           return
         }
       }
