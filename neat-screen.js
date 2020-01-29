@@ -79,7 +79,7 @@ function NeatScreen (props) {
       }
 
       // proceed to figure out the closest match
-      const filteredUsers = Array.from(new Set(users.filter(user => user.toLowerCase().startsWith(match.toLowerCase())))) // filter out duplicate nicks
+      const filteredUsers = Array.from(new Set(users.filter(user => user.search(/\s+/) === -1 && user.toLowerCase().startsWith(match.toLowerCase())))) // filter out duplicate nicks and people with spaces in their nicks, fuck that 
       if (filteredUsers.length > 0) {
         const userIndex = cyclingNicks ? (this.state.prevNickIndex + 1) % filteredUsers.length : 0
         const filteredUser = filteredUsers[userIndex]
