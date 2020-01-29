@@ -41,7 +41,7 @@ function NeatScreen (props) {
         .map(key => cabalUsers[key])
         .map(user => user.name || user.key.substring(0, 8))
         .sort()
-      let match = line.split(/\s+/g).slice(-1)[0] // usual case is we want to autocomplete the last word on a line
+      let match = line.trim().split(/\s+/g).slice(-1)[0] // usual case is we want to autocomplete the last word on a line
 
       const cursor = this.neat.input.cursor
       let lindex = -1
@@ -50,8 +50,8 @@ function NeatScreen (props) {
       const cursorWandering = cursor !== line.length
       if (cursorWandering) {
         // find left-most boundary of potential nickname fragment to autocomplete
-        for (let i = cursor - 1; i > 0; i--) {
-          if (line.charAt(i) === ' ') {
+        for (let i = cursor - 1; i >= 0; i--) {
+          if (line.charAt(i) === ' ' || i === 0) {
             lindex = i
             break
           }
@@ -69,7 +69,7 @@ function NeatScreen (props) {
 
       // determine if we are tabbing through alternatives of similar-starting nicks
       let cyclingNicks = false
-      if (this.state.prevCompletion !== undefined && match.startsWith(this.state.prevCompletion)) {
+      if (this.state.prevCompletion !== undefined && match.toLowerCase().startsWith(this.state.prevCompletion.toLowerCase())) {
         // use the original word we typed before tab-completing it
         match = this.state.prevCompletion
         cyclingNicks = true
@@ -79,22 +79,31 @@ function NeatScreen (props) {
       }
 
       // proceed to figure out the closest match
-      const filteredUsers = Array.from(new Set(users.filter(user => user.startsWith(match)))) // filter out duplicate nicks
+      const filteredUsers = Array.from(new Set(users.filter(user => user.toLowerCase().startsWith(match.toLowerCase())))) // filter out duplicate nicks
       if (filteredUsers.length > 0) {
         const userIndex = cyclingNicks ? (this.state.prevNickIndex + 1) % filteredUsers.length : 0
         const filteredUser = filteredUsers[userIndex]
         const currentInput = this.neat.input.rawLine()
         let completedInput = currentInput.slice(0, currentInput.length - match.length) + filteredUser
-        if (cyclingNicks) {
+        // i.e. repeated tabbing of similar-starting nicks
+        if (cyclingNicks) { 
           let prevNick = filteredUsers[this.state.prevNickIndex]
+          // we autocompleted a single nick w/ colon+space added, adjust for colon+space
+          if (currentInput.length === prevNick.length + 2) { prevNick += ": " } 
           completedInput = currentInput.slice(0, currentInput.length - prevNick.length) + filteredUser
         }
+        // i.e. cursor has been moved from end of line
         if (cursorWandering) {
-          completedInput = currentInput.slice(0, lindex + 1) + filteredUser + currentInput.slice(rindex)
+          completedInput = (lindex > 0) ? currentInput.slice(0, lindex + 1) : ""
+          completedInput += filteredUser + currentInput.slice(rindex)
         }
-        if (completedInput === filteredUser) { completedInput += ': ' } // we only autcompleted a single nick, add a colon and space
+        // ux: we only autcompleted a single nick, add a colon and space
+        if (completedInput === filteredUser) { 
+          completedInput += ': ' 
+        } 
         this.neat.input.set(completedInput) // update the input line with our newly tab-completed nick
-        // when neat-input.set() is used the cursor is automatically moved to the end of the line, if the cursor is wandering we instead want the cursor to be just after the autocompleted name
+        // when neat-input.set() is used the cursor is automatically moved to the end of the line, 
+        // if the cursor is wandering we instead want the cursor to be just after the autocompleted name
         if (cursorWandering) {
           this.neat.input.cursor = cursor + (filteredUser.length - currentInput.slice(lindex, rindex).trim().length)
         }
