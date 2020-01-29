@@ -138,7 +138,12 @@ function NeatScreen (props) {
     if (!key || !key.name) return
     if (key.name === 'home') this.neat.input.cursor = 0
     else if (key.name === 'end') this.neat.input.cursor = this.neat.input.rawLine().length
-    else return
+    else if (key.name !== 'tab' && this.state.prevCompletion) {
+      delete this.state.prevCompletion
+      delete this.state.prevNickIndex
+    } else {
+      return
+    }
     this.bus.emit('render')
   })
 
