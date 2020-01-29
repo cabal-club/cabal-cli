@@ -66,10 +66,12 @@ function NeatScreen (props) {
         }
         match = [line.slice(lindex, rindex).trim()]
       }
+      if (!match) return
 
-      let cyclingNicks = (this.state.prevCompletion !== undefined)
-      if (cyclingNicks && match[0].startsWith(this.state.prevCompletion[0])) {
+      let cyclingNicks = false
+      if (this.state.prevCompletion !== undefined && match[0].startsWith(this.state.prevCompletion[0])) {
         match = this.state.prevCompletion
+        cyclingNicks = true
       } else {
         delete this.state.prevCompletion
         delete this.state.prevNickIndex
