@@ -140,9 +140,9 @@ function NeatScreen (props) {
   this.neat.input.on('ctrl-d', () => {
     var line = this.neat.input.rawLine()
     var cursor = this.neat.input.cursor
-    var text = line.substring(0, cursor) + line.substring(cursor + 1)
+    var text = line.slice(0, cursor-1) + line.slice(cursor)
     this.neat.input.set(text)
-    this.neat.input.cursor = cursor
+    this.neat.input.cursor = cursor - 1
   })
 
   this.neat.input.on('pageup', () => { this.state.scrollback++ })
