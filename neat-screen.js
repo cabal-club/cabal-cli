@@ -86,23 +86,23 @@ function NeatScreen (props) {
         const currentInput = this.neat.input.rawLine()
         let completedInput = currentInput.slice(0, currentInput.length - match.length) + filteredUser
         // i.e. repeated tabbing of similar-starting nicks
-        if (cyclingNicks) { 
+        if (cyclingNicks) {
           let prevNick = filteredUsers[this.state.prevNickIndex]
           // we autocompleted a single nick w/ colon+space added, adjust for colon+space
-          if (currentInput.length === prevNick.length + 2) { prevNick += ": " } 
+          if (currentInput.length === prevNick.length + 2) { prevNick += ': ' }
           completedInput = currentInput.slice(0, currentInput.length - prevNick.length) + filteredUser
         }
         // i.e. cursor has been moved from end of line
         if (cursorWandering) {
-          completedInput = (lindex > 0) ? currentInput.slice(0, lindex + 1) : ""
+          completedInput = (lindex > 0) ? currentInput.slice(0, lindex + 1) : ''
           completedInput += filteredUser + currentInput.slice(rindex)
         }
         // ux: we only autcompleted a single nick, add a colon and space
-        if (completedInput === filteredUser) { 
-          completedInput += ': ' 
-        } 
+        if (completedInput === filteredUser) {
+          completedInput += ': '
+        }
         this.neat.input.set(completedInput) // update the input line with our newly tab-completed nick
-        // when neat-input.set() is used the cursor is automatically moved to the end of the line, 
+        // when neat-input.set() is used the cursor is automatically moved to the end of the line,
         // if the cursor is wandering we instead want the cursor to be just after the autocompleted name
         if (cursorWandering) {
           this.neat.input.cursor = cursor + (filteredUser.length - currentInput.slice(lindex, rindex).trim().length)
