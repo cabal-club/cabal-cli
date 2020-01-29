@@ -42,6 +42,7 @@ function NeatScreen (props) {
         .map(user => user.name || user.key.substring(0, 8))
         .sort()
       const pattern = (/(\S+)/g) // all nicknames without space in them are valid for autocomplete
+      // TODO: rewrite without using match regex?
       let match = line.split(/\s+/g).slice(-1)[0].match(pattern) // usual case is to only autocomplete last word on line
       const cursor = this.neat.input.cursor
       let lindex = -1
@@ -66,13 +67,26 @@ function NeatScreen (props) {
         match = [line.slice(lindex, rindex).trim()]
       }
 
+      let cyclingNicks = (this.state.prevCompletion !== undefined)
+      if (cyclingNicks && match[0].startsWith(this.state.prevCompletion[0])) {
+        match = this.state.prevCompletion
+      } else {
+        delete this.state.prevCompletion
+        delete this.state.prevNickIndex
+      }
+
       for (let word of match) {
         let filteredUsers = users.filter(user => user.startsWith(word))
         if (filteredUsers.length > 0) {
+          let userIndex = cyclingNicks ? (this.state.prevNickIndex + 1) % filteredUsers.length : 0
           // only autocomplete first match, for now
-          const filteredUser = filteredUsers[0]
+          const filteredUser = filteredUsers[userIndex]
           let currentInput = this.neat.input.rawLine()
           let completedInput = currentInput.slice(0, currentInput.length - word.length) + filteredUser
+          if (cyclingNicks) {
+            let prevNick = filteredUsers[this.state.prevNickIndex]
+            completedInput = currentInput.slice(0, currentInput.length - prevNick.length) + filteredUser
+          }
           if (cursorWandering) {
             completedInput = currentInput.slice(0, lindex + 1) + filteredUser + currentInput.slice(rindex)
           }
@@ -82,6 +96,8 @@ function NeatScreen (props) {
           if (cursorWandering) {
             this.neat.input.cursor = cursor + (filteredUser.length - currentInput.slice(lindex, rindex).trim().length) 
           }
+          this.state.prevCompletion = match
+          this.state.prevNickIndex = userIndex
           return
         }
       }
