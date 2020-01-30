@@ -25,15 +25,41 @@ function NeatScreen (props) {
   this.neat.input.on('update', () => this.neat.render())
   this.neat.input.on('enter', (line) => this.commander.process(line))
 
+  // welcome to autocomplete town
   this.neat.input.on('tab', () => {
     var line = this.neat.input.rawLine()
     if (line.length > 1 && line[0] === '/') {
+      let parts = line.split(/\s+/g)
       // command completion
-      var soFar = line.slice(1)
-      var commands = Object.keys(this.commander.commands)
-      var matchingCommands = commands.filter(cmd => cmd.startsWith(soFar))
-      if (matchingCommands.length === 1) {
-        this.neat.input.set('/' + matchingCommands[0])
+      if (parts.length === 1) {
+        var soFar = line.slice(1)
+        var commands = Object.keys(this.commander.commands)
+        var matchingCommands = commands.filter(cmd => cmd.startsWith(soFar))
+        if (matchingCommands.length === 1) {
+          this.neat.input.set('/' + matchingCommands[0])
+        }
+      // argument completion
+      } else if (parts.length === 2) {
+        const command = parts[0].slice(1)
+        // we only have channel completion atm: return if command is unrelated to channels
+        if (!['leave', 'l', 'join', 'j'].includes(command)) { return }
+        // channel completion
+        let channelFragment = parts[1].trim()
+        if (this.state.prevChannelFragment && channelFragment.startsWith(this.state.prevChannelFragment)) {
+          channelFragment = this.state.prevChannelFragment
+        } else {
+          // clear up old state
+          delete this.state.prevChannelFragment
+          delete this.state.prevChannelId
+        }
+        const channels = this.state.cabal.getChannels()
+        const matches = channels.filter(ch => ch.startsWith(channelFragment))
+        if (matches.length === 0) { return }
+        const chid = this.state.prevChannelId !== undefined ? (this.state.prevChannelId + 1) % matches.length : 0
+        const channelMatch = matches[chid]
+        this.neat.input.set(`${parts[0]} ${channelMatch}`)
+        this.state.prevChannelId = chid
+        this.state.prevChannelFragment = channelFragment
       }
     } else {
       const cabalUsers = this.client.getUsers()
