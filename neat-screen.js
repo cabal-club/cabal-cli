@@ -384,12 +384,14 @@ NeatScreen.prototype.formatMessage = function (msg) {
     const users = this.client.getUsers()
     const authorSource = users[msg.key] || msg
 
-    const author = authorSource.name || authorSource.key.slice(0, 8)
+    const author = util.sanitizeString(authorSource.name || authorSource.key.slice(0, 8))
     // add author field for later use in calculating the left-padding of multi-line messages
     msg.author = author
     var localNick = 'uninitialized'
     if (this.state) { localNick = this.state.cabal.getLocalName() }
-    /* sanitize input to prevent interface from breaking */
+
+    /* sanitize user inputs to prevent interface from breaking */
+    localNick = util.sanitizeString(localNick)
     var msgtxt = msg.value.content.text
     if (msg.value.type !== 'status') {
       msgtxt = util.sanitizeString(msgtxt)

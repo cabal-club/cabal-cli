@@ -34,7 +34,7 @@ function Commander (view, client) {
       call: (arg) => {
         if (arg === '') return
         this.cabal.publishNick(arg)
-        this.view.writeLine("* you're now known as " + arg)
+        this.view.writeLine("* you're now known as " + util.sanitizeString(arg))
       }
     },
     emote: {
@@ -57,7 +57,7 @@ function Commander (view, client) {
         var userkeys = Object.keys(users).map((key) => users[key]).sort(util.cmpUser)
         logToView('* history of peers in this cabal')
         userkeys.map((u) => {
-          var username = u.name || 'conspirator'
+          var username = util.sanitizeString(u.name) || 'conspirator'
           var spaces = ' '.repeat(15)
           var paddedName = (username + spaces).slice(0, spaces.length)
           logToView(`  ${paddedName} ${u.key}`)

@@ -83,7 +83,7 @@ function linkSize (state) {
 }
 
 function renderPrompt (state) {
-  var name = state.cabal ? state.cabal.getLocalName() : 'unknown'
+  var name = util.sanitizeString(state.cabal ? state.cabal.getLocalName() : 'unknown')
   return [
     `[${chalk.cyan(name)}:${state.cabal.getCurrentChannel()}] ${state.neat.input.line()}`
   ]
@@ -156,7 +156,7 @@ function renderNicks (state, width, height) {
   users = users
     .map(function (user) {
       var name = ''
-      if (user && user.name) name += user.name.slice(0, width)
+      if (user && user.name) name += util.sanitizeString(user.name).slice(0, width)
       else name += user.key.slice(0, Math.min(8, width))
       if (user.online) { onlines[name] = name in onlines ? onlines[name] + 1 : 1 }
       return name
