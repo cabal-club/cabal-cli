@@ -231,7 +231,6 @@ function NeatScreen (props) {
     self.loadChannel(channels[n])
   }
 
-  this.neat.input.on('ctrl-d', () => process.exit(0))
   this.neat.input.on('pageup', () => { this.state.scrollback++ })
   this.neat.input.on('pagedown', () => { this.state.scrollback = Math.max(0, this.state.scrollback - 1) })
 
