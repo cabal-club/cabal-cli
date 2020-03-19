@@ -23,11 +23,14 @@ function wrapAnsi (text, width, padding = 11) {
   var line = []
   var lineLen = 0
   var insideCode = false
+  var insideWord = false
   for (var i = 0; i < text.length; i++) {
     var chr = text.charAt(i)
     if (chr.charCodeAt(0) === 27) {
       insideCode = true
     }
+
+    insideWord = !(chr.charCodeAt(0) === 32 || chr.charCodeAt(0) === 10) // ascii code for the SPACE character || NEWLINE character
 
     if (chr !== '\n') {
       line.push(chr)
@@ -36,9 +39,16 @@ function wrapAnsi (text, width, padding = 11) {
     if (!insideCode) {
       lineLen++
       if (lineLen >= width - 1 || chr === '\n') {
-        res.push(line.join(''))
-        line = [' '.repeat(padding)]
-        lineLen = padding
+        let breakpoint = line.lastIndexOf(' ')
+        if (insideWord && breakpoint >= 0) { // breakpoint is -1 when e.g. a superlong url is posted; there exists no space before it
+          res.push(line.slice(0, breakpoint).join('')) // grab the first part of the line and push its str as a result
+          line = [' '.repeat(padding)].concat(line.slice(breakpoint + 1)) // take the part after the breakpoint and add to new line
+          lineLen = padding + line.slice(1).length // `padding` is counted separately cause it's added as a single string (not array elements)
+        } else {
+          res.push(line.join(''))
+          line = [' '.repeat(padding)]
+          lineLen = padding
+        }
       }
     }
 
