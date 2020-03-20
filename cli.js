@@ -228,6 +228,7 @@ function start (keys) {
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
+      keys = [client.getCurrentCabal().key]
     }
     if (!args.seed) { frontend({ client }) } else {
       keys.forEach((k) => {
