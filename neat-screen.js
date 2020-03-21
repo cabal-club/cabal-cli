@@ -299,12 +299,10 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.loadChannel('!status')
 }
 
-NeatScreen.prototype.registerUpdateHandler = function (cabal, oldCabal) {
-  if (this._updateHandler) {
-    // remove previous listener
-    oldCabal.removeListener('update', this._updateHandler)
-  }
-  this._updateHandler = (updatedDetails) => {
+NeatScreen.prototype.registerUpdateHandler = function (cabal) {
+  if (!this._updateHandler) this._updateHandler = {}
+  if (this._updateHandler[cabal.key]) return // we already have a handler for that cabal
+  this._updateHandler[cabal.key] = (updatedDetails) => {
     // insert timeout handler for to debounce events when tons are streaming in
     if (this.updateTimer) clearTimeout(this.updateTimer)
     this.updateTimer = setTimeout(() => {
@@ -313,7 +311,7 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal, oldCabal) {
     }, 20)
   }
   // register an event handler for all updates from the cabal
-  cabal.on('update', this._updateHandler)
+  cabal.on('update', this._updateHandler[cabal.key])
 }
 
 NeatScreen.prototype._pagesize = function () {
@@ -339,9 +337,8 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
 }
 
 NeatScreen.prototype.showCabal = function (cabal) {
-  var oldCabal = this.state.cabal
   this.state.cabal = this.client.focusCabal(cabal)
-  this.registerUpdateHandler(this.state.cabal, oldCabal)
+  this.registerUpdateHandler(this.state.cabal)
   this.commander.cabal = this.state.cabal
   this.client.focusChannel()
   this.bus.emit('render')
