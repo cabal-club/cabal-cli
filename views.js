@@ -188,7 +188,7 @@ function renderMessages (state, width, height) {
 
   // Character-wrap to area edge
   var allLines = msgs.reduce(function (accum, msg) {
-    let nickLength = msg.raw.author ? msg.raw.author.length : 0
+    const nickLength = msg.raw.author ? msg.raw.author.length : 0
     accum.push.apply(accum, util.wrapAnsi(msg.formatted, width, nickLength + 8 /* ti:me:msg */ + 4 /* spacing + <> */))
     return accum
   }, [])

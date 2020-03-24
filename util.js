@@ -39,7 +39,7 @@ function wrapAnsi (text, width, padding = 11) {
     if (!insideCode) {
       lineLen++
       if (lineLen >= width - 1 || chr === '\n') {
-        let breakpoint = line.lastIndexOf(' ')
+        const breakpoint = line.lastIndexOf(' ')
         if (insideWord && breakpoint >= 0) { // breakpoint is -1 when e.g. a superlong url is posted; there exists no space before it
           res.push(line.slice(0, breakpoint).join('')) // grab the first part of the line and push its str as a result
           line = [' '.repeat(padding)].concat(line.slice(breakpoint + 1)) // take the part after the breakpoint and add to new line
