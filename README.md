@@ -115,3 +115,9 @@ ctrl+{n,p}
 &nbsp;&nbsp;&nbsp;&nbsp;select channels  1-9  
 `alt-n`  
 &nbsp;&nbsp;&nbsp;&nbsp;tab between the cabals & channels panes 
+
+## Configuring
+
+There is a little configuration that can be done to the terminal frontend.
+Timestamp format and indentation of line-wrapped messages can be tweaked.
+See examples in: [.cabal.yml-example](.cabal.yml-example)

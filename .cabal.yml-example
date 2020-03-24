@@ -2,3 +2,12 @@ cabals:
   - cabal://bd45fde0ad866d4069af490f0ca9b07110808307872d4b659a4ff7a4ef85315a
   - 22f7763be0e939160dd04137b66aaac8f2179350eec740e57a656dfdf1f4dc29
   - cbl://3d45fde0ad866d4069af490f0ca9b07110808307872d4b659a4ff7a4ef853132
+
+frontend:
+  # timestamp format, using https://github.com/samsonjs/strftime
+  # a shorter alternative can be: '%H%M'
+  messageTimeformat: '%T'
+
+  # indent messages wrapped onto next line to
+  # after: none, time, nick
+  messageIndent: nick

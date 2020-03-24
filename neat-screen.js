@@ -13,6 +13,7 @@ var welcomeMessage = fs.readFileSync(welcomePath).toString().split('\n')
 function NeatScreen (props) {
   if (!(this instanceof NeatScreen)) return new NeatScreen(props)
   this.client = props.client
+  this.config = props.frontendConfig
   this.commander = Commander(this, this.client)
   var self = this
 
@@ -246,6 +247,8 @@ function NeatScreen (props) {
     state.mentions = {}
     state.selectedWindowPane = 'channels'
     state.windowPanes = [state.selectedWindowPane]
+    state.config = this.config
+    state.messageTimeLength = strftime(this.config.messageTimeformat, new Date()).length
     this.state = state
 
     Object.defineProperty(this.state, 'cabal', {
@@ -425,7 +428,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var color = keyToColour(msg.key) || colours[5]
 
-    var timestamp = `${chalk.dim(formatTime(msg.value.timestamp))}`
+    var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
     var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
     if (msg.value.type === 'status') {
       highlight = false // never highlight from status
@@ -455,8 +458,8 @@ NeatScreen.prototype.formatMessage = function (msg) {
   }
 }
 
-function formatTime (t) {
-  return strftime('%T', new Date(t))
+function formatTime (t, fmt) {
+  return strftime(fmt, new Date(t))
 }
 
 function keyToColour (key) {

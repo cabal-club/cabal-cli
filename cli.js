@@ -15,6 +15,9 @@ var rootdir = Client.getCabalDirectory()
 var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
+const defaultMessageTimeformat = '%T'
+const defaultMessageIndent = 'nick'
+
 var usage = `Usage
 
   Create a new cabal:
@@ -75,7 +78,15 @@ mkdirp.sync(rootdir)
 
 // create a default config in rootdir if it doesn't exist
 if (!fs.existsSync(rootconfig)) {
-  saveConfig(rootconfig, { cabals: [], aliases: {}, cache: {} })
+  saveConfig(rootconfig, {
+    cabals: [],
+    aliases: {},
+    cache: {},
+    frontend: {
+      messageTimeformat: defaultMessageTimeformat,
+      messageIndent: defaultMessageIndent
+    }
+  })
 }
 
 // Attempt to load local or homedir config file
@@ -85,6 +96,13 @@ try {
     if (!config.cabals) { config.cabals = [] }
     if (!config.aliases) { config.aliases = {} }
     if (!config.cache) { config.cache = {} }
+    if (!config.frontend) { config.frontend = {} }
+    if (!config.frontend.messageTimeformat) {
+      config.frontend.messageTimeformat = defaultMessageTimeformat
+    }
+    if (!config.frontend.messageIndent) {
+      config.frontend.messageIndent = defaultMessageIndent
+    }
     cabalKeys = config.cabals
   }
 } catch (e) {
@@ -189,7 +207,7 @@ if (!cabalKeys.length) {
     captureQrCode({ retry: true }).then((key) => {
       if (key) {
         console.log('\u0007') // system bell
-        start([key])
+        start([key], config.frontend)
       } else {
         console.log('No QR code detected.')
         process.exit(0)
@@ -201,11 +219,11 @@ if (!cabalKeys.length) {
         console.error('Linux: sudo apt-get install fswebcam')
       })
   } else {
-    start(cabalKeys)
+    start(cabalKeys, config.frontend)
   }
 }
 
-function start (keys) {
+function start (keys, frontendConfig) {
   if (args.key && args.message) {
     publishSingleMessage({
       key: args.key,
@@ -230,7 +248,7 @@ function start (keys) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
       keys = [client.getCurrentCabal().key]
     }
-    if (!args.seed) { frontend({ client }) } else {
+    if (!args.seed) { frontend({ client, frontendConfig }) } else {
       keys.forEach((k) => {
         console.log('Seeding', k)
         console.log()
