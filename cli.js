@@ -121,7 +121,7 @@ const client = new Client({
 })
 
 if (args.clear) {
-  delete config['aliases']
+  delete config.aliases
   saveConfig(configFilePath, config)
   process.stdout.write('Aliases cleared\n')
   process.exit(0)
@@ -138,7 +138,7 @@ if (args.aliases) {
   var aliases = Object.keys(config.aliases)
   if (aliases.length === 0) {
     process.stdout.write("You don't have any saved aliases.\n\n")
-    process.stdout.write(`Save an alias by running\n`)
+    process.stdout.write('Save an alias by running\n')
     process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--alias cabal://c001..c4b41')} `)
     process.stdout.write(`${chalk.blueBright('--key your-alias-name')}\n`)
   } else {
@@ -224,7 +224,7 @@ function start (keys) {
     saveConfig(configFilePath, config)
   }
 
-  var pendingCabals = args.new ? [ client.createCabal() ] : keys.map(client.addCabal.bind(client))
+  var pendingCabals = args.new ? [client.createCabal()] : keys.map(client.addCabal.bind(client))
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
@@ -298,13 +298,13 @@ function saveConfig (path, config) {
   // make sure config is well-formatted (contains all config options)
   if (!config.cabals) { config.cabals = [] }
   if (!config.aliases) { config.aliases = {} }
-  let data = yaml.safeDump(config, {
+  const data = yaml.safeDump(config, {
     sortKeys: true
   })
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function publishSingleMessage ({key, channel, message, messageType, timeout}) {
+function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
   client.addCabal(key).then(cabal => cabal.publishMessage({
     type: messageType || 'chat/text',

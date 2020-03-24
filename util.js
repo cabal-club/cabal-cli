@@ -11,6 +11,7 @@ function sanitizeString (str) {
   // emojis break the cli: replace them with shortcodes
   str = emojiConverter.replaceUnicode(str)
   str = stripAnsi(str) // strip non-visible sequences
+  /* eslint no-control-regex: "off" */
   return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
 }
 // Character-wrap text containing ANSI escape codes.
@@ -39,7 +40,7 @@ function wrapAnsi (text, width, padding = 11) {
     if (!insideCode) {
       lineLen++
       if (lineLen >= width - 1 || chr === '\n') {
-        let breakpoint = line.lastIndexOf(' ')
+        const breakpoint = line.lastIndexOf(' ')
         if (insideWord && breakpoint >= 0) { // breakpoint is -1 when e.g. a superlong url is posted; there exists no space before it
           res.push(line.slice(0, breakpoint).join('')) // grab the first part of the line and push its str as a result
           line = [' '.repeat(padding)].concat(line.slice(breakpoint + 1)) // take the part after the breakpoint and add to new line

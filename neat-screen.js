@@ -16,11 +16,13 @@ function NeatScreen (props) {
   this.commander = Commander(this, this.client)
   var self = this
 
-  this.neat = neatLog(this.renderApp.bind(this), { fullscreen: true,
+  this.neat = neatLog(this.renderApp.bind(this), {
+    fullscreen: true,
     style: function (start, cursor, end) {
       if (!cursor) cursor = ' '
       return start + chalk.underline(cursor) + end
-    } }
+    }
+  }
   )
   this.neat.input.on('update', () => this.neat.render())
   this.neat.input.on('enter', (line) => this.commander.process(line))
@@ -29,7 +31,7 @@ function NeatScreen (props) {
   this.neat.input.on('tab', () => {
     var line = this.neat.input.rawLine()
     if (line.length > 1 && line[0] === '/') {
-      let parts = line.split(/\s+/g)
+      const parts = line.split(/\s+/g)
       // command completion
       if (parts.length === 1) {
         var soFar = line.slice(1)

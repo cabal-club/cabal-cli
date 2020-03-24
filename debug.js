@@ -11,7 +11,7 @@ function print (t, arr, printAll) {
 function simplify (arr) {
   if (arr.length && arr[0].value) {
     return arr.map((m) => {
-      let content = m.value.content ? m.value.content.text : JSON.stringify(m.value)
+      const content = m.value.content ? m.value.content.text : JSON.stringify(m.value)
       return `${m.value.timestamp}: ${content}`
     })
   }

@@ -28,7 +28,7 @@
     "cross-zip-cli": "^1.0.0",
     "mocha": "^6.2.2",
     "pkg": "^4.3.8",
-    "standard": "^11.0.1"
+    "standard": "^14.3.3"
   },
   "scripts": {
     "test": "standard --fix ./*.js && mocha",

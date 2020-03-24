@@ -128,10 +128,10 @@ function Commander (view, client) {
           logToView(`${slash}${command}`)
           logToView(`  ${this.commands[key].help()}`)
         }
-        logToView(`alt-n`)
-        logToView(`  move between channels/cabals panes`)
-        logToView(`ctrl+{n,p}`)
-        logToView(`  move up/down channels/cabals`)
+        logToView('alt-n')
+        logToView('  move between channels/cabals panes')
+        logToView('ctrl+{n,p}')
+        logToView('  move up/down channels/cabals')
       }
     },
     qr: {
@@ -173,7 +173,7 @@ function Commander (view, client) {
       help: () => 'display the public keys associated with the passed in nick',
       call: (arg) => {
         const users = this.cabal.getUsers()
-        let whoisKeys = Object.keys(users).filter((k) => users[k].name && users[k].name === arg)
+        const whoisKeys = Object.keys(users).filter((k) => users[k].name && users[k].name === arg)
         const logToView = this.logger()
         logToView(`* ${arg}'s public keys:`)
         // list all of arg's public keys in list
