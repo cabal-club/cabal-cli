@@ -11,6 +11,7 @@ function sanitizeString (str) {
   // emojis break the cli: replace them with shortcodes
   str = emojiConverter.replaceUnicode(str)
   str = stripAnsi(str) // strip non-visible sequences
+  /* eslint no-control-regex: "off" */
   return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
 }
 // Character-wrap text containing ANSI escape codes.
