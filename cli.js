@@ -10,6 +10,10 @@ var chalk = require('chalk')
 var captureQrCode = require('node-camera-qr-reader')
 
 var args = minimist(process.argv.slice(2))
+const version = getClientVersion()
+
+// set terminal window title
+process.stdout.write('\x1B]0;cabal ' + version + '\x07')
 
 var rootdir = Client.getCabalDirectory()
 var rootconfig = `${rootdir}/config.yml`
@@ -59,7 +63,7 @@ Work in progress! Learn more at https://github.com/cabal-club
 `
 
 if (args.version || args.v) {
-  console.log(JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version)
+  console.log(version)
   process.exit(0)
 }
 
@@ -333,4 +337,13 @@ function publishSingleMessage ({ key, channel, message, messageType, timeout }) 
   })
   )
   setTimeout(function () { process.exit(0) }, timeout || 5000)
+}
+
+function getClientVersion () {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version
+  } catch (e) {
+    console.error('failed to read cabal\'s package.json -- something is wrong with your installation')
+    process.exit(1)
+  }
 }
