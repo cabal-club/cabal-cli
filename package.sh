@@ -3,7 +3,7 @@
 # also need to include .node files until pkg supports including them in binary
 #   https://github.com/zeit/pkg/issues/329
 
-NODE_ABI="node-64"
+NODE_ABI="node.napi"
 VERSION=$(node -pe "require('./package.json').version")
 
 rm -rf dist
@@ -21,9 +21,9 @@ cp node_modules/utp-native/prebuilds/linux-x64/$NODE_ABI.node builds/cabal-$VERS
 cp node_modules/utp-native/prebuilds/darwin-x64/$NODE_ABI.node builds/cabal-$VERSION-macos-x64/
 cp node_modules/utp-native/prebuilds/win32-x64/$NODE_ABI.node builds/cabal-$VERSION-win-x64/
 
-cp node_modules/leveldown/prebuilds/linux-x64/node.napi.node builds/cabal-$VERSION-linux-x64/
-cp node_modules/leveldown/prebuilds/darwin-x64/node.napi.node builds/cabal-$VERSION-macos-x64/
-cp node_modules/leveldown/prebuilds/win32-x64/node.napi.node builds/cabal-$VERSION-win-x64/
+cp node_modules/leveldown/prebuilds/linux-x64/$NODE_ABI.node builds/cabal-$VERSION-linux-x64/
+cp node_modules/leveldown/prebuilds/darwin-x64/$NODE_ABI.node builds/cabal-$VERSION-macos-x64/
+cp node_modules/leveldown/prebuilds/win32-x64/$NODE_ABI.node builds/cabal-$VERSION-win-x64/
 
 cp LICENSE builds/cabal-$VERSION-linux-x64/
 cp LICENSE builds/cabal-$VERSION-macos-x64/
