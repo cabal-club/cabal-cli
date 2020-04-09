@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "ansi-escapes": "^4.3.0",
-    "cabal-client": "^2.0.0",
+    "cabal-client": "^2.1.1",
     "chalk": "^2.4.1",
     "js-yaml": "^3.13.1",
     "minimist": "^1.2.0",
