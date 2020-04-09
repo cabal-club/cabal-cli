@@ -2,14 +2,12 @@
   "name": "cabal",
   "version": "9.2.5",
   "description": "p2p chat",
-  "main": "index.js",
   "bin": {
     "cabal": "cli.js"
   },
   "dependencies": {
     "ansi-escapes": "^4.3.0",
     "cabal-client": "^2.0.0",
-    "cabal-core": "^9.0.3",
     "chalk": "^2.4.1",
     "js-yaml": "^3.13.1",
     "minimist": "^1.2.0",
