@@ -13,7 +13,7 @@ var args = minimist(process.argv.slice(2))
 const version = getClientVersion()
 
 // set terminal window title
-process.stdout.write('\x1B]0;cabal ' + version + '\x07')
+process.stdout.write('\x1B]0;cabal\x07')
 
 var rootdir = Client.getCabalDirectory()
 var rootconfig = `${rootdir}/config.yml`
