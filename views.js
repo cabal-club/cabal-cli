@@ -165,10 +165,10 @@ function renderNicks (state, width, height) {
   var nickCount = {}
   users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
   return users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
-    if (nickCount[u] === 1) return u in onlines ? u : chalk.gray(u)
+    if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u)
     var dupecount = ` (${nickCount[u]})`
     var name = u.slice(0, 15 - dupecount.length)
-    return (u in onlines ? name : chalk.gray(name)) + chalk.green(dupecount)
+    return (u in onlines ? chalk.bold(name) : chalk.gray(name)) + chalk.green(dupecount)
   }).slice(0, height)
 }
 
