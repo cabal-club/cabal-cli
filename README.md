@@ -8,7 +8,7 @@ database & api.
 ![](cli-2019-04.png)
 
 chat with us:  
-`npx cabal cabal://cabal-club.github.io`
+`npx cabal cabal://cabal.chat`
 
 ## Installation
 
