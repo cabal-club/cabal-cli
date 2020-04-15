@@ -178,6 +178,10 @@ if (args.alias && !args.key) {
 
 // user wants to alias a cabal:// key with a name
 if (args.alias && args.key) {
+  if (!cabalKeys.find(function(k) { return k === args.key })) {
+    console.log(console.error("Error: Couldn't resolve cabal key:", chalk.yellow(args.key)))
+    process.exit(1)
+  }
   config.aliases[args.alias] = args.key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(args.key)} as ${chalk.blueBright(args.alias)}`)
