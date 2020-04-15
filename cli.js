@@ -163,8 +163,8 @@ if (args.aliases) {
   if (aliases.length === 0) {
     process.stdout.write("You don't have any saved aliases.\n\n")
     process.stdout.write('Save an alias by running\n')
-    process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--alias cabal://c001..c4b41')} `)
-    process.stdout.write(`${chalk.blueBright('--key your-alias-name')}\n`)
+    process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--key cabal://c001..c4b41')} `)
+    process.stdout.write(`${chalk.blueBright('--alias your-alias-name')}\n`)
   } else {
     aliases.forEach(function (alias) {
       process.stdout.write(`${chalk.blueBright(alias)}\t\t ${chalk.greenBright(config.aliases[alias])}\n`)
