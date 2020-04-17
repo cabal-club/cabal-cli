@@ -15,6 +15,8 @@ function NeatScreen (props) {
   this.client = props.client
   this.config = props.frontendConfig
   this.commander = Commander(this, this.client)
+  this.lastInputTime = 0
+  this.inputTimer = null
   var self = this
 
   this.neat = neatLog(this.renderApp.bind(this), {
@@ -25,7 +27,21 @@ function NeatScreen (props) {
     }
   }
   )
-  this.neat.input.on('update', () => this.neat.render())
+  this.neat.input.on('update', () => {
+    // debounce keyboard input events so pasting from clipboard is fast
+    var now = Date.now()
+    var ms = 20
+    if (this.inputTimer) {
+    } else if (now > this.lastInputTime + ms) {
+      this.lastInputTime = now
+      this.neat.render()
+    } else {
+      this.inputTimer = setTimeout(() => {
+        this.inputTimer = null
+        this.neat.render()
+      }, ms)
+    }
+  })
   this.neat.input.on('enter', (line) => this.commander.process(line))
 
   // welcome to autocomplete town
