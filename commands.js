@@ -10,6 +10,7 @@ function Commander (view, client) {
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
+  this.historyIndex = -1 // negative: new msg. >=0: index from the last item
   this.aliases = {}
 
   this.commands = {
@@ -217,6 +218,7 @@ Commander.prototype.alias = function (command, alias) {
 Commander.prototype.process = function (line) {
   line = line.trim()
   this.history.push(line)
+  this.historyIndex = -1
   if (this.history.length > 1000) this.history.shift()
   var match = this.pattern.exec(line)
   var cmd = match ? match[1] : ''
