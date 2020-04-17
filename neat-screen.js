@@ -144,17 +144,27 @@ function NeatScreen (props) {
   })
 
   this.neat.input.on('up', () => {
-    if (this.commander.history.length) {
-      var command = this.commander.history.pop()
-      this.commander.history.unshift(command)
+    var i = Math.min(this.commander.history.length - 1, this.commander.historyIndex + 1)
+    var j = this.commander.history.length - 1 - i
+    if (j >= 0 && j < this.commander.history.length) {
+      this.commander.historyIndex = i
+      var command = this.commander.history[j]
       this.neat.input.set(command)
     }
   })
 
   this.neat.input.on('down', () => {
-    if (this.commander.history.length) {
-      var command = this.commander.history.shift()
-      this.commander.history.push(command)
+    var len = this.commander.history.length
+    var i = Math.max(-1, this.commander.historyIndex - 1)
+    this.commander.historyIndex = i
+    if (i < 0) {
+      var line = this.neat.input.rawLine()
+      if (line.length > 0 && line !== this.commander.history[len - 1]) {
+        this.commander.history.push(line)
+      }
+      this.neat.input.set('')
+    } else {
+      var command = this.commander.history[len - 1 - i]
       this.neat.input.set(command)
     }
   })
