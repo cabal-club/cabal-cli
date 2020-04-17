@@ -69,8 +69,8 @@ function NeatScreen (props) {
       // nick completion
       const users = Object.keys(cabalUsers)
         .map(key => cabalUsers[key])
-        .map(user => user.name || user.key.substring(0, 8))
         .sort(util.cmpUser)
+        .map(user => user.name || user.key.substring(0, 8))
       let match = line.trim().split(/\s+/g).slice(-1)[0] // usual case is we want to autocomplete the last word on a line
 
       const cursor = this.neat.input.cursor
