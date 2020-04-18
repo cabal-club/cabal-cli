@@ -41,11 +41,13 @@ var usage = `Usage
 
     --new     Start a new cabal
     --nick    Your nickname
-    --alias   Save an alias for the specified cabal, use with --key
+    --alias   Save an alias for the specified cabal. Used with --key.
+                --alias <name> --key <cabal>
     --aliases Print out your saved cabal aliases
     --forget  Forgets the specified alias
     --clear   Clears out all aliases
-    --key     Specify a cabal key. Used with --alias
+    --key     Specify a cabal key. Used with --alias.
+                --alias <name> --key <cabal>
     --join    Only join the specified cabal, disregarding whatever is in the config
     --config  Specify a full path to a cabal config
     --qr      Capture a frame from a connected camera to read a cabal key from a QR code
