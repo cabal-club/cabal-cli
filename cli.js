@@ -256,6 +256,7 @@ function start (keys, frontendConfig) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
       keys = [client.getCurrentCabal().key]
     }
+    if (args.nick && args.nick.length > 0) client.getCurrentCabal().publishNick(args.nick)
     if (!args.seed) { frontend({ client, frontendConfig }) } else {
       keys.forEach((k) => {
         console.log('Seeding', k)
