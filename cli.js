@@ -160,15 +160,16 @@ if (args.clear) {
 
 if (args.forget) {
   let success = false
+  /* eslint no-inner-declarations: "off" */
   function forgetCabal (k) {
-    let index = config.cabals.indexOf(k)
+    const index = config.cabals.indexOf(k)
     if (index >= 0) {
-        config.cabals.splice(index, 1)
-        success = true
+      config.cabals.splice(index, 1)
+      success = true
     }
   }
-  if (config.aliases[args.forget]) { 
-    let aliasedKey = config.aliases[args.forget]
+  if (config.aliases[args.forget]) {
+    const aliasedKey = config.aliases[args.forget]
     success = true
     delete config.aliases[args.forget]
     // forget any potential reuses of the aliased key in config.cabals array
@@ -176,10 +177,10 @@ if (args.forget) {
   }
   // check if key is among saved cabals
   if (!success) forgetCabal(args.forget)
-  if (success) { 
+  if (success) {
     saveConfig(configFilePath, config)
-    console.log(`${args.forget} has been forgotten`) 
-  } else { console.log("no such cabal") }
+    console.log(`${args.forget} has been forgotten`)
+  } else { console.log('no such cabal') }
   process.exit(0)
 }
 
@@ -240,12 +241,12 @@ if (args.key) {
 // join and save the passed in cabal keys
 if (args.save) {
   cabalKeys = args._.map(getKey)
-  if (args.save.length  > 0) cabalKeys = cabalKeys.concat(getKey(args.save))
+  if (args.save.length > 0) cabalKeys = cabalKeys.concat(getKey(args.save))
   if (!cabalKeys.length) {
     console.log(`${chalk.magentaBright('cabal:')} error, need cabal keys to save. example:`)
     console.log(`${chalk.greenBright('cabal --save cabal://key')}`)
     process.exit(1)
-  } 
+  }
 
   config.cabals = config.cabals.concat(cabalKeys)
   saveConfig(configFilePath, config)
@@ -253,13 +254,13 @@ if (args.save) {
   if (cabalKeys.length === 1) {
     console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(cabalKeys[0])}`)
   } else {
-    console.log(`${chalk.magentaBright('cabal:')} saved the following keys:`) 
+    console.log(`${chalk.magentaBright('cabal:')} saved the following keys:`)
     cabalKeys.forEach((key) => { console.log(`${chalk.greenBright(key)}`) })
-  } 
+  }
   process.exit(0)
 }
 
-// try to initiate the frontend using either qr codes via webcam, using cabal keys passed via cli, 
+// try to initiate the frontend using either qr codes via webcam, using cabal keys passed via cli,
 // or starting an entirely new cabal per --new
 if (args.qr) {
   console.log('Cabal is looking for a QR code...')
@@ -278,7 +279,7 @@ if (args.qr) {
     console.error('Linux: sudo apt-get install fswebcam')
   })
 } else if (cabalKeys.length || args.new) {
-    start(cabalKeys, config.frontend)
+  start(cabalKeys, config.frontend)
 } else {
   // no keys, no qr, and not trying to start a new cabal => print help info
   process.stderr.write(usage)
@@ -303,7 +304,7 @@ function start (keys, frontendConfig) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
       keys = [client.getCurrentCabal().key]
     }
-    // edgecase: if the config is empty we remember the first joined cabals in it 
+    // edgecase: if the config is empty we remember the first joined cabals in it
     if (!config.cabals.length) {
       config.cabals = keys
       saveConfig(configFilePath, config)
