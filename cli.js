@@ -46,13 +46,16 @@ var usage = `Usage
 
     --new     Start a new cabal
     --nick    Your nickname
-    --alias   Save an alias for the specified cabal, use with --key
+    --alias   Save an alias for the specified cabal. Used with --key.
+                --alias <name> --key <cabal>
     --aliases Print out your saved cabal aliases
     --cabals  Print out your saved cabals
     --forget  Forgets the specified cabal. Works on aliases and keys persisted with --save
     --clear   Clears out all aliases
-    --key     Specify a cabal key. Used with --alias
-    --save    Join the specified cabal, and save it to config for future joins
+    --save    Save the specified cabal to the config
+                --save <cabal>
+    --key     Specify a cabal key. Used with --alias.
+                --alias <name> --key <cabal>
     --config  Specify a full path to a cabal config
     --qr      Capture a frame from a connected camera to read a cabal key from a QR code
 
@@ -256,30 +259,30 @@ if (args.save) {
   process.exit(0)
 }
 
-if (!cabalKeys.length) {
+// try to initiate the frontend using either qr codes via webcam, using cabal keys passed via cli, 
+// or starting an entirely new cabal per --new
+if (args.qr) {
+  console.log('Cabal is looking for a QR code...')
+  console.log('Press ctrl-c to stop.')
+  captureQrCode({ retry: true }).then((key) => {
+    if (key) {
+      console.log('\u0007') // system bell
+      start([key], config.frontend)
+    } else {
+      console.log('No QR code detected.')
+      process.exit(0)
+    }
+  }).catch((e) => {
+    console.error('Webcam capture failed. Have you installed the appropriate drivers? See the documentation for more information.')
+    console.error('Mac OSX: brew install imagesnap')
+    console.error('Linux: sudo apt-get install fswebcam')
+  })
+} else if (cabalKeys.length || args.new) {
+    start(cabalKeys, config.frontend)
+} else {
+  // no keys, no qr, and not trying to start a new cabal => print help info
   process.stderr.write(usage)
   process.exit(1)
-} else {
-  if (args.qr) {
-    console.log('Cabal is looking for a QR code...')
-    console.log('Press ctrl-c to stop.')
-    captureQrCode({ retry: true }).then((key) => {
-      if (key) {
-        console.log('\u0007') // system bell
-        start([key], config.frontend)
-      } else {
-        console.log('No QR code detected.')
-        process.exit(0)
-      }
-    })
-      .catch((e) => {
-        console.error('Webcam capture failed. Have you installed the appropriate drivers? See the documentation for more information.')
-        console.error('Mac OSX: brew install imagesnap')
-        console.error('Linux: sudo apt-get install fswebcam')
-      })
-  } else {
-    start(cabalKeys, config.frontend)
-  }
 }
 
 function start (keys, frontendConfig) {
@@ -305,6 +308,7 @@ function start (keys, frontendConfig) {
       config.cabals = keys
       saveConfig(configFilePath, config)
     }
+    if (args.nick && args.nick.length > 0) client.getCurrentCabal().publishNick(args.nick)
     if (!args.seed) { frontend({ client, frontendConfig }) } else {
       keys.forEach((k) => {
         console.log('Seeding', k)

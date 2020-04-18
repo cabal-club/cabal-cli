@@ -7,14 +7,14 @@ database & api.
 
 ![](cli-2019-04.png)
 
-chat with us:  
+chat with us:
 `npx cabal cabal://cabal.chat`
 
 ## Installation
 
 ```
 $ npm install --global cabal
-$ cabal --new 
+$ cabal --new
 ```
 
 ## Usage
@@ -22,6 +22,7 @@ $ cabal --new
 ```
 cabal --new
 ```
+then copy the key and give it to someone else.
 
 #### Connect to an existing instance:
 ```
@@ -30,6 +31,15 @@ cabal <key>
 e.g.
 ```
 cabal cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+```
+
+#### Save an alias to a key
+
+create a local name for a key.
+
+```
+cabal --alias <name> --key <key>
+cabal <name>
 ```
 
 #### Scan a QR code to join a cabal:
