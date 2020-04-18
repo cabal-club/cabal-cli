@@ -12,7 +12,7 @@
     "js-yaml": "^3.13.1",
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
-    "neat-input": "^1.11.0",
+    "neat-input": "^1.11.1",
     "neat-log": "^3.1.0",
     "neato-emoji-converter": "^1.1.2",
     "node-camera-qr-reader": "^1.0.1",
