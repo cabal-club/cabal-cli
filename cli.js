@@ -23,7 +23,6 @@ const defaultMessageTimeformat = '%T'
 const defaultMessageIndent = 'nick'
 
 var usage = `Usage
-
   Create a new cabal:
     cabal --new
 
@@ -36,6 +35,12 @@ var usage = `Usage
   Join a cabal by a QR code:
     cabal --qr
 
+  Save a cabal to the config for next time:
+    cabal --save cabal://key
+
+  Join all of your --save cabals by running just \`cabal\`:
+    cabal
+
   Options:
     --seed    Start a headless seed for the specified cabal key
 
@@ -43,10 +48,11 @@ var usage = `Usage
     --nick    Your nickname
     --alias   Save an alias for the specified cabal, use with --key
     --aliases Print out your saved cabal aliases
-    --forget  Forgets the specified alias
+    --cabals  Print out your saved cabals
+    --forget  Forgets the specified cabal. Works on aliases and keys persisted with --save
     --clear   Clears out all aliases
     --key     Specify a cabal key. Used with --alias
-    --join    Only join the specified cabal, disregarding whatever is in the config
+    --save    Join the specified cabal, and save it to config for future joins
     --config  Specify a full path to a cabal config
     --qr      Capture a frame from a connected camera to read a cabal key from a QR code
 
@@ -150,9 +156,27 @@ if (args.clear) {
 }
 
 if (args.forget) {
-  delete config.aliases[args.forget]
-  saveConfig(configFilePath, config)
-  process.stdout.write(`${args.forget} has been forgotten`)
+  let success = false
+  function forgetCabal (k) {
+    let index = config.cabals.indexOf(k)
+    if (index >= 0) {
+        config.cabals.splice(index, 1)
+        success = true
+    }
+  }
+  if (config.aliases[args.forget]) { 
+    let aliasedKey = config.aliases[args.forget]
+    success = true
+    delete config.aliases[args.forget]
+    // forget any potential reuses of the aliased key in config.cabals array
+    forgetCabal(aliasedKey)
+  }
+  // check if key is among saved cabals
+  if (!success) forgetCabal(args.forget)
+  if (success) { 
+    saveConfig(configFilePath, config)
+    console.log(`${args.forget} has been forgotten`) 
+  } else { console.log("no such cabal") }
   process.exit(0)
 }
 
@@ -171,6 +195,20 @@ if (args.aliases) {
   process.exit(0)
 }
 
+if (args.cabals) {
+  var savedCabals = config.cabals
+  if (savedCabals.length === 0) {
+    process.stdout.write("You don't have any saved cabals.\n\n")
+    process.stdout.write('Save a cabal by running\n')
+    process.stdout.write(`${chalk.magentaBright('cabal: ')} ${chalk.greenBright('--save cabal://c001..c4b41')} `)
+  } else {
+    savedCabals.forEach(function (saved) {
+      process.stdout.write(`${chalk.greenBright(saved)}\n`)
+    })
+  }
+  process.exit(0)
+}
+
 if (args.alias && !args.key) {
   logError('the --alias option needs to be used together with --key')
   process.exit(1)
@@ -178,10 +216,6 @@ if (args.alias && !args.key) {
 
 // user wants to alias a cabal:// key with a name
 if (args.alias && args.key) {
-  if (!cabalKeys.find(function(k) { return k === args.key })) {
-    console.log(console.error("Error: Couldn't resolve cabal key:", chalk.yellow(args.key)))
-    process.exit(1)
-  }
   config.aliases[args.alias] = args.key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(args.key)} as ${chalk.blueBright(args.alias)}`)
@@ -200,9 +234,26 @@ if (args.key) {
   cabalKeys = args._.map(getKey)
 }
 
-// disregard config
-if (args.join) {
-  cabalKeys = [getKey(args.join)]
+// join and save the passed in cabal keys
+if (args.save) {
+  cabalKeys = args._.map(getKey)
+  if (args.save.length  > 0) cabalKeys = cabalKeys.concat(getKey(args.save))
+  if (!cabalKeys.length) {
+    console.log(`${chalk.magentaBright('cabal:')} error, need cabal keys to save. example:`)
+    console.log(`${chalk.greenBright('cabal --save cabal://key')}`)
+    process.exit(1)
+  } 
+
+  config.cabals = config.cabals.concat(cabalKeys)
+  saveConfig(configFilePath, config)
+  // output message about keys having been saved
+  if (cabalKeys.length === 1) {
+    console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(cabalKeys[0])}`)
+  } else {
+    console.log(`${chalk.magentaBright('cabal:')} saved the following keys:`) 
+    cabalKeys.forEach((key) => { console.log(`${chalk.greenBright(key)}`) })
+  } 
+  process.exit(0)
 }
 
 if (!cabalKeys.length) {
@@ -243,18 +294,16 @@ function start (keys, frontendConfig) {
     return
   }
   keys = Array.from(new Set(keys)) // remove duplicates
-
-  // => remembers the latest cabal, allows joining latest with `cabal`
-  if (!args.join || !args.new) {
-    config.cabals = keys
-    saveConfig(configFilePath, config)
-  }
-
   var pendingCabals = args.new ? [client.createCabal()] : keys.map(client.addCabal.bind(client))
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
       keys = [client.getCurrentCabal().key]
+    }
+    // edgecase: if the config is empty we remember the first joined cabals in it 
+    if (!config.cabals.length) {
+      config.cabals = keys
+      saveConfig(configFilePath, config)
     }
     if (!args.seed) { frontend({ client, frontendConfig }) } else {
       keys.forEach((k) => {
@@ -323,6 +372,7 @@ function findConfigPath () {
 function saveConfig (path, config) {
   // make sure config is well-formatted (contains all config options)
   if (!config.cabals) { config.cabals = [] }
+  config.cabals = Array.from(new Set(config.cabals)) // dedupe array entries
   if (!config.aliases) { config.aliases = {} }
   const data = yaml.safeDump(config, {
     sortKeys: true
