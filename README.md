@@ -33,6 +33,26 @@ e.g.
 cabal cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
 ```
 
+#### Remember cabals for auto-joining
+save a cabal to the config
+
+```
+cabal --save <key>
+```
+
+then connect to all of your saved cabals, by simply running `cabal`:
+
+```
+cabal
+```
+
+show saved cabals with `--cabals` and remove a saved cabal with `--forget`
+
+```
+cabal --cabals
+cabal --forget <key|alias>
+```
+
 #### Save an alias to a key
 
 create a local name for a key.
