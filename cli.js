@@ -32,14 +32,14 @@ var usage = `Usage
   Join a cabal by an alias:
     cabal <your saved --alias of a cabal>
 
-  Join a cabal by a QR code:
-    cabal --qr
-
-  Save a cabal to the config for next time:
+  Save a cabal, adding it to the list of cabals to autojoin:
     cabal --save cabal://key
 
-  Join all of your --save cabals by running just \`cabal\`:
+  Join all of your saved cabals by running just \`cabal\`:
     cabal
+
+  Join a cabal by a QR code:
+    cabal --qr
 
   Options:
     --seed    Start a headless seed for the specified cabal key
