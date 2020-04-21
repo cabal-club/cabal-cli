@@ -45,22 +45,16 @@ function big (state) {
     // chat messages
     blit(screen, renderMessages(state, process.stdout.columns - (CHAN_COLS + 2) - (NICK_COLS + 2), process.stdout.rows - HEADER_ROWS), 24, 3)
     // channel topic description
-    if (state.topic) {
-      blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
-    }
+    blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
   } else {
     // channels pane
     blit(screen, renderChannels(state, CHAN_COLS, process.stdout.rows - HEADER_ROWS), 0, 3)
     blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
 
-    var chatY = 3
     // channel topic description
-    if (state.topic) {
-      blit(screen, renderChannelTopic(state, process.stdout.columns - 16 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
-      chatY++
-    }
+    blit(screen, renderChannelTopic(state, process.stdout.columns - 16 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
     // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, chatY)
+    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, 4)
   }
 
   // nicks pane
@@ -185,7 +179,7 @@ function renderNicks (state, width, height) {
 
 function renderChannelTopic (state, width, height) {
   var topic = state.topic || state.channel
-  var line = '➤ ' + topic
+  var line = topic ? '➤ ' + topic : ""
   line = line.substring(0, width - 1)
   if (line.length === width - 1) {
     line = line.substring(0, line.length - 1) + '…'
