@@ -81,20 +81,20 @@ function renderTitlebar (state, width) {
 }
 
 function renderCabals (state, width, height) {
-   return ["[" + state.cabals.map(function (cabal, idx) {
+   return ['[' + state.cabals.map(function (cabal, idx) {
       var key = cabal
       var keyTruncated = key.substring(0, 6)
-      let unread = ""
+      // if we're dealing with the active/focused cabal
       if (state.cabal.key === key) {
         if (state.selectedWindowPane === 'cabals') {
-          return `(${unread}${chalk.bgBlue(keyTruncated)})`
+          return `(${chalk.bgBlue(keyTruncated)})`
         } else {
-          return `(${unread}${chalk.cyan(keyTruncated)})`
+          return `(${chalk.cyan(keyTruncated)})`
         }
       } else {
-        return `${unread}${chalk.white(keyTruncated)}`
+        return chalk.white(keyTruncated)
       }
-    }).join(" ") + "]"]
+    }).join(' ') + ']']
 }
 
 function renderChannels (state, width, height) {
