@@ -260,11 +260,12 @@ function NeatScreen (props) {
     self.loadChannel(channels[n])
   }
 
+  const scrollOffset = 11
   this.neat.input.on('pageup', () => {
-    this.state.messageScrollback += process.stdout.rows-10;
+    this.state.messageScrollback += process.stdout.rows-scrollOffset;
   });
   this.neat.input.on('pagedown', () => {
-    this.state.messageScrollback = Math.max(0, this.state.messageScrollback - (process.stdout.rows-10));
+    this.state.messageScrollback = Math.max(0, this.state.messageScrollback - (process.stdout.rows-scrollOffset));
   });
   this.neat.input.on('shift-pageup', () => {
     this.state.userScrollback = Math.max(0, this.state.userScrollback - (process.stdout.rows-9));
