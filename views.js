@@ -31,38 +31,28 @@ function small (state) {
 
 function big (state) {
   var screen = []
-
   // title bar
   blit(screen, renderTitlebar(state, process.stdout.columns), 0, 0)
 
   if (state.cabals.length > 1) {
     // cabals pane
-    blit(screen, renderCabals(state, 6, process.stdout.rows - HEADER_ROWS), 0, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 6, 3)
-    // channels pane
-    blit(screen, renderChannels(state, 18, process.stdout.rows - HEADER_ROWS), 7, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 23, 3)
-    // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - (CHAN_COLS + 2) - (NICK_COLS + 2), process.stdout.rows - HEADER_ROWS), 24, 3)
-    // channel topic description
-    blit(screen, renderChannelTopic(state, process.stdout.columns - 23 - 17, process.stdout.rows - HEADER_ROWS), 24, 3)
-  } else {
-    // channels pane
-    blit(screen, renderChannels(state, CHAN_COLS, process.stdout.rows - HEADER_ROWS), 0, 3)
-    blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), 16, 3)
-
-    // channel topic description
-    blit(screen, renderChannelTopic(state, process.stdout.columns - 16 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
-    // chat messages
-    blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, 4)
+    blit(screen, renderCabals(state, 6, process.stdout.rows - HEADER_ROWS), 0, process.stdout.rows - 3)
   }
+  // channels listing
+  blit(screen, renderChannels(state, CHAN_COLS, process.stdout.rows - HEADER_ROWS), 0, 3)
+  blit(screen, renderVerticalLine('|', process.stdout.rows - 7, chalk.blue), 16, 3)
+
+  // channel topic description
+  blit(screen, renderChannelTopic(state, process.stdout.columns - 16 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
+  // chat messages
+  blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, 4)
 
   // nicks pane
-  blit(screen, renderVerticalLine('|', process.stdout.rows - 6, chalk.blue), process.stdout.columns - 17, 3)
+  blit(screen, renderVerticalLine('|', process.stdout.rows - 7, chalk.blue), process.stdout.columns - 17, 3)
   blit(screen, renderNicks(state, NICK_COLS, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
 
   // horizontal dividers
-  blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 3)
+  blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 4)
   blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
 
   // user input prompt
@@ -91,21 +81,20 @@ function renderTitlebar (state, width) {
 }
 
 function renderCabals (state, width, height) {
-  return state.cabals
-    .map(function (cabal, idx) {
+   return ["[" + state.cabals.map(function (cabal, idx) {
       var key = cabal
-      var keyTruncated = key.substring(0, 4)
+      var keyTruncated = key.substring(0, 6)
+      let unread = ""
       if (state.cabal.key === key) {
-        var fill = ' '
         if (state.selectedWindowPane === 'cabals') {
-          return '>' + chalk.bgBlue(keyTruncated + fill)
+          return `(${unread}${chalk.bgBlue(keyTruncated)})`
         } else {
-          return ' ' + chalk.bgBlue(keyTruncated + fill)
+          return `(${unread}${chalk.cyan(keyTruncated)})`
         }
       } else {
-        return ' ' + chalk.white(keyTruncated)
+        return `${unread}${chalk.white(keyTruncated)}`
       }
-    })
+    }).join(" ") + "]"]
 }
 
 function renderChannels (state, width, height) {
