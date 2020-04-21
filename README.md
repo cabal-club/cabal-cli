@@ -141,6 +141,10 @@ ctrl+{n,p}
 &nbsp;&nbsp;&nbsp;&nbsp;scroll up through backlog  
 `pagedown`  
 &nbsp;&nbsp;&nbsp;&nbsp;scroll down through backlog  
+`shift-pageup`
+&nbsp;&nbsp;&nbsp;&nbsp;scroll up through nicklist
+`shift-pagedown`
+&nbsp;&nbsp;&nbsp;&nbsp;scroll down through nicklist
 `alt-[1,9]`  
 &nbsp;&nbsp;&nbsp;&nbsp;select channels  1-9  
 `alt-n`  

@@ -260,8 +260,18 @@ function NeatScreen (props) {
     self.loadChannel(channels[n])
   }
 
-  this.neat.input.on('pageup', () => { this.state.scrollback++ })
-  this.neat.input.on('pagedown', () => { this.state.scrollback = Math.max(0, this.state.scrollback - 1) })
+  this.neat.input.on('pageup', () => {
+    this.state.messageScrollback += process.stdout.rows-10;
+  });
+  this.neat.input.on('pagedown', () => {
+    this.state.messageScrollback = Math.max(0, this.state.messageScrollback - (process.stdout.rows-10));
+  });
+  this.neat.input.on('shift-pageup', () => {
+    this.state.userScrollback = Math.max(0, this.state.userScrollback - (process.stdout.rows-9));
+  });
+  this.neat.input.on('shift-pagedown', () => {
+    this.state.userScrollback += process.stdout.rows-9;
+  });
 
   this.neat.use((state, bus) => {
     state.neat = this.neat
@@ -313,7 +323,7 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
   })
   this.state.topic = this.state.cabal.getTopic()
   var opts = {}
-  if (!this.scrollback > 0) { // only update view with messages if we're at the bottom i.e. not paging up
+  if (!this.messageScrollback > 0) { // only update view with messages if we're at the bottom i.e. not paging up
     this.processMessages(opts)
   }
   this.bus.emit('render')
@@ -323,7 +333,8 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
 NeatScreen.prototype.initializeCabalClient = function () {
   var details = this.client.getCurrentCabal()
   this.state.cabal = details
-  this.state.scrollback = 0
+  this.state.messageScrollback = 0
+  this.state.userScrollback = 0
   var counter = 0
   welcomeMessage.map((m) => this.client.addStatusMessage({ timestamp: Date.now() + counter++, text: m }))
   this.registerUpdateHandler(details)

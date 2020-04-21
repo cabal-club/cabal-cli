@@ -147,29 +147,40 @@ function renderHorizontalLine (chr, width, chlk) {
 }
 
 function renderNicks (state, width, height) {
-  var users = state.cabal.getChannelMembers()
+  // All known users
+  var users = state.cabal.getChannelMembers();
   users = Object.keys(users)
     .map(key => users[key])
-    .sort(util.cmpUser)
-  var onlines = {}
+    .sort(util.cmpUser);
 
-  users = users
-    .map(function (user) {
-      var name = ''
-      if (user && user.name) name += util.sanitizeString(user.name).slice(0, width)
-      else name += user.key.slice(0, Math.min(8, width))
-      if (user.online) { onlines[name] = name in onlines ? onlines[name] + 1 : 1 }
-      return name
-    })
+  // Check which users are online
+  var onlines = {};
+  users = users.map(function (user) {
+    var name = '';
+    if (user && user.name) name += util.sanitizeString(user.name).slice(0, width);
+    else name += user.key.slice(0, Math.min(8, width));
+    if (user.online) onlines[name] = name in onlines ? onlines[name] + 1 : 1;
+    return name;
+  });
 
-  var nickCount = {}
-  users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
-  return users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
-    if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u)
-    var dupecount = ` (${nickCount[u]})`
-    var name = u.slice(0, 15 - dupecount.length)
-    return (u in onlines ? chalk.bold(name) : chalk.gray(name)) + chalk.green(dupecount)
-  }).slice(0, height)
+  // Count how many occurances of same nickname there are
+  var nickCount = {};
+  users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1; });
+
+  // Format nicks with online state and possible duplication
+  var formattedNicks = users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
+      if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u);
+      var dupecount = ` (${nickCount[u]})`;
+      var name = u.slice(0, 15 - dupecount.length);
+      return (u in onlines ? chalk.bold(name) : chalk.gray(name)) + chalk.green(dupecount);
+  });
+
+  // Scrolling Rendering
+  state.userScrollback = Math.min(state.userScrollback, formattedNicks.length - height);
+  if (formattedNicks.length < height) state.userScrollback = 0;
+  var nickBlock = formattedNicks.slice(state.userScrollback, state.userScrollback + height);
+
+  return nickBlock;
 }
 
 function renderChannelTopic (state, width, height) {
@@ -201,18 +212,20 @@ function renderMessages (state, width, height) {
     return accum
   }, [])
 
-  state.scrollback = Math.min(state.scrollback, allLines.length - height)
+  // Scrollable Content
+
+  state.messageScrollback = Math.min(state.messageScrollback, allLines.length - height)
   if (allLines.length < height) {
-    state.scrollback = 0
+    state.messageScrollback = 0
   }
 
   var lines = (allLines.length < height)
     ? allLines.concat(Array(height - allLines.length).fill(''))
     : allLines.slice(
-      allLines.length - height - state.scrollback,
-      allLines.length - state.scrollback
+      allLines.length - height - state.messageScrollback,
+      allLines.length - state.messageScrollback
     )
-  if (state.scrollback > 0) {
+  if (state.messageScrollback > 0) {
     lines = lines.slice(0, lines.length - 1).concat(['More messages below...'])
   }
   return lines
