@@ -1,6 +1,5 @@
 var util = require('./util')
 var chalk = require('chalk')
-var qr = require('qrcode')
 
 function Commander (view, client) {
   if (!(this instanceof Commander)) return new Commander(view, client)
