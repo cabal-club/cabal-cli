@@ -8,6 +8,7 @@ var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
 var captureQrCode = require('node-camera-qr-reader')
+var fe = null
 
 var args = minimist(process.argv.slice(2))
 const version = getClientVersion()
@@ -128,6 +129,49 @@ const client = new Client({
   config: {
     dbdir: archivesdir,
     temp: args.temp
+  },
+  commands: {
+    // todo: custom commands
+    panes: {
+      help: () => 'set pane to navigate up and down in. panes: channels, cabals',
+      call: (cabal, res, arg) => {
+        if (arg === '' || !['channels', 'cabals'].includes(arg)) return
+        fe.setPane(arg)
+      }
+    },
+    quit: {
+      help: () => 'exit the cabal process',
+      call: (cabal, res, arg) => {
+        process.exit(0)
+      }
+    },
+    exit: {
+      help: () => 'exit the cabal process',
+      call: (cabal, res, arg) => {
+        process.exit(0)
+      }
+    },
+    help: {
+      help: () => 'display this help message',
+      call: (cabal, res, arg) => {
+        var foundAliases = {}
+        for (var key in cabal.client.commands) {
+          if (foundAliases[key]) { continue }
+          const slash = chalk.gray('/')
+          let command = key
+          if (cabal.client.aliases[key]) {
+            foundAliases[cabal.client.aliases[key]] = true
+            command += `, ${slash}${cabal.client.aliases[key]}`
+          }
+          fe.writeLine(`${slash}${command}`)
+          fe.writeLine(`  ${cabal.client.commands[key].help()}`)
+        }
+        fe.writeLine('alt-n')
+        fe.writeLine('  move between channels/cabals panes')
+        fe.writeLine('ctrl+{n,p}')
+        fe.writeLine('  move up/down channels/cabals')
+      }
+    }
   },
   persistentCache: {
     read: async function (name, err) {
@@ -310,7 +354,9 @@ function start (keys, frontendConfig) {
       saveConfig(configFilePath, config)
     }
     if (args.nick && args.nick.length > 0) client.getCurrentCabal().publishNick(args.nick)
-    if (!args.seed) { frontend({ client, frontendConfig }) } else {
+    if (!args.seed) {
+      fe = frontend({ client, frontendConfig })
+    } else {
       keys.forEach((k) => {
         console.log('Seeding', k)
         console.log()

@@ -52,7 +52,7 @@ function NeatScreen (props) {
       // command completion
       if (parts.length === 1) {
         var soFar = line.slice(1)
-        var commands = Object.keys(this.commander.commands)
+        var commands = Object.keys(this.client.getCommands())
         var matchingCommands = commands.filter(cmd => cmd.startsWith(soFar))
         if (matchingCommands.length === 1) {
           this.neat.input.set('/' + matchingCommands[0])
