@@ -382,7 +382,7 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
 NeatScreen.prototype.showCabal = function (cabal) {
   this.state.cabal = this.client.focusCabal(cabal)
   this.registerUpdateHandler(this.state.cabal)
-  this.commander.cabal = this.state.cabal
+  this.commander.setActiveCabal(this.state.cabal)
   this.client.focusChannel()
   this.bus.emit('render')
 }
@@ -467,7 +467,12 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var color = keyToColour(msg.key) || colours[5]
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
-    var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
+    if (this.state.cabal.showIds) {
+      var pubid = authorSource.key.slice(0, 9) 
+      var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.cyan(pubid)}${chalk.dim('>')}`
+    } else {
+      var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim('>')}`
+    }
     if (msg.value.type === 'status') {
       highlight = false // never highlight from status
       authorText = `${chalk.dim('-')}${highlight ? chalk.whiteBright(author) : chalk.cyan('status')}${chalk.dim('-')}`

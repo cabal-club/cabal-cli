@@ -3,13 +3,20 @@ var chalk = require('chalk')
 
 function Commander (view, client) {
   if (!(this instanceof Commander)) return new Commander(view, client)
+  this._hasListeners = {}
   this.client = client
-  this.cabal = client.getCurrentCabal()
+  this.cabal = null
+  this.setActiveCabal(client.getCurrentCabal())
   this.channel = '!status'
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
   this.historyIndex = -1 // negative: new msg. >=0: index from the last item
+}
+
+Commander.prototype.setActiveCabal = function (cabal) {
+  this.cabal = cabal
+  if (this._hasListeners[cabal.key]) return
   var log = this.logger()
   this.cabal.on('info', (msg) => {
     var txt = typeof msg === 'string' ? msg : (msg && msg.text ? msg.text : '')
@@ -18,6 +25,7 @@ function Commander (view, client) {
   this.cabal.on('error', (err) => {
     log(chalk.bold(chalk.red('! ' + util.sanitizeString(String(err)))))
   })
+  this._hasListeners[cabal.key] = true
 }
 
 // for use when writing multiple logs within short intervals
