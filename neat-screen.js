@@ -467,11 +467,12 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var color = keyToColour(msg.key) || colours[5]
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
+    let authorText
+    const pubid = authorSource.key.slice(0, 9) 
     if (this.state.cabal.showIds) {
-      var pubid = authorSource.key.slice(0, 9) 
-      var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.cyan(pubid)}${chalk.dim('>')}`
+      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.cyan(pubid)}${chalk.dim('>')}`
     } else {
-      var authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim('>')}`
+      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim('>')}`
     }
     if (msg.value.type === 'status') {
       highlight = false // never highlight from status
@@ -482,7 +483,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
-      authorText = `${chalk.white(author)}`
+      authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim(".") + chalk.cyan(pubid) : ""}`
       content = `${chalk.dim(msgtxt)}`
     }
 
