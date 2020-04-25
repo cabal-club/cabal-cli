@@ -337,7 +337,9 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.state.messageScrollback = 0
   this.state.userScrollback = 0
   var counter = 0
-  welcomeMessage.map((m) => this.client.addStatusMessage({ timestamp: Date.now() + counter++, text: m }))
+  this.client.getCabalKeys().forEach((key) => {
+    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ timestamp: Date.now() + counter++, text: m }))
+  })
   this.registerUpdateHandler(details)
   this.loadChannel('!status')
 }
