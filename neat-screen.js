@@ -312,7 +312,7 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
   var channels = this.client.getJoinedChannels()
   this.commander.channel = this.state.cabal.getCurrentChannel()
   this.state.windowPanes = this.state.cabals.length > 1 ? ['channels', 'cabals'] : ['channels']
-
+  this._updateCollisions()
   // reset cause we fill them up below
   this.state.unreadChannels = {}
   this.state.mentions = {}
@@ -342,6 +342,14 @@ NeatScreen.prototype.initializeCabalClient = function () {
   })
   this.registerUpdateHandler(details)
   this.loadChannel('!status')
+}
+
+// check for collisions in the first four hex chars of the users in the cabal. used in NeatScreen.prototype.formatMessage
+NeatScreen.prototype._updateCollisions = function () {
+  this.state.collision = {}
+  Object.keys(this.state.cabal.getUsers()).forEach((u) => {
+    this.state.collision[u.slice(0,4)] = typeof this.state.collision[u.slice(0,4)] === "undefined" ? false : true
+  })
 }
 
 NeatScreen.prototype.registerUpdateHandler = function (cabal) {
@@ -470,7 +478,8 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
     let authorText
-    const pubid = authorSource.key.slice(0, 9) 
+    // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the first 9
+    const pubid = this.state.collision[authorSource.key.slice(0, 4)] ? authorSource.key.slice(0, 9) : authorSource.key.slice(0, 4) 
     if (this.state.cabal.showIds) {
       authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.cyan(pubid)}${chalk.dim('>')}`
     } else {
