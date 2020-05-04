@@ -196,6 +196,8 @@ function NeatScreen (props) {
   this.neat.input.on('alt-8', () => { setChannelByIndex(7) })
   this.neat.input.on('alt-9', () => { setChannelByIndex(8) })
   this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
+  this.neat.input.on('alt-l', () => { this.commander.process("/ids") })
+
 
   this.neat.input.on('keypress', (ch, key) => {
     if (!key || !key.name) return
