@@ -95,6 +95,21 @@ function rightAlignText (text, width) {
   return lspace + text
 }
 
+// find the shortest length that is unambiguous when matching `key` for each entry in `keys`
+function unambiguous (keys, key) {
+  var n = 0
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i]
+    if (key === k) continue
+    var len = Math.min(k.length, key.length)
+    for (var j = 0; j < len; j++) {
+      if (key.charAt(j) !== k.charAt(j)) break
+      n = Math.max(n,j)
+    }
+  }
+  return n
+}
+
 function wrapStatusMsg (m) {
   return {
     key: 'status',
@@ -117,4 +132,4 @@ function cmpUser (a, b) {
   return a.key < b.key ? -1 : 1
 }
 
-module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString }
+module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString, unambiguous }

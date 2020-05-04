@@ -349,8 +349,12 @@ NeatScreen.prototype.initializeCabalClient = function () {
 // check for collisions in the first four hex chars of the users in the cabal. used in NeatScreen.prototype.formatMessage
 NeatScreen.prototype._updateCollisions = function () {
   this.state.collision = {}
-  Object.keys(this.state.cabal.getUsers()).forEach((u) => {
-    this.state.collision[u.slice(0,4)] = typeof this.state.collision[u.slice(0,4)] === "undefined" ? false : true
+  const userKeys = Object.keys(this.state.cabal.getUsers())
+  userKeys.forEach((u) => {
+    const collision = typeof this.state.collision[u.slice(0,4)] === "undefined" ? false : true
+    // if there is a collision in the first 4 chars of a pub key in the cabal, 
+    // expand it to the largest length that lets us disambiguate between the colliding ids
+    this.state.collision[u.slice(0,4)] = { collision, idlen: (collision ? util.unambiguous(userKeys, u) : 4) }
   })
 }
 
@@ -473,6 +477,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (msg.value.type !== 'status') {
       msgtxt = util.sanitizeString(msgtxt)
     }
+    var content = markdown(msgtxt)
 
     if (localNick.length > 0 && msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
@@ -480,24 +485,27 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
     let authorText
-    // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the first 9
-    const pubid = this.state.collision[authorSource.key.slice(0, 4)] ? authorSource.key.slice(0, 9) : authorSource.key.slice(0, 4) 
-    if (this.state.cabal.showIds) {
-      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
-    } else {
-      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim('>')}`
-    }
     if (msg.value.type === 'status') {
       highlight = false // never highlight from status
       authorText = `${chalk.dim('-')}${highlight ? chalk.whiteBright(author) : chalk.cyan('status')}${chalk.dim('-')}`
-    }
-    var content = markdown(msgtxt)
+    } else {
+      /* a user wrote a message, not the !status virtual message*/
 
-    var emote = (msg.value.type === 'chat/emote')
+      // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the largest length that
+      // lets us disambiguate between the two ids in the collision
+      const collision = this.state.collision[authorSource.key.slice(0, 4)]
+      const pubid = authorSource.key.slice(0, collision.idlen) 
+      if (this.state.cabal.showIds) {
+        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim(".")}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
+      } else {
+        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
+      }
 
-    if (emote) {
-      authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim(".") + chalk.inverse(chalk.cyan(pubid)) : ""}`
-      content = `${chalk.dim(msgtxt)}`
+      var emote = (msg.value.type === 'chat/emote')
+      if (emote) {
+        authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim(".") + chalk.inverse(chalk.cyan(pubid)) : ""}`
+        content = `${chalk.dim(msgtxt)}`
+      }
     }
 
     if (msg.value.type === 'chat/topic') {
