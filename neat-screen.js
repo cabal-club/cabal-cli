@@ -481,7 +481,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the first 9
     const pubid = this.state.collision[authorSource.key.slice(0, 4)] ? authorSource.key.slice(0, 9) : authorSource.key.slice(0, 4) 
     if (this.state.cabal.showIds) {
-      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.cyan(pubid)}${chalk.dim('>')}`
+      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
     } else {
       authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim('>')}`
     }
@@ -494,7 +494,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var emote = (msg.value.type === 'chat/emote')
 
     if (emote) {
-      authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim(".") + chalk.cyan(pubid) : ""}`
+      authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim(".") + chalk.inverse(chalk.cyan(pubid)) : ""}`
       content = `${chalk.dim(msgtxt)}`
     }
 
