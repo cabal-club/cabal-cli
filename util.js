@@ -103,11 +103,11 @@ function unambiguous (keys, key) {
     if (key === k) continue
     var len = Math.min(k.length, key.length)
     for (var j = 0; j < len; j++) {
-      if (key.charAt(j) !== k.charAt(j)) break
       n = Math.max(n,j)
+      if (key.charAt(j) !== k.charAt(j)) break
     }
   }
-  return n
+  return n+1
 }
 
 function wrapStatusMsg (m) {
