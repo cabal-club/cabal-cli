@@ -81,20 +81,20 @@ function renderTitlebar (state, width) {
 }
 
 function renderCabals (state, width, height) {
-   return ['[' + state.cabals.map(function (cabal, idx) {
-      var key = cabal
-      var keyTruncated = key.substring(0, 6)
-      // if we're dealing with the active/focused cabal
-      if (state.cabal.key === key) {
-        if (state.selectedWindowPane === 'cabals') {
-          return `(${chalk.bgBlue(keyTruncated)})`
-        } else {
-          return `(${chalk.cyan(keyTruncated)})`
-        }
+  return ['[' + state.cabals.map(function (cabal, idx) {
+    var key = cabal
+    var keyTruncated = key.substring(0, 6)
+    // if we're dealing with the active/focused cabal
+    if (state.cabal.key === key) {
+      if (state.selectedWindowPane === 'cabals') {
+        return `(${chalk.bgBlue(keyTruncated)})`
       } else {
-        return chalk.white(keyTruncated)
+        return `(${chalk.cyan(keyTruncated)})`
       }
-    }).join(' ') + ']']
+    } else {
+      return chalk.white(keyTruncated)
+    }
+  }).join(' ') + ']']
 }
 
 function renderChannels (state, width, height) {
@@ -131,44 +131,44 @@ function renderHorizontalLine (chr, width, chlk) {
 
 function renderNicks (state, width, height) {
   // All known users
-  var users = state.cabal.getChannelMembers();
+  var users = state.cabal.getChannelMembers()
   users = Object.keys(users)
     .map(key => users[key])
-    .sort(util.cmpUser);
+    .sort(util.cmpUser)
 
   // Check which users are online
-  var onlines = {};
+  var onlines = {}
   users = users.map(function (user) {
-    var name = '';
-    if (user && user.name) name += util.sanitizeString(user.name).slice(0, width);
-    else name += user.key.slice(0, Math.min(8, width));
-    if (user.online) onlines[name] = name in onlines ? onlines[name] + 1 : 1;
-    return name;
-  });
+    var name = ''
+    if (user && user.name) name += util.sanitizeString(user.name).slice(0, width)
+    else name += user.key.slice(0, Math.min(8, width))
+    if (user.online) onlines[name] = name in onlines ? onlines[name] + 1 : 1
+    return name
+  })
 
   // Count how many occurances of same nickname there are
-  var nickCount = {};
-  users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1; });
+  var nickCount = {}
+  users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
 
   // Format nicks with online state and possible duplication
   var formattedNicks = users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
-      if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u);
-      var dupecount = ` (${nickCount[u]})`;
-      var name = u.slice(0, 15 - dupecount.length);
-      return (u in onlines ? chalk.bold(name) : chalk.gray(name)) + chalk.green(dupecount);
-  });
+    if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u)
+    var dupecount = ` (${nickCount[u]})`
+    var name = u.slice(0, 15 - dupecount.length)
+    return (u in onlines ? chalk.bold(name) : chalk.gray(name)) + chalk.green(dupecount)
+  })
 
   // Scrolling Rendering
-  state.userScrollback = Math.min(state.userScrollback, formattedNicks.length - height);
-  if (formattedNicks.length < height) state.userScrollback = 0;
-  var nickBlock = formattedNicks.slice(state.userScrollback, state.userScrollback + height);
+  state.userScrollback = Math.min(state.userScrollback, formattedNicks.length - height)
+  if (formattedNicks.length < height) state.userScrollback = 0
+  var nickBlock = formattedNicks.slice(state.userScrollback, state.userScrollback + height)
 
-  return nickBlock;
+  return nickBlock
 }
 
 function renderChannelTopic (state, width, height) {
   var topic = state.topic || state.channel
-  var line = topic ? '➤ ' + topic : ""
+  var line = topic ? '➤ ' + topic : ''
   line = line.substring(0, width - 1)
   if (line.length === width - 1) {
     line = line.substring(0, line.length - 1) + '…'

@@ -149,6 +149,8 @@ ctrl+{n,p}
 &nbsp;&nbsp;&nbsp;&nbsp;select channels  1-9  
 `alt-n`  
 &nbsp;&nbsp;&nbsp;&nbsp;tab between the cabals & channels panes 
+`alt-l`  
+&nbsp;&nbsp;&nbsp;&nbsp;tab toggle id suffixes on/off
 
 #### Configuration
 
