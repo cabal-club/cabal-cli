@@ -196,8 +196,7 @@ function NeatScreen (props) {
   this.neat.input.on('alt-8', () => { setChannelByIndex(7) })
   this.neat.input.on('alt-9', () => { setChannelByIndex(8) })
   this.neat.input.on('alt-0', () => { setChannelByIndex(9) })
-  this.neat.input.on('alt-l', () => { this.commander.process("/ids") })
-
+  this.neat.input.on('alt-l', () => { this.commander.process('/ids') })
 
   this.neat.input.on('keypress', (ch, key) => {
     if (!key || !key.name) return
@@ -264,17 +263,17 @@ function NeatScreen (props) {
 
   const scrollOffset = 11
   this.neat.input.on('pageup', () => {
-    this.state.messageScrollback += process.stdout.rows-scrollOffset;
-  });
+    this.state.messageScrollback += process.stdout.rows - scrollOffset
+  })
   this.neat.input.on('pagedown', () => {
-    this.state.messageScrollback = Math.max(0, this.state.messageScrollback - (process.stdout.rows-scrollOffset));
-  });
+    this.state.messageScrollback = Math.max(0, this.state.messageScrollback - (process.stdout.rows - scrollOffset))
+  })
   this.neat.input.on('shift-pageup', () => {
-    this.state.userScrollback = Math.max(0, this.state.userScrollback - (process.stdout.rows-9));
-  });
+    this.state.userScrollback = Math.max(0, this.state.userScrollback - (process.stdout.rows - 9))
+  })
   this.neat.input.on('shift-pagedown', () => {
-    this.state.userScrollback += process.stdout.rows-9;
-  });
+    this.state.userScrollback += process.stdout.rows - 9
+  })
 
   this.neat.use((state, bus) => {
     state.neat = this.neat
@@ -340,7 +339,7 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.state.userScrollback = 0
   var counter = 0
   this.client.getCabalKeys().forEach((key) => {
-    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ timestamp: Date.now() + counter++, text: m }), "!status")
+    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ timestamp: Date.now() + counter++, text: m }), '!status')
   })
   this.registerUpdateHandler(details)
   this.loadChannel('!status')
@@ -351,10 +350,10 @@ NeatScreen.prototype._updateCollisions = function () {
   this.state.collision = {}
   const userKeys = Object.keys(this.state.cabal.getUsers())
   userKeys.forEach((u) => {
-	const collision = typeof this.state.collision[u.slice(0,4)] === "undefined" ? false : true
-    // if there is a collision in the first 4 chars of a pub key in the cabal, 
+    const collision = typeof this.state.collision[u.slice(0, 4)] !== 'undefined'
+    // if there is a collision in the first 4 chars of a pub key in the cabal,
     // expand it to the largest length that lets us disambiguate between the colliding ids
-    this.state.collision[u.slice(0,4)] = { collision, idlen: (collision ? util.unambiguous(userKeys, u) : 4) }
+    this.state.collision[u.slice(0, 4)] = { collision, idlen: (collision ? util.unambiguous(userKeys, u) : 4) }
   })
 }
 
@@ -477,6 +476,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (msg.value.type !== 'status') {
       msgtxt = util.sanitizeString(msgtxt)
     }
+    var content = markdown(msgtxt)
 
     if (localNick.length > 0 && msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
@@ -488,25 +488,24 @@ NeatScreen.prototype.formatMessage = function (msg) {
       highlight = false // never highlight from status
       authorText = `${chalk.dim('-')}${highlight ? chalk.whiteBright(author) : chalk.cyan('status')}${chalk.dim('-')}`
     } else {
-      /* a user wrote a message, not the !status virtual message*/
+      /* a user wrote a message, not the !status virtual message */
 
       // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the largest length that
       // lets us disambiguate between the two ids in the collision
       const collision = this.state.collision[authorSource.key.slice(0, 4)]
-      const pubid = authorSource.key.slice(0, collision.idlen) 
+      const pubid = authorSource.key.slice(0, collision.idlen)
       if (this.state.cabal.showIds) {
-        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim(".")}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
+        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('.')}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
       } else {
-        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author): chalk[color](author)}${chalk.dim('>')}`
+        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
       }
 
       var emote = (msg.value.type === 'chat/emote')
       if (emote) {
-        authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim(".") + chalk.inverse(chalk.cyan(pubid)) : ""}`
+        authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim('.') + chalk.inverse(chalk.cyan(pubid)) : ''}`
         content = `${chalk.dim(msgtxt)}`
       }
     }
-    var content = markdown(msgtxt)
 
     if (msg.value.type === 'chat/topic') {
       content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
