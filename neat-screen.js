@@ -492,16 +492,16 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
       // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the largest length that
       // lets us disambiguate between the two ids in the collision
-      const collision = this.state.collision[authorSource.key.slice(0, 4)]
-      const pubid = authorSource.key.slice(0, collision.idlen)
-      if (this.state.cabal.showIds) {
+      const collision = authorSource.key && this.state.collision[authorSource.key.slice(0, 4)]
+      const pubid = collision && authorSource.key && authorSource.key.slice(0, collision.idlen)
+      if (pubid && this.state.cabal.showIds) {
         authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('.')}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
       } else {
         authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
       }
 
       var emote = (msg.value.type === 'chat/emote')
-      if (emote) {
+      if (pubid && emote) {
         authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim('.') + chalk.inverse(chalk.cyan(pubid)) : ''}`
         content = `${chalk.dim(msgtxt)}`
       }

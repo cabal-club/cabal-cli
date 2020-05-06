@@ -16,7 +16,18 @@ const version = getClientVersion()
 // set terminal window title
 process.stdout.write('\x1B]0;cabal\x07')
 
-var rootdir = Client.getCabalDirectory()
+var rootdir = null
+if (args.config && fs.statSync(args.config).isDirectory()) {
+  rootdir = path.join(args.config, `v${Client.getDatabaseVersion()}`)
+} else if (args.config) {
+  rootdir = path.join(
+    path.dirname(path.resolve(args.config)),
+    `v${Client.getDatabaseVersion()}`
+  )
+} else {
+  rootdir = Client.getCabalDirectory()
+}
+
 var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
@@ -85,6 +96,7 @@ if (args.help || args.h) {
 var config
 var cabalKeys = []
 var configFilePath = findConfigPath()
+mkdirp.sync(path.dirname(configFilePath))
 var maxFeeds = 1000
 
 // make sure the .cabal/v<databaseVersion> folder exists
@@ -106,7 +118,11 @@ if (!fs.existsSync(rootconfig)) {
 // Attempt to load local or homedir config file
 try {
   if (configFilePath) {
-    config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))
+    if (fs.existsSync(configFilePath)) {
+      config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))
+    } else {
+      config = {}
+    }
     if (!config.cabals) { config.cabals = [] }
     if (!config.aliases) { config.aliases = {} }
     if (!config.cache) { config.cache = {} }
@@ -412,7 +428,9 @@ function logError (msg) {
 
 function findConfigPath () {
   var currentDirConfigFilename = '.cabal.yml'
-  if (args.config && fs.existsSync(args.config)) {
+  if (args.config && fs.statSync(args.config).isDirectory()) {
+    return path.join(args.config, `v${Client.getDatabaseVersion()}`, 'config.yml')
+  } else if (args.config && fs.existsSync(args.config)) {
     return args.config
   } else if (fs.existsSync(currentDirConfigFilename)) {
     return currentDirConfigFilename
