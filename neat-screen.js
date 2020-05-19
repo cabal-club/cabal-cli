@@ -287,6 +287,7 @@ function NeatScreen (props) {
     state.windowPanes = [state.selectedWindowPane]
     state.config = this.config
     state.messageTimeLength = strftime(this.config.messageTimeformat, new Date()).length
+    state.collision = {}
     this.state = state
 
     Object.defineProperty(this.state, 'cabal', {
