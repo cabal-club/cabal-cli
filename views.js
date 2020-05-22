@@ -164,6 +164,7 @@ function renderNicks (state, width, height) {
     var dupecount = ` (${nickCount[u]})`
     var name = u.slice(0, 15 - dupecount.length)
     name += chalk.green(dupecount)
+    return name
   })
 
   // Scrolling Rendering
