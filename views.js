@@ -138,24 +138,32 @@ function renderNicks (state, width, height) {
 
   // Check which users are online
   var onlines = {}
-  users = users.map(function (user) {
+  const names = users.map(function (user) {
     var name = ''
     if (user && user.name) name += util.sanitizeString(user.name).slice(0, width)
     else name += user.key.slice(0, Math.min(8, width))
     if (user.online) onlines[name] = name in onlines ? onlines[name] + 1 : 1
+    if (user.isAdmin()) name = chalk.green('@') + name
+    else if (user.isModerator()) name = chalk.green('%') + name
+    if (user.online) {
+      name = chalk.bold(chalk.white(name))
+    } else {
+      name = chalk.gray(name)
+    }
     return name
   })
 
   // Count how many occurances of same nickname there are
   var nickCount = {}
-  users.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
+  names.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
 
   // Format nicks with online state and possible duplication
-  var formattedNicks = users.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
-    if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u)
+  var formattedNicks = names.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
+    // if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u)
+    if (nickCount[u] === 1) return u
     var dupecount = ` (${nickCount[u]})`
     var name = u.slice(0, 15 - dupecount.length)
-    return (u in onlines ? chalk.bold(name) : chalk.gray(name)) + chalk.green(dupecount)
+    name += chalk.green(dupecount)
   })
 
   // Scrolling Rendering
