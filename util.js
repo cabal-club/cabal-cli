@@ -126,6 +126,10 @@ function wrapStatusMsg (m) {
 function cmpUser (a, b) {
   if (a.online && !b.online) return -1
   if (b.online && !a.online) return 1
+  if (a.isAdmin() && !b.isAdmin()) return -1
+  if (b.isAdmin() && !a.isAdmin()) return 1
+  if (a.isModerator() && !b.isModerator()) return -1
+  if (b.isModerator() && !a.isModerator()) return 1
   if (a.name && !b.name) return -1
   if (b.name && !a.name) return 1
   if (a.name && b.name) return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1

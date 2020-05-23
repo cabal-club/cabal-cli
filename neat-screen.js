@@ -388,6 +388,8 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
   this.client.getMessages(opts, (msgs) => {
     this.state.messages = []
     msgs.forEach((msg, i) => {
+      const user = this.client.getUsers()[msg.key]
+      if (user && user.isHidden()) return
       this.state.messages.push(this.formatMessage(msg))
     })
     this.bus.emit('render')
@@ -465,11 +467,16 @@ NeatScreen.prototype.formatMessage = function (msg) {
     const users = this.client.getUsers()
     const authorSource = users[msg.key] || msg
 
-    const author = util.sanitizeString(authorSource.name || authorSource.key.slice(0, 8))
+    let author = util.sanitizeString(authorSource.name || authorSource.key.slice(0, 8))
     // add author field for later use in calculating the left-padding of multi-line messages
     msg.author = author
     var localNick = 'uninitialized'
     if (this.state) { localNick = this.state.cabal.getLocalName() }
+
+    if (authorSource.constructor.name === 'User') {
+      if (authorSource.isAdmin()) author = chalk.green('@') + author
+      else if (authorSource.isModerator()) author = chalk.green('%') + author
+    }
 
     /* sanitize user inputs to prevent interface from breaking */
     localNick = util.sanitizeString(localNick)
