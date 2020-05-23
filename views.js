@@ -75,8 +75,8 @@ function renderPrompt (state) {
 
 function renderTitlebar (state, width) {
   return [
-    chalk.bgBlue(util.centerText(chalk.white.bold(`CABAL@${version}`), width)),
-    util.rightAlignText(chalk.white(`cabal://${state.cabal.key.toString('hex')}`), width)
+    chalk.bgBlue(util.centerText(chalk.whiteBright.bold(`CABAL@${version}`), width)),
+    util.rightAlignText(`cabal://${state.cabal.key.toString('hex')}`, width)
   ]
 }
 
@@ -107,14 +107,14 @@ function renderChannels (state, width, height) {
         var fillWidth = width - channelTruncated.length - 3
         var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
         if (state.selectedWindowPane === 'channels') {
-          return '>' + chalk.bgBlue(channelTruncated + fill)
+          return '>' + chalk.whiteBright(chalk.bgBlue(channelTruncated + fill))
         } else {
           return ' ' + chalk.bgBlue(channelTruncated + fill)
         }
       } else {
         if (mentioned) return '@' + chalk.magenta(channelTruncated)
         else if (unread) return '*' + chalk.green(channelTruncated)
-        else return ' ' + chalk.white(channelTruncated)
+        else return ' ' + channelTruncated
       }
     }).slice(0, height)
 }
@@ -146,9 +146,7 @@ function renderNicks (state, width, height) {
     if (user.isAdmin()) name = chalk.green('@') + name
     else if (user.isModerator()) name = chalk.green('%') + name
     if (user.online) {
-      name = chalk.bold(chalk.white(name))
-    } else {
-      name = chalk.gray(name)
+      name = chalk.bold(name)
     }
     return name
   })
