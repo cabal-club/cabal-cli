@@ -558,7 +558,7 @@ var colours = [
   'blueBright',
   'magentaBright',
   'cyanBright',
-  'whiteBright'
+  //'whiteBright'
 ]
 
 module.exports = NeatScreen
