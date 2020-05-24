@@ -341,6 +341,7 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.client.getCabalKeys().forEach((key) => {
     welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ text: m }), '!status')
   })
+  this.bus.emit('render')
   this.registerUpdateHandler(details)
   this.loadChannel('!status')
 }
