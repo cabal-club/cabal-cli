@@ -17,28 +17,14 @@ function Commander (view, client) {
 Commander.prototype.setActiveCabal = function (cabal) {
   this.cabal = cabal
   if (this._hasListeners[cabal.key]) return
-  var log = this.logger()
   this.cabal.on('info', (msg) => {
     var txt = typeof msg === 'string' ? msg : (msg && msg.text ? msg.text : '')
-    log('* ' + util.sanitizeString(txt))
+    this.view.writeLine('* ' + util.sanitizeString(txt))
   })
   this.cabal.on('error', (err) => {
-    log(chalk.bold(chalk.red('! ' + util.sanitizeString(String(err)))))
+    this.view.writeLine(chalk.bold(chalk.red('! ' + util.sanitizeString(String(err)))))
   })
   this._hasListeners[cabal.key] = true
-}
-
-// for use when writing multiple logs within short intervals
-// to keep timestamp ordering correct. see usage for the `help` command above
-Commander.prototype.logger = function () {
-  var counter = -1000 // set counter 1000 ms in the past to prevent status messages from being purged due to being in the future
-  function ts () {
-    return Date.now() + counter++
-  }
-  var logToView = (msg) => {
-    this.view.writeLine.bind(this.view)(msg, ts())
-  }
-  return logToView
 }
 
 Commander.prototype.process = function (line) {

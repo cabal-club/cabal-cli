@@ -338,9 +338,8 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.state.cabal = details
   this.state.messageScrollback = 0
   this.state.userScrollback = 0
-  var counter = 0
   this.client.getCabalKeys().forEach((key) => {
-    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ timestamp: Date.now() + counter++, text: m }), '!status')
+    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ text: m }), '!status')
   })
   this.registerUpdateHandler(details)
   this.loadChannel('!status')
@@ -411,8 +410,8 @@ NeatScreen.prototype.renderApp = function (state) {
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
-NeatScreen.prototype.writeLine = function (line, timestamp) {
-  this.client.addStatusMessage({ timestamp: timestamp || Date.now(), text: line })
+NeatScreen.prototype.writeLine = function (text) {
+  this.client.addStatusMessage({ text })
   this.bus.emit('render')
 }
 
