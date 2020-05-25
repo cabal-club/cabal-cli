@@ -340,6 +340,20 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.state.userScrollback = 0
   this.client.getCabalKeys().forEach((key) => {
     welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ text: m }), '!status')
+    this.state.moderationKeys = moderationKeys = this.state.cabal.core.adminKeys.map((k) => { return { key: k, type: 'admin' }}).concat(this.state.cabal.core.modKeys.map((k) => { return { key: k, type: 'mod' }}))
+    if (this.state.moderationKeys.length > 0) {
+      let moderationMessage = [
+      'you joined via a moderation key, meaning you are allowing someone else to help administer moderation on your behalf.', 
+      'if you would like to remove the applied moderation keys, type:'
+      ]
+      this.state.moderationKeys.forEach((k) => {
+        moderationMessage.push(`/un${k.type} ${k.key}`)
+      })
+      moderationMessage.push('for more information, type /moderation')
+      moderationMessage.forEach((text) => {
+        this.client.getDetails(key).addStatusMessage({ text }) 
+      })
+    }
   })
   this.bus.emit('render')
   this.registerUpdateHandler(details)
