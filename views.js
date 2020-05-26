@@ -75,7 +75,7 @@ function renderPrompt (state) {
 }
 
 function renderTitlebar (state, width) {
-  const moderationKey = util.getModerationKey(state)
+  const moderationKey = chalk.cyan(util.getModerationKey(state))
   return [
     chalk.bgBlue(util.centerText(chalk.whiteBright.bold(`CABAL@${version}`), width)),
     util.rightAlignText(`cabal://${state.cabal.key.toString('hex')}${moderationKey}`, width)

@@ -343,12 +343,12 @@ NeatScreen.prototype.initializeCabalClient = function () {
     this.state.moderationKeys = moderationKeys = this.state.cabal.core.adminKeys.map((k) => { return { key: k, type: 'admin' }}).concat(this.state.cabal.core.modKeys.map((k) => { return { key: k, type: 'mod' }}))
     if (this.state.moderationKeys.length > 0) {
       let moderationMessage = [
-      'you joined via a moderation key, meaning you are allowing someone else to help administer moderation on your behalf.', 
-      'if you would like to remove the applied moderation keys, type:'
-      ]
-      this.state.moderationKeys.forEach((k) => {
-        moderationMessage.push(`/un${k.type} ${k.key}`)
-      })
+      'you joined via a moderation key, meaning you are allowing someone else to help administer moderation on your behalf.']
+      // comment out how to remove applied moderators until it actually has a lasting effect across sessions, see https://github.com/cabal-club/cabal-cli/pull/190#discussion_r430021350
+      // moderationMessage.push('if you would like to remove the applied moderation keys, type:')
+      // this.state.moderationKeys.forEach((k) => {
+      //   moderationMessage.push(`/un${k.type} ${k.key}`)
+      // })
       moderationMessage.push('for more information, type /moderation')
       moderationMessage.forEach((text) => {
         this.client.getDetails(key).addStatusMessage({ text }, '!status') 
