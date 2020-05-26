@@ -338,10 +338,24 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.state.cabal = details
   this.state.messageScrollback = 0
   this.state.userScrollback = 0
-  var counter = 0
   this.client.getCabalKeys().forEach((key) => {
-    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ timestamp: Date.now() + counter++, text: m }), '!status')
+    welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ text: m }, '!status'))
+    this.state.moderationKeys = this.state.cabal.core.adminKeys.map((k) => { return { key: k, type: 'admin' } }).concat(this.state.cabal.core.modKeys.map((k) => { return { key: k, type: 'mod' } }))
+    if (this.state.moderationKeys.length > 0) {
+      const moderationMessage = [
+        'you joined via a moderation key, meaning you are allowing someone else to help administer moderation on your behalf.']
+      // comment out how to remove applied moderators until it actually has a lasting effect across sessions, see https://github.com/cabal-club/cabal-cli/pull/190#discussion_r430021350
+      // moderationMessage.push('if you would like to remove the applied moderation keys, type:')
+      // this.state.moderationKeys.forEach((k) => {
+      //   moderationMessage.push(`/un${k.type} ${k.key}`)
+      // })
+      moderationMessage.push('for more information, type /moderation')
+      moderationMessage.forEach((text) => {
+        this.client.getDetails(key).addStatusMessage({ text }, '!status')
+      })
+    }
   })
+  this.bus.emit('render')
   this.registerUpdateHandler(details)
   this.loadChannel('!status')
 }
@@ -411,8 +425,8 @@ NeatScreen.prototype.renderApp = function (state) {
 }
 
 // use to write anything else to the screen, e.g. info messages or emotes
-NeatScreen.prototype.writeLine = function (line, timestamp) {
-  this.client.addStatusMessage({ timestamp: timestamp || Date.now(), text: line })
+NeatScreen.prototype.writeLine = function (text) {
+  this.client.addStatusMessage({ text })
   this.bus.emit('render')
 }
 
@@ -557,8 +571,8 @@ var colours = [
   'yellowBright',
   'blueBright',
   'magentaBright',
-  'cyanBright',
-  //'whiteBright'
+  'cyanBright'
+  // 'whiteBright'
 ]
 
 module.exports = NeatScreen
