@@ -63,7 +63,7 @@ function big (state) {
 
 function linkSize (state) {
   const moderationKey = util.getModerationKey(state)
-  if (state.cabal.key) return `cabal://${state.cabal.key.toString('hex')}`.length + adminKey.length
+  if (state.cabal.key) return `cabal://${state.cabal.key.toString('hex')}`.length + moderationKey.length
   else return 'cabal://...'
 }
 
