@@ -38,6 +38,9 @@ var usage = `Usage
   Create a new cabal:
     cabal --new
 
+  Create a new cabal and name it locally:
+    cabal --new --alias <name>
+
   Join a cabal by its key:
     cabal cabal://key
 
