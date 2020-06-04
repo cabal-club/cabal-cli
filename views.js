@@ -62,7 +62,8 @@ function big (state) {
 }
 
 function linkSize (state) {
-  if (state.cabal.key) return `cabal://${state.cabal.key.toString('hex')}`.length
+  const moderationKey = util.getModerationKey(state)
+  if (state.cabal.key) return `cabal://${state.cabal.key.toString('hex')}`.length + moderationKey.length
   else return 'cabal://...'
 }
 
@@ -74,9 +75,10 @@ function renderPrompt (state) {
 }
 
 function renderTitlebar (state, width) {
+  const moderationKey = chalk.cyan(util.getModerationKey(state))
   return [
     chalk.bgBlue(util.centerText(chalk.whiteBright.bold(`CABAL@${version}`), width)),
-    util.rightAlignText(`cabal://${state.cabal.key.toString('hex')}`, width)
+    util.rightAlignText(`cabal://${state.cabal.key.toString('hex')}${moderationKey}`, width)
   ]
 }
 

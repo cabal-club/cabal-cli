@@ -7,6 +7,21 @@ function log (err, result) {
   if (arguments.length >= 2) { console.log(result) }
 }
 
+// return the most suitable moderation key.
+// if we don't have one set, default to the current user's key.
+// if we have joined via multiple keys, pick the first admin key.
+// if we don't have any admin keys, but we do have a mod key, use that instead
+// only return one, due to excessively long keys ':)
+function getModerationKey (state) {
+  let moderationKey = state.cabal.user ? `?admin=${state.cabal.user.key}` : ''
+  if (state.moderationKeys.length > 0) {
+    // if admin key is set, it will be at the top. otherwise we'll set a mod key
+    const key = state.moderationKeys[0]
+    moderationKey = `?${key.type}=${key.key}`
+  }
+  return moderationKey
+}
+
 function sanitizeString (str) {
   // emojis break the cli: replace them with shortcodes
   str = emojiConverter.replaceUnicode(str)
@@ -136,4 +151,4 @@ function cmpUser (a, b) {
   return a.key < b.key ? -1 : 1
 }
 
-module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString, unambiguous }
+module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString, unambiguous, getModerationKey }

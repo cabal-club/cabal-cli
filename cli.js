@@ -9,6 +9,7 @@ var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
 var captureQrCode = require('node-camera-qr-reader')
 var fe = null
+const onExit = require('signal-exit')
 
 var args = minimist(process.argv.slice(2))
 const version = getClientVersion()
@@ -211,6 +212,14 @@ const client = new Client({
       config.cache[name] = { key: key, expiresAt: expiredTime }
       saveConfig(configFilePath, config)
     }
+  }
+})
+
+// Close all cabals on exit.
+onExit(function () {
+  for (let cabal of client.cabals.values()) {
+    cabal._destroy(() => {
+    })
   }
 })
 
