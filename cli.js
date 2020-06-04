@@ -273,16 +273,14 @@ if (args.cabals) {
   process.exit(0)
 }
 
-if (args.alias && !args.key) {
+if (args.alias && !args.new && !args.key) {
   logError('the --alias option needs to be used together with --key')
   process.exit(1)
 }
 
 // user wants to alias a cabal:// key with a name
 if (args.alias && args.key) {
-  config.aliases[args.alias] = args.key
-  saveConfig(configFilePath, config)
-  console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(args.key)} as ${chalk.blueBright(args.alias)}`)
+  saveKeyAsAlias(args.key, args.alias)
   process.exit(0)
 }
 
@@ -362,6 +360,8 @@ function start (keys, frontendConfig) {
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
       console.error(`created the cabal: ${chalk.greenBright('cabal://' + client.getCurrentCabal().key)}`) // log to terminal output (stdout is occupied by interface)
+      // allow saving newly created cabal as alias
+      if (args.alias) { saveKeyAsAlias(client.getCurrentCabal().key, args.alias) }
       keys = [client.getCurrentCabal().key]
     }
     // edgecase: if the config is empty we remember the first joined cabals in it
@@ -447,6 +447,12 @@ function saveConfig (path, config) {
     sortKeys: true
   })
   fs.writeFileSync(path, data, 'utf8')
+}
+
+function saveKeyAsAlias(key, alias) {
+  config.aliases[alias] = key
+  saveConfig(configFilePath, config)
+  console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(key)} as ${chalk.blueBright(alias)}`)
 }
 
 function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
