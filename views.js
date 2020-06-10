@@ -147,6 +147,7 @@ function renderNicks (state, width, height) {
     if (user.online) onlines[name] = name in onlines ? onlines[name] + 1 : 1
     if (user.isAdmin()) name = chalk.green('@') + name
     else if (user.isModerator()) name = chalk.green('%') + name
+    else if (user.isHidden()) name = chalk.green('-') + name
     if (user.online) {
       name = chalk.bold(name)
     }

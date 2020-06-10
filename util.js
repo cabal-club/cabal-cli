@@ -139,6 +139,8 @@ function wrapStatusMsg (m) {
 }
 
 function cmpUser (a, b) {
+  if (!a.isHidden() && b.isHidden()) return -1
+  if (!b.isHidden() && a.isHidden()) return 1
   if (a.online && !b.online) return -1
   if (b.online && !a.online) return 1
   if (a.isAdmin() && !b.isAdmin()) return -1

@@ -506,9 +506,9 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
     let authorText
-    if (msg.value.type === 'status') {
+    if (msg.value.type === 'status' || msg.value.type === 'chat/moderation') {
       highlight = false // never highlight from status
-      authorText = `${chalk.dim('-')}${highlight ? chalk.whiteBright(author) : chalk.cyan('status')}${chalk.dim('-')}`
+      authorText = `${chalk.dim('-')}${chalk.cyan('status')}${chalk.dim('-')}`
     } else {
       /* a user wrote a message, not the !status virtual message */
 
@@ -531,6 +531,22 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
     if (msg.value.type === 'chat/topic') {
       content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
+    } else if (msg.value.type === 'chat/moderation') {
+      const { role, type, issuerid, receiverid } = msg.value.content
+      const issuer = this.client.getUsers()[issuerid]
+      const receiver = this.client.getUsers()[receiverid]
+      let text, action
+      const reason = msg.value.content.reason ? `(${chalk.cyan('reason:')} ${msg.value.content.reason})` : ''
+      const issuerName = issuer && issuer.name ? issuer.name : issuerid.slice(0, 8)
+      const receiverName = receiver && receiver.name ? receiver.name : receiverid.slice(0, 8)
+      if (['admin', 'mod'].includes(role)) { action = (type === 'add' ? 'added' : 'removed') }
+      if (role === 'hide') { action = (type === 'add' ? 'hid' : 'unhid') }
+      if (role === 'hide')  {
+        text = `${issuerName} ${chalk.cyan(action)} ${receiverName} ${reason}`
+      } else {
+        text = `${issuerName} ${chalk.cyan(action)} ${receiverName} as ${chalk.cyan(role)} ${reason}`
+      }
+      content = `${chalk.magenta('moderation')}: ${text}`
     }
 
     return {
