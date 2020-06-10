@@ -538,7 +538,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
       let text, action
       const reason = msg.value.content.reason ? `(${chalk.cyan('reason:')} ${msg.value.content.reason})` : ''
       const issuerName = issuer && issuer.name ? issuer.name : issuerid.slice(0, 8)
-      const receiverName = receiver && receiver.name ? receiver.name : eceiverid.slice(0, 8)
+      const receiverName = receiver && receiver.name ? receiver.name : receiverid.slice(0, 8)
       if (['admin', 'mod'].includes(role)) { action = (type === 'add' ? 'added' : 'removed') }
       if (role === 'hide') { action = (type === 'add' ? 'hid' : 'unhid') }
       if (role === 'hide')  {
