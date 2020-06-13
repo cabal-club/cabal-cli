@@ -535,18 +535,18 @@ NeatScreen.prototype.formatMessage = function (msg) {
       const { role, type, issuerid, receiverid } = msg.value.content
       const issuer = this.client.getUsers()[issuerid]
       const receiver = this.client.getUsers()[receiverid]
-      let text, action
+      let action
       const reason = msg.value.content.reason ? `(${chalk.cyan('reason:')} ${msg.value.content.reason})` : ''
       const issuerName = issuer && issuer.name ? issuer.name : issuerid.slice(0, 8)
       const receiverName = receiver && receiver.name ? receiver.name : receiverid.slice(0, 8)
-      if (['admin', 'mod'].includes(role)) { action = (type === 'add' ? 'added' : 'removed') }
-      if (role === 'hide') { action = (type === 'add' ? 'hid' : 'unhid') }
-      if (role === 'hide')  {
-        text = `${issuerName} ${chalk.cyan(action)} ${receiverName} ${reason}`
-      } else {
-        text = `${issuerName} ${chalk.cyan(action)} ${receiverName} as ${chalk.cyan(role)} ${reason}`
+      if (['admin', 'mod'].includes(role)) {
+        action = (type === 'add' ? chalk.green('added') : chalk.red('removed')) 
+        content = `${issuerName} ${action} ${receiverName} as ${chalk.cyan(role)} ${reason}`
       }
-      content = `${chalk.magenta('moderation')}: ${text}`
+      if (role === 'hide') {
+        action = (type === 'add' ? chalk.red('hid') : chalk.green('unhid'))
+        content = `${issuerName} ${action} ${receiverName} ${reason}`
+      }
     }
 
     return {
