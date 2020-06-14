@@ -217,7 +217,7 @@ const client = new Client({
 
 // Close all cabals on exit.
 onExit(function () {
-  for (let cabal of client.cabals.values()) {
+  for (const cabal of client.cabals.values()) {
     cabal._destroy(() => {
     })
   }
@@ -461,7 +461,7 @@ function saveConfig (path, config) {
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function saveKeyAsAlias(key, alias) {
+function saveKeyAsAlias (key, alias) {
   config.aliases[alias] = key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(key)} as ${chalk.blueBright(alias)}`)

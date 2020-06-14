@@ -540,7 +540,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
       const issuerName = issuer && issuer.name ? issuer.name : issuerid.slice(0, 8)
       const receiverName = receiver && receiver.name ? receiver.name : receiverid.slice(0, 8)
       if (['admin', 'mod'].includes(role)) {
-        action = (type === 'add' ? chalk.green('added') : chalk.red('removed')) 
+        action = (type === 'add' ? chalk.green('added') : chalk.red('removed'))
         content = `${issuerName} ${action} ${receiverName} as ${chalk.cyan(role)} ${reason}`
       }
       if (role === 'hide') {
