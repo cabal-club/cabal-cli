@@ -487,11 +487,6 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var localNick = 'uninitialized'
     if (this.state) { localNick = this.state.cabal.getLocalName() }
 
-    if (authorSource.constructor.name === 'User') {
-      if (authorSource.isAdmin()) author = chalk.green('@') + author
-      else if (authorSource.isModerator()) author = chalk.green('%') + author
-    }
-
     /* sanitize user inputs to prevent interface from breaking */
     localNick = util.sanitizeString(localNick)
     var msgtxt = msg.value.content.text
@@ -501,6 +496,11 @@ NeatScreen.prototype.formatMessage = function (msg) {
     var content = markdown(msgtxt)
 
     if (localNick.length > 0 && msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
+
+    if (authorSource.constructor.name === 'User') {
+      if (authorSource.isAdmin()) author = chalk.green('@') + author
+      else if (authorSource.isModerator()) author = chalk.green('%') + author
+    }
 
     var color = keyToColour(msg.key) || colours[5]
 
