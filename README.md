@@ -136,23 +136,23 @@ ctrl-{n,p}
 `ctrl-n`  
 &nbsp;&nbsp;&nbsp;&nbsp;go to next channel  
 `ctrl-p`  
-&nbsp;&nbsp;&nbsp;&nbsp;go to next unread channel
+&nbsp;&nbsp;&nbsp;&nbsp;go to previous channel  
 `ctrl-a`  
-&nbsp;&nbsp;&nbsp;&nbsp;tab toggle id suffixes on/off
+&nbsp;&nbsp;&nbsp;&nbsp;go to next unread channel  
 `pageup`  
 &nbsp;&nbsp;&nbsp;&nbsp;scroll up through backlog  
 `pagedown`  
 &nbsp;&nbsp;&nbsp;&nbsp;scroll down through backlog  
-`shift-pageup`
-&nbsp;&nbsp;&nbsp;&nbsp;scroll up through nicklist
-`shift-pagedown`
-&nbsp;&nbsp;&nbsp;&nbsp;scroll down through nicklist
-`alt-[1,9]`  
+`shift-pageup`  
+&nbsp;&nbsp;&nbsp;&nbsp;scroll up through nicklist  
+`shift-pagedown`  
+&nbsp;&nbsp;&nbsp;&nbsp;scroll down through nicklist  
+`alt-[1,9]`   
 &nbsp;&nbsp;&nbsp;&nbsp;select channels  1-9  
 `alt-n`  
-&nbsp;&nbsp;&nbsp;&nbsp;tab between the cabals & channels panes 
+&nbsp;&nbsp;&nbsp;&nbsp;tab between the cabals & channels panes   
 `alt-l`  
-&nbsp;&nbsp;&nbsp;&nbsp;tab toggle id suffixes on/off
+&nbsp;&nbsp;&nbsp;&nbsp;tab toggle id suffixes on/off  
 
 #### Configuration
 
