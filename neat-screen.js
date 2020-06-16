@@ -231,6 +231,13 @@ function NeatScreen (props) {
     cycleCurrentPane.bind(this)(1)
   })
 
+  // cycle to next unread channel
+  this.neat.input.on('ctrl-a', () => {
+    const channels = Object.keys(this.state.unreadChannels)
+    if (channels.length === 0 || (channels.length === 1 && channels[0] === this.state.cabal.getCurrentChannel())) return
+    this.loadChannel(channels[0])
+  })
+
   function cycleCurrentPane (dir) {
     var i
     if (this.state.selectedWindowPane === 'cabals') {
@@ -241,7 +248,7 @@ function NeatScreen (props) {
       setCabalByIndex.bind(this)(i)
     } else {
       var channels = this.state.cabal.getJoinedChannels()
-      i = channels.indexOf(this.commander.channel)
+      i = channels.indexOf(this.state.cabal.getCurrentChannel())
       i += dir * 1
       i = i % channels.length
       if (i < 0) i += channels.length
@@ -257,7 +264,6 @@ function NeatScreen (props) {
   function setChannelByIndex (n) {
     var channels = self.state.cabal.getJoinedChannels()
     if (n < 0 || n >= channels.length) return
-    self.commander.channel = channels[n]
     self.loadChannel(channels[n])
   }
 
@@ -312,7 +318,6 @@ NeatScreen.prototype._handleUpdate = function (updatedDetails) {
   }
   this.state.cabal = updatedDetails
   var channels = this.client.getJoinedChannels()
-  this.commander.channel = this.state.cabal.getCurrentChannel()
   this.state.windowPanes = this.state.cabals.length > 1 ? ['channels', 'cabals'] : ['channels']
   this._updateCollisions()
   // reset cause we fill them up below

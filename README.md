@@ -116,14 +116,14 @@ cabal <key> --seed
 
 alt-n
   move between channels/cabals panes
-ctrl+{n,p}
+ctrl-{n,p}
   move up/down channels/cabals
 ```
 
 ## Hotkeys
-`ctrl+u`  
+`ctrl-u`  
 &nbsp;&nbsp;&nbsp;&nbsp;clear input line  
-`ctrl+w`  
+`ctrl-w`  
 &nbsp;&nbsp;&nbsp;&nbsp;delete last word in input  
 `up-arrow`  
 &nbsp;&nbsp;&nbsp;&nbsp;cycle through command history  
@@ -133,10 +133,12 @@ ctrl+{n,p}
 &nbsp;&nbsp;&nbsp;&nbsp;go to start of input line  
 `end`  
 &nbsp;&nbsp;&nbsp;&nbsp;go to end of input line  
-`ctrl+n`  
+`ctrl-n`  
 &nbsp;&nbsp;&nbsp;&nbsp;go to next channel  
-`ctrl+p`  
-&nbsp;&nbsp;&nbsp;&nbsp;go to previous channel  
+`ctrl-p`  
+&nbsp;&nbsp;&nbsp;&nbsp;go to next unread channel
+`ctrl-a`  
+&nbsp;&nbsp;&nbsp;&nbsp;tab toggle id suffixes on/off
 `pageup`  
 &nbsp;&nbsp;&nbsp;&nbsp;scroll up through backlog  
 `pagedown`  

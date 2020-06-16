@@ -7,7 +7,6 @@ function Commander (view, client) {
   this.client = client
   this.cabal = null
   this.setActiveCabal(client.getCurrentCabal())
-  this.channel = '!status'
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
