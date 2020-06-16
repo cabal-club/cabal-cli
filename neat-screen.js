@@ -232,7 +232,7 @@ function NeatScreen (props) {
   })
 
   // cycle to next unread channel
-  this.neat.input.on('ctrl-a', () => {
+  this.neat.input.on('ctrl-r', () => {
     // prioritize channels with mentions. after all those are exhausted, continue to unread channels
     const channels = Array.from(new Set(Object.keys(this.state.mentions).concat(Object.keys(this.state.unreadChannels))))
     channels.sort()
