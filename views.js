@@ -104,7 +104,7 @@ function renderChannels (state, width, height) {
   const numPrefixWidth = String(channels.length).length
   return channels
     .map((channel, idx) => {
-      var channelTruncated = channel.substring(0, width - 3)
+      var channelTruncated = channel.substring(0, width - 5)
       var unread = channel in state.unreadChannels
       var mentioned = channel in state.mentions
 
@@ -117,7 +117,7 @@ function renderChannels (state, width, height) {
       numPrefix = chalk.cyan(numPrefix)
 
       if (state.cabal.getCurrentChannel() === channel) {
-        var fillWidth = width - channelTruncated.length - 6
+        var fillWidth = width - channelTruncated.length - 5
         var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
         if (state.selectedWindowPane === 'channels') {
           return ' ' + chalk.whiteBright(chalk.bgBlue(numPrefix + channelTruncated + fill))
