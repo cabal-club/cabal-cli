@@ -100,23 +100,34 @@ function renderCabals (state, width, height) {
 }
 
 function renderChannels (state, width, height) {
-  return state.cabal.getJoinedChannels()
+  const channels = state.cabal.getJoinedChannels()
+  const numPrefixWidth = String(channels.length).length
+  return channels
     .map((channel, idx) => {
       var channelTruncated = channel.substring(0, width - 3)
       var unread = channel in state.unreadChannels
       var mentioned = channel in state.mentions
+
+      const channelIdx = idx + 1
+      let numPrefix = channelIdx + '. '
+      const numLength = String(channelIdx).length
+      if (numLength < numPrefixWidth) {
+        numPrefix += new Array(numLength).fill(' ').join('')
+      }
+      numPrefix = chalk.cyan(numPrefix)
+
       if (state.cabal.getCurrentChannel() === channel) {
-        var fillWidth = width - channelTruncated.length - 3
+        var fillWidth = width - channelTruncated.length - 6
         var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
         if (state.selectedWindowPane === 'channels') {
-          return '>' + chalk.whiteBright(chalk.bgBlue(channelTruncated + fill))
+          return ' ' + chalk.whiteBright(chalk.bgBlue(numPrefix + channelTruncated + fill))
         } else {
-          return ' ' + chalk.bgBlue(channelTruncated + fill)
+          return ' ' + chalk.bgBlue(numPrefix + channelTruncated + fill)
         }
       } else {
-        if (mentioned) return '@' + chalk.magenta(channelTruncated)
-        else if (unread) return '*' + chalk.green(channelTruncated)
-        else return ' ' + channelTruncated
+        if (mentioned) return ' ' + numPrefix + '@' + chalk.magenta(channelTruncated)
+        else if (unread) return ' ' + numPrefix + '*' + chalk.green(channelTruncated)
+        else return ' ' + numPrefix + channelTruncated
       }
     }).slice(0, height)
 }
