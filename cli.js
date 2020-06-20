@@ -385,7 +385,11 @@ function start (keys, frontendConfig) {
     if (!args.seed) {
       fe = frontend({ client, frontendConfig })
     } else {
-      keys.forEach((k) => {
+      let seedKeys = []
+      for (const details of client.cabals.keys()) {
+        seedKeys.push(details.key)
+      }
+      seedKeys.forEach((k) => {
         console.log('Seeding', k)
         console.log()
         console.log('@: new peer')
