@@ -149,35 +149,50 @@ function renderNicks (state, width, height) {
     .map(key => users[key])
     .sort(util.cmpUser)
 
-  // Check which users are online
-  var onlines = {}
-  const names = users.map(function (user) {
-    var name = ''
-    if (user && user.name) name += util.sanitizeString(user.name).slice(0, width)
-    else name += user.key.slice(0, Math.min(8, width))
-    if (user.online) onlines[name] = name in onlines ? onlines[name] + 1 : 1
-    if (user.isAdmin()) name = chalk.green('@') + name
-    else if (user.isModerator()) name = chalk.green('%') + name
-    else if (user.isHidden()) name = chalk.green('-') + name
-    if (user.online) {
-      name = chalk.bold(name)
-    }
-    return name
-  })
+  function getPrintedName (user) {
+    if (user && user.name) return user.name
+    else user.key.slice(0, 8)
+  }
 
   // Count how many occurances of same nickname there are
-  var nickCount = {}
-  names.forEach(function (u) { nickCount[u] = u in nickCount ? nickCount[u] + 1 : 1 })
-
-  // Format nicks with online state and possible duplication
-  var formattedNicks = names.filter((u, i, arr) => arr.indexOf(u) === i).map((u) => {
-    // if (nickCount[u] === 1) return u in onlines ? chalk.bold(u) : chalk.gray(u)
-    if (nickCount[u] === 1) return u
-    var dupecount = ` (${nickCount[u]})`
-    var name = u.slice(0, 15 - dupecount.length)
-    name += chalk.green(dupecount)
-    return name
+  const onlineNickCount = {}
+  const offlineNickCount = {}
+  users.forEach(user => {
+    const name = getPrintedName(user)
+    if (user.online) onlineNickCount[name] = name in onlineNickCount ? onlineNickCount[name] + 1 : 1
+    else offlineNickCount[name] = name in offlineNickCount ? offlineNickCount[name] + 1 : 1
   })
+
+  // Format and colorize names
+  const seen = {}
+  const formattedNicks = users
+    .filter(user => {
+      const name = getPrintedName(user)
+      if (seen[name]) return false
+      seen[name] = true
+      return true
+    })
+    .map(user => {
+      const name = getPrintedName(user)
+      let outputName
+
+      // Duplicate nick count
+      const duplicates = user.online ? onlineNickCount[name] : offlineNickCount[name]
+      const dupecountStr = `(${duplicates})`
+      outputName = util.sanitizeString(name).slice(0, width)
+      if (duplicates > 1) outputName = outputName.slice(0, width - dupecountStr.length - 2)
+
+      // Colorize
+      let colorizedName = outputName.slice()
+      if (user.isAdmin()) colorizedName = chalk.green('@') + colorizedName
+      else if (user.isModerator()) colorizedName = chalk.green('%') + colorizedName
+      else if (user.isHidden()) colorizedName = chalk.green('-') + colorizedName
+      if (user.online) {
+        colorizedName = chalk.bold(colorizedName)
+      }
+      if (duplicates > 1) colorizedName += ' ' + chalk.green(dupecountStr)
+      return colorizedName
+    })
 
   // Scrolling Rendering
   state.userScrollback = Math.min(state.userScrollback, formattedNicks.length - height)

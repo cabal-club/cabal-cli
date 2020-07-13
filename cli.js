@@ -385,7 +385,7 @@ function start (keys, frontendConfig) {
     if (!args.seed) {
       fe = frontend({ client, frontendConfig })
     } else {
-      let seedKeys = []
+      const seedKeys = []
       for (const details of client.cabals.keys()) {
         seedKeys.push(details.key)
       }
