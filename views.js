@@ -151,7 +151,7 @@ function renderNicks (state, width, height) {
 
   function getPrintedName (user) {
     if (user && user.name) return user.name
-    else user.key.slice(0, 8)
+    else return user.key.slice(0, 8)
   }
 
   // Count how many occurances of same nickname there are
