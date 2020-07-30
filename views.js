@@ -179,8 +179,9 @@ function renderNicks (state, width, height) {
       // Duplicate nick count
       const duplicates = user.online ? onlineNickCount[name] : offlineNickCount[name]
       const dupecountStr = `(${duplicates})`
-      outputName = util.sanitizeString(name).slice(0, width)
-      if (duplicates > 1) outputName = outputName.slice(0, width - dupecountStr.length - 2)
+      const modSigilLength = (user.isAdmin() || user.isModerator() || user.isHidden()) ? 1 : 0
+      outputName = util.sanitizeString(name).slice(0, width - modSigilLength)
+      if (duplicates > 1) outputName = outputName.slice(0, width - dupecountStr.length - 2 - modSigilLength)
 
       // Colorize
       let colorizedName = outputName.slice()
