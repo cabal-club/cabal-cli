@@ -10,6 +10,7 @@ var chalk = require('chalk')
 var captureQrCode = require('node-camera-qr-reader')
 var fe = null
 const onExit = require('signal-exit')
+const { version: packageJSONVersion } = require('./package.json')
 
 var args = minimist(process.argv.slice(2))
 const version = getClientVersion()
@@ -233,7 +234,7 @@ if (args.clear) {
 if (args.forget) {
   let success = false
   /* eslint no-inner-declarations: "off" */
-  function forgetCabal (k) {
+  function forgetCabal(k) {
     const index = config.cabals.indexOf(k)
     if (index >= 0) {
       config.cabals.splice(index, 1)
@@ -356,7 +357,7 @@ if (args.qr) {
   process.exit(1)
 }
 
-function start (keys, frontendConfig) {
+function start(keys, frontendConfig) {
   if (args.key && args.message) {
     publishSingleMessage({
       key: args.key,
@@ -406,13 +407,13 @@ function start (keys, frontendConfig) {
   })
 }
 
-function trackAndPrintEvents (cabal) {
+function trackAndPrintEvents(cabal) {
   cabal.ready(() => {
     // Listen for feeds
     cabal.kcore._logs.feeds().forEach(listen)
     cabal.kcore._logs.on('feed', listen)
 
-    function listen (feed) {
+    function listen(feed) {
       feed.on('download', idx => {
         process.stdout.write('.')
       })
@@ -431,18 +432,18 @@ function trackAndPrintEvents (cabal) {
   })
 }
 
-function getKey (str) {
+function getKey(str) {
   // return key if what was passed in was a saved alias
   if (str in config.aliases) { return config.aliases[str] }
   // else assume it's a cabal key
   return str
 }
 
-function logError (msg) {
+function logError(msg) {
   console.error(`${chalk.red('cabal:')} ${msg}`)
 }
 
-function findConfigPath () {
+function findConfigPath() {
   var currentDirConfigFilename = '.cabal.yml'
   if (args.config && fs.statSync(args.config).isDirectory()) {
     return path.join(args.config, `v${Client.getDatabaseVersion()}`, 'config.yml')
@@ -454,7 +455,7 @@ function findConfigPath () {
   return rootconfig
 }
 
-function saveConfig (path, config) {
+function saveConfig(path, config) {
   // make sure config is well-formatted (contains all config options)
   if (!config.cabals) { config.cabals = [] }
   config.cabals = Array.from(new Set(config.cabals)) // dedupe array entries
@@ -465,13 +466,13 @@ function saveConfig (path, config) {
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function saveKeyAsAlias (key, alias) {
+function saveKeyAsAlias(key, alias) {
   config.aliases[alias] = key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(key)} as ${chalk.blueBright(alias)}`)
 }
 
-function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
+function publishSingleMessage({ key, channel, message, messageType, timeout }) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
   client.addCabal(key).then(cabal => cabal.publishMessage({
     type: messageType || 'chat/text',
@@ -484,11 +485,11 @@ function publishSingleMessage ({ key, channel, message, messageType, timeout }) 
   setTimeout(function () { process.exit(0) }, timeout || 5000)
 }
 
-function getClientVersion () {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version
-  } catch (e) {
-    console.error('failed to read cabal\'s package.json -- something is wrong with your installation')
-    process.exit(1)
+function getClientVersion() {
+  if (packageJSONVersion) {
+    return packageJSONVersion
   }
+  console
+    .error('failed to read cabal\'s package.json -- something is wrong with your installation')
+  process.exit(1)
 }
