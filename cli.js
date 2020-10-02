@@ -155,6 +155,7 @@ const client = new Client({
     // todo: custom commands
     panes: {
       help: () => 'set pane to navigate up and down in. panes: channels, cabals',
+      category: ["misc"],
       call: (cabal, res, arg) => {
         if (arg === '' || !['channels', 'cabals'].includes(arg)) return
         fe.setPane(arg)
@@ -162,35 +163,102 @@ const client = new Client({
     },
     quit: {
       help: () => 'exit the cabal process',
+      category: ["basics"],
       call: (cabal, res, arg) => {
         process.exit(0)
       }
     },
     exit: {
       help: () => 'exit the cabal process',
+      category: ["basics"],
       call: (cabal, res, arg) => {
         process.exit(0)
       }
     },
     help: {
       help: () => 'display this help message',
+      category: ["basics"],
       call: (cabal, res, arg) => {
-        var foundAliases = {}
-        for (var key in cabal.client.commands) {
-          if (foundAliases[key]) { continue }
-          const slash = chalk.gray('/')
-          let command = key
-          if (cabal.client.aliases[key]) {
-            foundAliases[cabal.client.aliases[key]] = true
-            command += `, ${slash}${cabal.client.aliases[key]}`
-          }
-          fe.writeLine(`${slash}${command}`)
-          fe.writeLine(`  ${cabal.client.commands[key].help()}`)
+        const hotkeysExplanation = `
+ctrl-u  
+  clear input line  
+ctrl-w  
+  delete last word in input  
+up-arrow  
+  cycle through command history  
+down-arrow  
+  cycle through command history  
+ctrl-a, home  
+  go to start of input line  
+ctrl-e, end  
+  go to end of input line  
+ctrl-n  
+  go to next channel  
+ctrl-p  
+  go to previous channel  
+ctrl-r  
+  go to next unread channel  
+pageup  
+  scroll up through backlog  
+pagedown  
+  scroll down through backlog  
+shift-pageup  
+  scroll up through nicklist  
+shift-pagedown  
+  scroll down through nicklist  
+alt-[1,9]   
+  select channels  1-9  
+alt-n  
+  tab between the cabals & channels panes   
+ctrl-{n,p}
+  move up/down channels/cabals
+alt-l  
+  toggle id suffixes on/off  
+`
+        let categories = new Set(["hotkeys"])
+
+        function printCategories () {
+          for (const cat of Array.from(categories).sort((a, b) => a.localeCompare(b))) {
+            fe.writeLine(`/help ${chalk.cyan(cat)}`)
+          } 
         }
-        fe.writeLine('alt-n')
-        fe.writeLine('  move between channels/cabals panes')
-        fe.writeLine('ctrl+{n,p}')
-        fe.writeLine('  move up/down channels/cabals')
+        var foundAliases = {}
+        const commands = {}
+        for (const key in cabal.client.commands) {
+          if (!cabal.client.commands[key].category) { continue }
+          cabal.client.commands[key].category.forEach(cat => {
+            if (!commands[cat]) commands[cat] = []
+            commands[cat].push(key)
+            categories.add(cat)
+          })
+        }
+        if (!arg) {
+          fe.writeLine("the help command is split into sections:")
+          printCategories()
+          return
+        } else if (arg && !categories.has(arg)) {
+          fe.writeLine(`${arg} is not a help section, try:`)
+          printCategories()
+          return
+        } else {
+          fe.writeLine(`help: ${chalk.cyan(arg)}`)
+          if (arg === "hotkeys") {
+            fe.writeLine(hotkeysExplanation)
+            return
+          }
+          // print all commands from the category defined by `arg`
+          commands[arg].forEach(key => {
+            if (foundAliases[key]) { return }
+            const slash = chalk.gray('/')
+            let command = key
+            if (cabal.client.aliases[key]) {
+              foundAliases[cabal.client.aliases[key]] = true
+              command += `, ${slash}${cabal.client.aliases[key]}`
+            }
+            fe.writeLine(`${slash}${command}`)
+            fe.writeLine(`  ${cabal.client.commands[key].help()}`)
+          })
+        }
       }
     }
   },
