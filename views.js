@@ -205,7 +205,7 @@ function renderNicks (state, width, height) {
 
 function renderChannelTopic (state, width, height) {
   var topic = state.topic || state.channel
-  var line = topic ? '➤ ' + topic : ''
+  var line = topic ? '➤ ' + topic + ' lol' : ''
   line = line.substring(0, width - 1)
   if (line.length === width - 1) {
     line = line.substring(0, line.length - 1) + '…'
@@ -228,7 +228,7 @@ function renderMessages (state, width, height) {
     if (state.config.messageIndent === 'nick') {
       indent += nickLength + 3 // + space and <>
     }
-    accum.push.apply(accum, util.wrapAnsi(msg.formatted, width, indent))
+    accum.push.apply(accum, util.wrapAnsi(msg.formatted + ' lol', width, indent))
     return accum
   }, [])
 
