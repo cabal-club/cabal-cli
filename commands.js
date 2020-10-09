@@ -23,11 +23,12 @@ Commander.prototype.setActiveCabal = function (cabal) {
       switch (msg.command) {
           case "channels":
             var {joined, channel, userCount, topic} = msg
-            var userPart = userCount ? `: ${userCount} ${userCount === 1 ? 'person' : 'people'}` : ''
+            var userPart = `${userCount} ${userCount === 1 ? 'person' : 'people'}` 
+            userPart = userCount > 0 ? ": " + chalk.cyan(userPart) : ''
             var shortTopic = topic.length > 40 ? topic.slice(0, 40) + '..' : topic || ''
             shortTopic = util.sanitizeString(shortTopic)
             channel = util.sanitizeString(channel)
-            txt = `${joined ? '*' : ' '} ${channel}${userPart} ${chalk.cyan(shortTopic)}`
+            txt = `${joined ? '*' : ' '} ${channel}${userPart} ${shortTopic}`
             break
       }
     }
