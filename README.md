@@ -16,6 +16,14 @@ chat with us:
 $ npm install --global cabal
 $ cabal --new
 ```
+If that fails the newest node is not yet supported by the stack. Try this:
+
+Install [nvm](https://github.com/nvm-sh/nvm), open a new shell and run
+```
+$ nvm install 12
+$ npm install --global cabal
+$ cabal --new
+```
 
 ## Usage
 #### Start a new instance:
