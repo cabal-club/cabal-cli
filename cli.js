@@ -180,6 +180,8 @@ const client = new Client({
       category: ["basics"],
       call: (cabal, res, arg) => {
         const hotkeysExplanation = `
+ctrl-l  
+  redraw the screen
 ctrl-u  
   clear input line  
 ctrl-w  

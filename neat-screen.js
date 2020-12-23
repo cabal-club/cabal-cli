@@ -231,6 +231,11 @@ function NeatScreen (props) {
     cycleCurrentPane.bind(this)(1)
   })
 
+  // redraw the screen
+  this.neat.input.on('ctrl-l', () => {
+      this.neat.clear()
+  })
+
   // cycle to next unread channel
   this.neat.input.on('ctrl-r', () => {
     // prioritize channels with mentions. after all those are exhausted, continue to unread channels

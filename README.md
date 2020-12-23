@@ -129,6 +129,8 @@ ctrl-{n,p}
 ```
 
 ## Hotkeys
+`ctrl-l`  
+&nbsp;&nbsp;&nbsp;&nbsp;redraw the screen  
 `ctrl-u`  
 &nbsp;&nbsp;&nbsp;&nbsp;clear input line  
 `ctrl-w`  
