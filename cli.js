@@ -60,6 +60,7 @@ var usage = `Usage
 
   Options:
     --seed    Start a headless seed for the specified cabal key
+    --port    Listen for cabal traffic on the passed in port (default: 13331)
 
     --new     Start a new cabal
     --nick    Your nickname
@@ -112,6 +113,7 @@ if (!fs.existsSync(rootconfig)) {
   saveConfig(rootconfig, {
     cabals: [],
     aliases: {},
+    preferredPort: 0,
     cache: {},
     frontend: {
       messageTimeformat: defaultMessageTimeformat,
@@ -130,6 +132,7 @@ try {
     }
     if (!config.cabals) { config.cabals = [] }
     if (!config.aliases) { config.aliases = {} }
+    if (!config.preferredPort) { config.preferredPort = 0 }
     if (!config.cache) { config.cache = {} }
     if (!config.frontend) { config.frontend = {} }
     if (!config.frontend.messageTimeformat) {
@@ -149,7 +152,8 @@ const client = new Client({
   maxFeeds: maxFeeds,
   config: {
     dbdir: archivesdir,
-    temp: args.temp
+    temp: args.temp,
+    preferredPort: args.port || config.preferredPort
   },
   commands: {
     // todo: custom commands
@@ -366,6 +370,16 @@ if (args.alias && args.key) {
   saveKeyAsAlias(args.key, args.alias)
   process.exit(0)
 }
+
+if (args.port) {
+  let port = parseInt(args.port)
+  if (isNaN(port) || port < 0 || port > 65535) {
+    logError(`${args.port} is not a valid port number`)
+    process.exit(1)
+  }
+  args.port = port
+}
+
 
 if (args.key) {
   // If a key is provided, place it at the top of the keys provided from the config

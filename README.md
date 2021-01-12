@@ -87,6 +87,14 @@ This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VP
 cabal <key> --seed
 ```
 
+#### Custom port
+If you have a tightly configured firewall and need to port-forward a port, the default port Cabal uses is port `13331`.
+You can change this with the `--port` flag, or setting `preferredPort` in your .cabal.yml config file.
+
+```
+cabal <key> --seed --port 7331
+```
+
 ## Commands
 ```py
 /add, /cabal
