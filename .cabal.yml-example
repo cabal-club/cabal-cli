@@ -11,3 +11,7 @@ frontend:
   # indent messages wrapped onto next line to
   # after: none, time, nick
   messageIndent: nick
+
+# change preferredPort from 0 if you want to communicate over a custom port
+# cabal defaults to port 13331
+preferredPort: 0
