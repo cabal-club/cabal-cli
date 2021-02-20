@@ -415,7 +415,7 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
     this.state.messages = []
     msgs.forEach((msg, i) => {
       const user = this.client.getUsers()[msg.key]
-      if (user && user.isHidden()) return
+      if (user && user.isHidden(opts.channel)) return
       this.state.messages.push(this.formatMessage(msg))
     })
     this.bus.emit('render')

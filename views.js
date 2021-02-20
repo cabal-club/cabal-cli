@@ -145,6 +145,7 @@ function renderHorizontalLine (chr, width, chlk) {
 function renderNicks (state, width, height) {
   // All known users
   var users = state.cabal.getChannelMembers()
+  const currentChannel = state.cabal.getCurrentChannel()
   users = Object.keys(users)
     .map(key => users[key])
     .sort(util.cmpUser)
@@ -179,15 +180,15 @@ function renderNicks (state, width, height) {
       // Duplicate nick count
       const duplicates = user.online ? onlineNickCount[name] : offlineNickCount[name]
       const dupecountStr = `(${duplicates})`
-      const modSigilLength = (user.isAdmin() || user.isModerator() || user.isHidden()) ? 1 : 0
+      const modSigilLength = (user.isAdmin(currentChannel) || user.isModerator(currentChannel) || user.isHidden(currentChannel)) ? 1 : 0
       outputName = util.sanitizeString(name).slice(0, width - modSigilLength)
       if (duplicates > 1) outputName = outputName.slice(0, width - dupecountStr.length - 2 - modSigilLength)
 
       // Colorize
       let colorizedName = outputName.slice()
-      if (user.isAdmin()) colorizedName = chalk.green('@') + colorizedName
-      else if (user.isModerator()) colorizedName = chalk.green('%') + colorizedName
-      else if (user.isHidden()) colorizedName = chalk.green('-') + colorizedName
+      if (user.isAdmin(currentChannel)) colorizedName = chalk.green('@') + colorizedName
+      else if (user.isModerator(currentChannel)) colorizedName = chalk.green('%') + colorizedName
+      else if (user.isHidden(currentChannel)) colorizedName = chalk.green('-') + colorizedName
       if (user.online) {
         colorizedName = chalk.bold(colorizedName)
       }
