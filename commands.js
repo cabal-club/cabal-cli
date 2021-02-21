@@ -1,5 +1,6 @@
 var util = require('./util')
 var chalk = require('chalk')
+var views = require('./views')
 
 function Commander (view, client) {
   if (!(this instanceof Commander)) return new Commander(view, client)
@@ -27,7 +28,8 @@ Commander.prototype.setActiveCabal = function (cabal) {
             var {joined, channel, userCount, topic} = msg
             var userPart = `${userCount} ${userCount === 1 ? 'person' : 'people'}` 
             userPart = userCount > 0 ? ": " + chalk.cyan(userPart) : ''
-            var shortTopic = topic && topic.length > 40 ? topic.slice(0, 40) + '..' : topic || ''
+            const maxTopicLength = views.getChatWidth() -  `00:00:00 -status-   ${channel}: 999 people `.length - 2 /* misc unknown padding that just makes it work v0v */
+            var shortTopic = topic && topic.length > maxTopicLength ? topic.slice(0, maxTopicLength-2) + '..' : topic || ''
             shortTopic = util.sanitizeString(shortTopic)
             channel = util.sanitizeString(channel)
             txt = `${joined ? '*' : ' '} ${channel}${userPart} ${shortTopic}`

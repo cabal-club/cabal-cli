@@ -8,11 +8,19 @@ const HEADER_ROWS = 8
 const NICK_COLS = 15
 const CHAN_COLS = 16
 
-module.exports = { big, small, getPageSize }
+module.exports = { big, small, getPageSize, getChatWidth }
 
 function getPageSize () {
   return process.stdout.rows - HEADER_ROWS
 }
+
+function getChatWidth () {
+  if (process.stdout.columns > 80) {
+    return process.stdout.columns - NICK_COLS - CHAN_COLS - 2 /* 2x vertical dividers */ - 1 /* nick col padding */
+  }
+  return process.stdout.columns
+}
+
 
 function small (state) {
   var screen = []
@@ -200,7 +208,6 @@ function renderNicks (state, width, height) {
   state.userScrollback = Math.min(state.userScrollback, formattedNicks.length - height)
   if (formattedNicks.length < height) state.userScrollback = 0
   var nickBlock = formattedNicks.slice(state.userScrollback, state.userScrollback + height)
-
   return nickBlock
 }
 
