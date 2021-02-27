@@ -397,6 +397,24 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
   }
   // register an event handler for all updates from the cabal
   cabal.on('update', this._updateHandler[cabal.key])
+  cabal.on("channel-archive", ({ channel, reason, key, isLocal }) => {
+    const issuer = this.client.getUsers()[key]
+    if (!issuer || isLocal ) { return }
+    reason = reason ? `(${chalk.cyan('reason:')} ${reason})` : ''
+    const issuerName = issuer && issuer.name ? issuer.name : key.slice(0, 8)
+    const text = `${issuerName} ${chalk.magenta('archived')} channel ${chalk.cyan(channel)}`
+    this.client.addStatusMessage({ text })
+    this.bus.emit("render")
+  })
+  cabal.on("channel-unarchive", (envelope) => {
+    const issuer = this.client.getUsers()[key]
+    if (!issuer || isLocal ) { return }
+    reason = reason ? `(${chalk.cyan('reason:')} ${reason})` : ''
+    const issuerName = issuer && issuer.name ? issuer.name : key.slice(0, 8)
+    const text = `${issuerName} ${chalk.magenta('unarchived')} channel ${chalk.cyan(channel)}`
+    this.client.addStatusMessage({ text })
+    this.bus.emit("render")
+  })
 }
 
 NeatScreen.prototype._pagesize = function () {
