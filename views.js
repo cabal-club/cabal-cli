@@ -8,10 +8,17 @@ const HEADER_ROWS = 8
 const NICK_COLS = 15
 const CHAN_COLS = 16
 
-module.exports = { big, small, getPageSize }
+module.exports = { big, small, getPageSize, getChatWidth }
 
 function getPageSize () {
   return process.stdout.rows - HEADER_ROWS
+}
+
+function getChatWidth () {
+  if (process.stdout.columns > 80) {
+    return process.stdout.columns - NICK_COLS - CHAN_COLS - 2 /* 2x vertical dividers */ - 1 /* nick col padding */
+  }
+  return process.stdout.columns
 }
 
 function small (state) {
@@ -145,6 +152,7 @@ function renderHorizontalLine (chr, width, chlk) {
 function renderNicks (state, width, height) {
   // All known users
   var users = state.cabal.getChannelMembers()
+  const currentChannel = state.cabal.getCurrentChannel()
   users = Object.keys(users)
     .map(key => users[key])
     .sort(util.cmpUser)
@@ -179,15 +187,15 @@ function renderNicks (state, width, height) {
       // Duplicate nick count
       const duplicates = user.online ? onlineNickCount[name] : offlineNickCount[name]
       const dupecountStr = `(${duplicates})`
-      const modSigilLength = (user.isAdmin() || user.isModerator() || user.isHidden()) ? 1 : 0
+      const modSigilLength = (user.isAdmin(currentChannel) || user.isModerator(currentChannel) || user.isHidden(currentChannel)) ? 1 : 0
       outputName = util.sanitizeString(name).slice(0, width - modSigilLength)
       if (duplicates > 1) outputName = outputName.slice(0, width - dupecountStr.length - 2 - modSigilLength)
 
       // Colorize
       let colorizedName = outputName.slice()
-      if (user.isAdmin()) colorizedName = chalk.green('@') + colorizedName
-      else if (user.isModerator()) colorizedName = chalk.green('%') + colorizedName
-      else if (user.isHidden()) colorizedName = chalk.green('-') + colorizedName
+      if (user.isAdmin(currentChannel)) colorizedName = chalk.green('@') + colorizedName
+      else if (user.isModerator(currentChannel)) colorizedName = chalk.green('%') + colorizedName
+      else if (user.isHidden(currentChannel)) colorizedName = chalk.green('-') + colorizedName
       if (user.online) {
         colorizedName = chalk.bold(colorizedName)
       }
@@ -199,7 +207,6 @@ function renderNicks (state, width, height) {
   state.userScrollback = Math.min(state.userScrollback, formattedNicks.length - height)
   if (formattedNicks.length < height) state.userScrollback = 0
   var nickBlock = formattedNicks.slice(state.userScrollback, state.userScrollback + height)
-
   return nickBlock
 }
 

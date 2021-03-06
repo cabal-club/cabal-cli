@@ -159,7 +159,7 @@ const client = new Client({
     // todo: custom commands
     panes: {
       help: () => 'set pane to navigate up and down in. panes: channels, cabals',
-      category: ["misc"],
+      category: ['misc'],
       call: (cabal, res, arg) => {
         if (arg === '' || !['channels', 'cabals'].includes(arg)) return
         fe.setPane(arg)
@@ -167,21 +167,21 @@ const client = new Client({
     },
     quit: {
       help: () => 'exit the cabal process',
-      category: ["basics"],
+      category: ['basics'],
       call: (cabal, res, arg) => {
         process.exit(0)
       }
     },
     exit: {
       help: () => 'exit the cabal process',
-      category: ["basics"],
+      category: ['basics'],
       call: (cabal, res, arg) => {
         process.exit(0)
       }
     },
     help: {
       help: () => 'display this help message',
-      category: ["basics"],
+      category: ['basics'],
       call: (cabal, res, arg) => {
         const hotkeysExplanation = `
 ctrl-l  
@@ -221,12 +221,12 @@ ctrl-{n,p}
 alt-l  
   toggle id suffixes on/off  
 `
-        let categories = new Set(["hotkeys"])
+        const categories = new Set(['hotkeys'])
 
         function printCategories () {
           for (const cat of Array.from(categories).sort((a, b) => a.localeCompare(b))) {
             fe.writeLine(`/help ${chalk.cyan(cat)}`)
-          } 
+          }
         }
         var foundAliases = {}
         const commands = {}
@@ -239,16 +239,14 @@ alt-l
           })
         }
         if (!arg) {
-          fe.writeLine("the help command is split into sections:")
+          fe.writeLine('the help command is split into sections:')
           printCategories()
-          return
         } else if (arg && !categories.has(arg)) {
           fe.writeLine(`${arg} is not a help section, try:`)
           printCategories()
-          return
         } else {
           fe.writeLine(`help: ${chalk.cyan(arg)}`)
-          if (arg === "hotkeys") {
+          if (arg === 'hotkeys') {
             fe.writeLine(hotkeysExplanation)
             return
           }
@@ -308,7 +306,7 @@ if (args.clear) {
 if (args.forget) {
   let success = false
   /* eslint no-inner-declarations: "off" */
-  function forgetCabal(k) {
+  function forgetCabal (k) {
     const index = config.cabals.indexOf(k)
     if (index >= 0) {
       config.cabals.splice(index, 1)
@@ -372,14 +370,13 @@ if (args.alias && args.key) {
 }
 
 if (args.port) {
-  let port = parseInt(args.port)
+  const port = parseInt(args.port)
   if (isNaN(port) || port < 0 || port > 65535) {
     logError(`${args.port} is not a valid port number`)
     process.exit(1)
   }
   args.port = port
 }
-
 
 if (args.key) {
   // If a key is provided, place it at the top of the keys provided from the config
@@ -441,7 +438,7 @@ if (args.qr) {
   process.exit(1)
 }
 
-function start(keys, frontendConfig) {
+function start (keys, frontendConfig) {
   if (args.key && args.message) {
     publishSingleMessage({
       key: args.key,
@@ -491,13 +488,13 @@ function start(keys, frontendConfig) {
   })
 }
 
-function trackAndPrintEvents(cabal) {
+function trackAndPrintEvents (cabal) {
   cabal.ready(() => {
     // Listen for feeds
     cabal.kcore._logs.feeds().forEach(listen)
     cabal.kcore._logs.on('feed', listen)
 
-    function listen(feed) {
+    function listen (feed) {
       feed.on('download', idx => {
         process.stdout.write('.')
       })
@@ -516,18 +513,18 @@ function trackAndPrintEvents(cabal) {
   })
 }
 
-function getKey(str) {
+function getKey (str) {
   // return key if what was passed in was a saved alias
   if (str in config.aliases) { return config.aliases[str] }
   // else assume it's a cabal key
   return str
 }
 
-function logError(msg) {
+function logError (msg) {
   console.error(`${chalk.red('cabal:')} ${msg}`)
 }
 
-function findConfigPath() {
+function findConfigPath () {
   var currentDirConfigFilename = '.cabal.yml'
   if (args.config && fs.statSync(args.config).isDirectory()) {
     return path.join(args.config, `v${Client.getDatabaseVersion()}`, 'config.yml')
@@ -539,7 +536,7 @@ function findConfigPath() {
   return rootconfig
 }
 
-function saveConfig(path, config) {
+function saveConfig (path, config) {
   // make sure config is well-formatted (contains all config options)
   if (!config.cabals) { config.cabals = [] }
   config.cabals = Array.from(new Set(config.cabals)) // dedupe array entries
@@ -550,13 +547,13 @@ function saveConfig(path, config) {
   fs.writeFileSync(path, data, 'utf8')
 }
 
-function saveKeyAsAlias(key, alias) {
+function saveKeyAsAlias (key, alias) {
   config.aliases[alias] = key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(key)} as ${chalk.blueBright(alias)}`)
 }
 
-function publishSingleMessage({ key, channel, message, messageType, timeout }) {
+function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
   console.log(`Publishing message to channel - ${channel || 'default'}: ${message}`)
   client.addCabal(key).then(cabal => cabal.publishMessage({
     type: messageType || 'chat/text',
@@ -569,7 +566,7 @@ function publishSingleMessage({ key, channel, message, messageType, timeout }) {
   setTimeout(function () { process.exit(0) }, timeout || 5000)
 }
 
-function getClientVersion() {
+function getClientVersion () {
   if (packageJSONVersion) {
     return packageJSONVersion
   }

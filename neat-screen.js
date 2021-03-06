@@ -233,7 +233,7 @@ function NeatScreen (props) {
 
   // redraw the screen
   this.neat.input.on('ctrl-l', () => {
-      this.neat.clear()
+    this.neat.clear()
   })
 
   // cycle to next unread channel
@@ -397,6 +397,19 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
   }
   // register an event handler for all updates from the cabal
   cabal.on('update', this._updateHandler[cabal.key])
+  // create & register event handlers for channel archiving events
+  const processChannelArchiving = (type, { channel, reason, key, isLocal }) => {
+    const issuer = this.client.getUsers()[key]
+    if (!issuer || isLocal) { return }
+    reason = reason ? `(${chalk.cyan('reason:')} ${reason})` : ''
+    const issuerName = issuer && issuer.name ? issuer.name : key.slice(0, 8)
+    const action = type === 'archive' ? 'archived' : 'unarchived'
+    const text = `${issuerName} ${chalk.magenta(action)} channel ${chalk.cyan(channel)} ${reason}`
+    this.client.addStatusMessage({ text })
+    this.bus.emit('render')
+  }
+  cabal.on('channel-archive', (envelope) => { processChannelArchiving('archive', envelope) })
+  cabal.on('channel-unarchive', (envelope) => { processChannelArchiving('unarchive', envelope) })
 }
 
 NeatScreen.prototype._pagesize = function () {
@@ -415,7 +428,7 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
     this.state.messages = []
     msgs.forEach((msg, i) => {
       const user = this.client.getUsers()[msg.key]
-      if (user && user.isHidden()) return
+      if (user && user.isHidden(opts.channel)) return
       this.state.messages.push(this.formatMessage(msg))
     })
     this.bus.emit('render')

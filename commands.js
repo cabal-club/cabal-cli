@@ -1,5 +1,6 @@
 var util = require('./util')
 var chalk = require('chalk')
+var views = require('./views')
 
 function Commander (view, client) {
   if (!(this instanceof Commander)) return new Commander(view, client)
@@ -10,7 +11,7 @@ function Commander (view, client) {
   this.view = view
   this.pattern = (/^\/(\w*)\s*(.*)/)
   this.history = []
-  this.historyIndex = -1 // negative: new msg. >=0: index from the last item
+  this.historyIndex = -1 // negative: new msg, >=0: index from the last item
 }
 
 Commander.prototype.setActiveCabal = function (cabal) {
@@ -19,17 +20,20 @@ Commander.prototype.setActiveCabal = function (cabal) {
   this.cabal.on('info', (msg) => {
     var txt = typeof msg === 'string' ? msg : (msg && msg.text ? msg.text : '')
     txt = util.sanitizeString(txt)
-    if (msg.command) {
-      switch (msg.command) {
-          case "channels":
-            var {joined, channel, userCount, topic} = msg
-            var userPart = `${userCount} ${userCount === 1 ? 'person' : 'people'}` 
-            userPart = userCount > 0 ? ": " + chalk.cyan(userPart) : ''
-            var shortTopic = topic.length > 40 ? topic.slice(0, 40) + '..' : topic || ''
-            shortTopic = util.sanitizeString(shortTopic)
-            channel = util.sanitizeString(channel)
-            txt = `${joined ? '*' : ' '} ${channel}${userPart} ${shortTopic}`
-            break
+    const meta = msg.meta
+    if (meta.command) {
+      switch (meta.command) {
+        case 'channels':
+          if (meta.seq === 0) break // don't rewrite the payload of the first `/channels` message
+          var { joined, channel, userCount, topic } = msg
+          var userPart = `${userCount} ${userCount === 1 ? 'person' : 'people'}`
+          userPart = userCount > 0 ? ': ' + chalk.cyan(userPart) : ''
+          var maxTopicLength = views.getChatWidth() - `00:00:00 -status-   ${channel}: 999 people `.length - 2 /* misc unknown padding that just makes it work v0v */
+          var shortTopic = topic && topic.length > maxTopicLength ? topic.slice(0, maxTopicLength - 2) + '..' : topic || ''
+          shortTopic = util.sanitizeString(shortTopic)
+          channel = util.sanitizeString(channel)
+          txt = `${joined ? '*' : ' '} ${channel}${userPart} ${shortTopic}`
+          break
       }
     }
     this.view.writeLine(txt)
