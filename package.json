@@ -1,6 +1,6 @@
 {
   "name": "cabal",
-  "version": "13.3.7",
+  "version": "13.4.0",
   "description": "p2p chat",
   "bin": {
     "cabal": "cli.js"
