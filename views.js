@@ -21,7 +21,6 @@ function getChatWidth () {
   return process.stdout.columns
 }
 
-
 function small (state) {
   var screen = []
   var titlebarSize = Math.ceil(linkSize(state) / process.stdout.columns)

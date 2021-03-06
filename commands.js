@@ -23,17 +23,17 @@ Commander.prototype.setActiveCabal = function (cabal) {
     const meta = msg.meta
     if (meta.command) {
       switch (meta.command) {
-          case "channels":
-            if (meta.seq === 0) break // don't rewrite the payload of the first `/channels` message
-            var {joined, channel, userCount, topic} = msg
-            var userPart = `${userCount} ${userCount === 1 ? 'person' : 'people'}` 
-            userPart = userCount > 0 ? ": " + chalk.cyan(userPart) : ''
-            const maxTopicLength = views.getChatWidth() -  `00:00:00 -status-   ${channel}: 999 people `.length - 2 /* misc unknown padding that just makes it work v0v */
-            var shortTopic = topic && topic.length > maxTopicLength ? topic.slice(0, maxTopicLength-2) + '..' : topic || ''
-            shortTopic = util.sanitizeString(shortTopic)
-            channel = util.sanitizeString(channel)
-            txt = `${joined ? '*' : ' '} ${channel}${userPart} ${shortTopic}`
-            break
+        case 'channels':
+          if (meta.seq === 0) break // don't rewrite the payload of the first `/channels` message
+          var { joined, channel, userCount, topic } = msg
+          var userPart = `${userCount} ${userCount === 1 ? 'person' : 'people'}`
+          userPart = userCount > 0 ? ': ' + chalk.cyan(userPart) : ''
+          var maxTopicLength = views.getChatWidth() - `00:00:00 -status-   ${channel}: 999 people `.length - 2 /* misc unknown padding that just makes it work v0v */
+          var shortTopic = topic && topic.length > maxTopicLength ? topic.slice(0, maxTopicLength - 2) + '..' : topic || ''
+          shortTopic = util.sanitizeString(shortTopic)
+          channel = util.sanitizeString(channel)
+          txt = `${joined ? '*' : ' '} ${channel}${userPart} ${shortTopic}`
+          break
       }
     }
     this.view.writeLine(txt)
