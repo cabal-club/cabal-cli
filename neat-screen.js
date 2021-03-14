@@ -17,6 +17,8 @@ function NeatScreen (props) {
   this.commander = Commander(this, this.client)
   this.lastInputTime = 0
   this.inputTimer = null
+  this.BACKLOG_BATCH = 250
+  this.additionalBacklog = 0
   var self = this
 
   this.neat = neatLog(this.renderApp.bind(this), {
@@ -422,6 +424,7 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
   opts.newerThan = opts.newerThan || null
   opts.olderThan = opts.olderThan || Date.now()
   opts.amount = opts.amount || this._pagesize() * 2.5
+  opts.amount += this.additionalBacklog
 
   // var unreadCount = this.client.getNumberUnreadMessages()
   this.client.getMessages(opts, (msgs) => {
@@ -465,11 +468,19 @@ NeatScreen.prototype.setPane = function (pane) {
   this.bus.emit('render')
 }
 
+NeatScreen.prototype.moreBacklog = function () {
+  this.additionalBacklog += this.BACKLOG_BATCH
+  const text =`adding ${this.BACKLOG_BATCH} messages to backlog, total extra messages: ${this.additionalBacklog}`
+  this.client.addStatusMessage({ text })
+  this.processMessages()
+}
+
 NeatScreen.prototype.loadChannel = function (channel) {
   this.client.focusChannel(channel)
   // clear the old channel state
   this.state.messages = []
   this.state.topic = ''
+  this.additionalBacklog = 0
 
   this.processMessages()
   // load the topic
