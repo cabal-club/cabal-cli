@@ -157,6 +157,13 @@ const client = new Client({
   },
   commands: {
     // todo: custom commands
+    more: {
+      help: () => 'adds more messages to the backlog of current channel',
+      category: ['misc'],
+      call: (cabal, res, arg) => {
+        fe.moreBacklog()
+      }
+    },
     panes: {
       help: () => 'set pane to navigate up and down in. panes: channels, cabals',
       category: ['misc'],
