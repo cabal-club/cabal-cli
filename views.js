@@ -76,8 +76,15 @@ function linkSize (state) {
 
 function renderPrompt (state) {
   var name = util.sanitizeString(state.cabal ? state.cabal.getLocalName() : 'unknown')
+  var channel = state.cabal.getCurrentChannel()
+  var channelName = channel
+  if (state.cabal.isChannelPrivate(channel)) {
+    const recipient = state.cabal.getUsers()[channelName]
+    const recipientName = recipient.name || recipient.slice(0,8)
+    channelName = "pm with " + recipientName
+  }
   return [
-    `[${chalk.cyan(name)}:${state.cabal.getCurrentChannel()}] ${state.neat.input.line()}`
+    `[${chalk.cyan(name)}:${channelName}] ${state.neat.input.line()}`
   ]
 }
 

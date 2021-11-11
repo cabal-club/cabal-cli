@@ -424,7 +424,7 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
     this.client.addStatusMessage({ text:  chalk.magentaBright(text) })
   })
     
-  cabal.on("publish-private-message", ({ message }) => {
+  cabal.on("publish-private-message", message => {
     // don't display the notification if we're already looking at the pm it came from
     if (cabal.getCurrentChannel() === message.content.channel) { return }
     const users = cabal.getUsers()
