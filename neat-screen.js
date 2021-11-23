@@ -256,7 +256,7 @@ function NeatScreen (props) {
       if (i < 0) i += this.state.cabals.length
       setCabalByIndex.bind(this)(i)
     } else {
-      var channels = this.state.cabal.getJoinedChannels()
+      var channels = this.state.cabal.getChannels({ includePM: true })
       i = channels.indexOf(this.state.cabal.getCurrentChannel())
       i += dir * 1
       i = i % channels.length
@@ -271,7 +271,7 @@ function NeatScreen (props) {
   }
 
   function setChannelByIndex (n) {
-    var channels = self.state.cabal.getJoinedChannels()
+    var channels = self.state.cabal.getChannels({ includePM: true })
     if (n < 0 || n >= channels.length) return
     self.loadChannel(channels[n])
   }
@@ -412,6 +412,32 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
   }
   cabal.on('channel-archive', (envelope) => { processChannelArchiving('archive', envelope) })
   cabal.on('channel-unarchive', (envelope) => { processChannelArchiving('unarchive', envelope) })
+
+  cabal.on("private-message", (envelope) => {
+    // never display PMs inline from a hidden user
+    if (envelope.author.isHidden()) return
+    // don't display the notif if we're just sending something to ourselves (covered by publish-private-message event)
+    if (envelope.author.key === cabal.getLocalUser().key) return
+    // don't display the notification if we're already looking at the pm it came from
+    if (cabal.getCurrentChannel() === envelope.channel) { return }
+    const text = `PM [${envelope.author.name}]: ${envelope.message.value.content.text}`
+    this.client.addStatusMessage({ text:  chalk.magentaBright(text) })
+  })
+    
+  cabal.on("publish-private-message", message => {
+    // don't display the notification if we're already looking at the pm it came from
+    if (cabal.getCurrentChannel() === message.content.channel) { return }
+    const users = cabal.getUsers()
+    const pubkey = message.content.channel
+    let name = pubkey.slice(0, 8)
+    if (pubkey in users) {
+    // never display PMs inline from a hidden user
+      if (users[pubkey].isHidden()) return
+      name = users[pubkey].name
+    }
+    const text = `PM to [${name}]: ${message.content.text}`
+    this.client.addStatusMessage({ text:  chalk.magentaBright(text) })
+  })
 }
 
 NeatScreen.prototype._pagesize = function () {

@@ -76,8 +76,15 @@ function linkSize (state) {
 
 function renderPrompt (state) {
   var name = util.sanitizeString(state.cabal ? state.cabal.getLocalName() : 'unknown')
+  var channel = state.cabal.getCurrentChannel()
+  var channelName = channel
+  if (state.cabal.isChannelPrivate(channel)) {
+    const recipient = state.cabal.getUsers()[channelName]
+    const recipientName = recipient.name || recipient.slice(0,8)
+    channelName = "pm with " + recipientName
+  }
   return [
-    `[${chalk.cyan(name)}:${state.cabal.getCurrentChannel()}] ${state.neat.input.line()}`
+    `[${chalk.cyan(name)}:${channelName}] ${state.neat.input.line()}`
   ]
 }
 
@@ -107,11 +114,18 @@ function renderCabals (state, width, height) {
 }
 
 function renderChannels (state, width, height) {
-  const channels = state.cabal.getJoinedChannels()
+  const channels = state.cabal.getChannels({"includePM": true})
   const numPrefixWidth = String(channels.length).length
-  return channels
+
+  const users = state.cabal.getUsers()
+  return channels 
     .map((channel, idx) => {
+      const isPrivate = state.cabal.isChannelPrivate(channel)
       var channelTruncated = channel.substring(0, width - 5)
+      if (isPrivate) {
+        // if private, `channel` contains the pubkey of who we are chatting with
+        channelTruncated = `+${getPrintedName(users[channel])}`
+      }
       var unread = channel in state.unreadChannels
       var mentioned = channel in state.mentions
 
@@ -126,6 +140,7 @@ function renderChannels (state, width, height) {
       if (state.cabal.getCurrentChannel() === channel) {
         var fillWidth = width - channelTruncated.length - 5
         var fill = (fillWidth > 0) ? new Array(fillWidth).fill(' ').join('') : ''
+        if (isPrivate) return ' ' + chalk.whiteBright(chalk.bgMagenta(numPrefix + channelTruncated + fill))
         if (state.selectedWindowPane === 'channels') {
           return ' ' + chalk.whiteBright(chalk.bgBlue(numPrefix + channelTruncated + fill))
         } else {
@@ -134,6 +149,7 @@ function renderChannels (state, width, height) {
       } else {
         if (mentioned) return ' ' + numPrefix + '@' + chalk.magenta(channelTruncated)
         else if (unread) return ' ' + numPrefix + '*' + chalk.green(channelTruncated)
+        else if (isPrivate) return ' ' + numPrefix + chalk.cyan(channelTruncated)
         else return ' ' + numPrefix + channelTruncated
       }
     }).slice(0, height)
@@ -149,6 +165,11 @@ function renderHorizontalLine (chr, width, chlk) {
   return [txt]
 }
 
+function getPrintedName (user) {
+  if (user && user.name) return user.name
+  else return user.key.slice(0, 8)
+}
+
 function renderNicks (state, width, height) {
   // All known users
   var users = state.cabal.getChannelMembers()
@@ -157,10 +178,6 @@ function renderNicks (state, width, height) {
     .map(key => users[key])
     .sort(util.cmpUser)
 
-  function getPrintedName (user) {
-    if (user && user.name) return user.name
-    else return user.key.slice(0, 8)
-  }
 
   // Count how many occurances of same nickname there are
   const onlineNickCount = {}
@@ -218,7 +235,11 @@ function renderChannelTopic (state, width, height) {
     line = line.substring(0, line.length - 1) + '…'
   }
   line = line + new Array(width - line.length - 1).fill(' ').join('')
-  return [chalk.whiteBright(chalk.bgBlue(line))]
+
+  const isPrivate = state.cabal.isChannelPrivate(state.cabal.channel)
+  // visually distinguish private channel from all other channels
+  if (isPrivate) { return [chalk.whiteBright(chalk.bgMagenta(line))] }
+  else { return [chalk.whiteBright(chalk.bgBlue(line))] }
 }
 
 function renderMessages (state, width, height) {
