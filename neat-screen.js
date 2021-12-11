@@ -256,7 +256,7 @@ function NeatScreen (props) {
       if (i < 0) i += this.state.cabals.length
       setCabalByIndex.bind(this)(i)
     } else {
-      var channels = this.state.cabal.getChannels({ includePM: true })
+      var channels = this.state.cabal.getChannels({ includePM: true, onlyJoined: true })
       i = channels.indexOf(this.state.cabal.getCurrentChannel())
       i += dir * 1
       i = i % channels.length
@@ -271,7 +271,7 @@ function NeatScreen (props) {
   }
 
   function setChannelByIndex (n) {
-    var channels = self.state.cabal.getChannels({ includePM: true })
+    var channels = self.state.cabal.getChannels({ includePM: true, onlyJoined: true })
     if (n < 0 || n >= channels.length) return
     self.loadChannel(channels[n])
   }
