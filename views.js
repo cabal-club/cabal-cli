@@ -80,7 +80,7 @@ function renderPrompt (state) {
   var channelName = channel
   if (state.cabal.isChannelPrivate(channel)) {
     const recipient = state.cabal.getUsers()[channelName]
-    const recipientName = recipient.name || recipient.slice(0,8)
+    const recipientName = recipient.name || recipient.key.slice(0,8)
     channelName = "pm with " + recipientName
   }
   return [
