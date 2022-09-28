@@ -490,7 +490,11 @@ function start (keys, frontendConfig) {
       })
     }
   }).catch((e) => {
-    if (e) { console.error(e) } else { console.error("Error: Couldn't resolve one of the following cabal keys:", chalk.yellow(keys.join(' '))) }
+    if (!e || e.toString() === 'Error: dns failed to resolve') {
+      console.error("Error: Couldn't resolve one of the following cabal keys:", chalk.yellow(keys.join(' ')))
+    } else {
+      console.error(e)
+    }
     process.exit(1)
   })
 }
