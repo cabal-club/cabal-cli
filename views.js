@@ -80,8 +80,8 @@ function renderPrompt (state) {
   var channelName = channel
   if (state.cabal.isChannelPrivate(channel)) {
     const recipient = state.cabal.getUsers()[channelName]
-    const recipientName = recipient.name || recipient.key.slice(0,8)
-    channelName = "pm with " + recipientName
+    const recipientName = recipient.name || recipient.key.slice(0, 8)
+    channelName = 'pm with ' + recipientName
   }
   return [
     `[${chalk.cyan(name)}:${channelName}] ${state.neat.input.line()}`
@@ -114,11 +114,11 @@ function renderCabals (state, width, height) {
 }
 
 function renderChannels (state, width, height) {
-  const channels = state.cabal.getChannels({"includePM": true, onlyJoined: true })
+  const channels = state.cabal.getChannels({ includePM: true, onlyJoined: true })
   const numPrefixWidth = String(channels.length).length
 
   const users = state.cabal.getUsers()
-  return channels 
+  return channels
     .map((channel, idx) => {
       const isPrivate = state.cabal.isChannelPrivate(channel)
       var channelTruncated = channel.substring(0, width - 5)
@@ -177,7 +177,6 @@ function renderNicks (state, width, height) {
   users = Object.keys(users)
     .map(key => users[key])
     .sort(util.cmpUser)
-
 
   // Count how many occurances of same nickname there are
   const onlineNickCount = {}
@@ -238,8 +237,7 @@ function renderChannelTopic (state, width, height) {
 
   const isPrivate = state.cabal.isChannelPrivate(state.cabal.channel)
   // visually distinguish private channel from all other channels
-  if (isPrivate) { return [chalk.whiteBright(chalk.bgMagenta(line))] }
-  else { return [chalk.whiteBright(chalk.bgBlue(line))] }
+  if (isPrivate) { return [chalk.whiteBright(chalk.bgMagenta(line))] } else { return [chalk.whiteBright(chalk.bgBlue(line))] }
 }
 
 function renderMessages (state, width, height) {

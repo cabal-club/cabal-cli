@@ -413,7 +413,7 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
   cabal.on('channel-archive', (envelope) => { processChannelArchiving('archive', envelope) })
   cabal.on('channel-unarchive', (envelope) => { processChannelArchiving('unarchive', envelope) })
 
-  cabal.on("private-message", (envelope) => {
+  cabal.on('private-message', (envelope) => {
     // never display PMs inline from a hidden user
     if (envelope.author.isHidden()) return
     // don't display the notif if we're just sending something to ourselves (covered by publish-private-message event)
@@ -421,10 +421,10 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
     // don't display the notification if we're already looking at the pm it came from
     if (cabal.getCurrentChannel() === envelope.channel) { return }
     const text = `PM [${envelope.author.name}]: ${envelope.message.value.content.text}`
-    this.client.addStatusMessage({ text:  chalk.magentaBright(text) })
+    this.client.addStatusMessage({ text: chalk.magentaBright(text) })
   })
-    
-  cabal.on("publish-private-message", message => {
+
+  cabal.on('publish-private-message', message => {
     // don't display the notification if we're already looking at the pm it came from
     if (cabal.getCurrentChannel() === message.content.channel) { return }
     const users = cabal.getUsers()
@@ -436,7 +436,7 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
       name = users[pubkey].name
     }
     const text = `PM to [${name}]: ${message.content.text}`
-    this.client.addStatusMessage({ text:  chalk.magentaBright(text) })
+    this.client.addStatusMessage({ text: chalk.magentaBright(text) })
   })
 }
 
@@ -496,7 +496,7 @@ NeatScreen.prototype.setPane = function (pane) {
 
 NeatScreen.prototype.moreBacklog = function () {
   this.additionalBacklog += this.BACKLOG_BATCH
-  const text =`adding ${this.BACKLOG_BATCH} messages to backlog, total extra messages: ${this.additionalBacklog}`
+  const text = `adding ${this.BACKLOG_BATCH} messages to backlog, total extra messages: ${this.additionalBacklog}`
   this.client.addStatusMessage({ text })
   this.processMessages()
 }
