@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "ansi-escapes": "^4.3.1",
-    "cabal-client": "^7.3.2",
+    "cabal-client": "^7.3.3",
     "chalk": "^4.0.0",
     "js-yaml": "^3.13.1",
     "minimist": "^1.2.5",
@@ -15,7 +15,6 @@
     "neat-log": "^3.1.0",
     "neato-emoji-converter": "^1.1.2",
     "node-camera-qr-reader": "^1.0.1",
-    "noise-protocol": "3.0.1",
     "signal-exit": "^3.0.3",
     "strftime": "^0.10.0",
     "strip-ansi": "^6.0.0",
