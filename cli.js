@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-var Client = require('cabal-client')
+var Client = require('../mock.js').Client
+console.log(Client)
 var minimist = require('minimist')
 var fs = require('fs')
 var path = require('path')

@@ -59,7 +59,7 @@ function NeatScreen (props) {
         if (matchingCommands.length === 1) {
           this.neat.input.set('/' + matchingCommands[0])
         }
-      // argument completion
+        // argument completion
       } else if (parts.length === 2) {
         const command = parts[0].slice(1)
         // we only have channel completion atm: return if command is unrelated to channels
@@ -298,6 +298,7 @@ function NeatScreen (props) {
     state.topic = ''
     state.unreadChannels = {}
     state.mentions = {}
+    state.moderationKeys = []
     state.selectedWindowPane = 'channels'
     state.windowPanes = [state.selectedWindowPane]
     state.config = this.config
@@ -354,7 +355,7 @@ NeatScreen.prototype.initializeCabalClient = function () {
   this.state.userScrollback = 0
   this.client.getCabalKeys().forEach((key) => {
     welcomeMessage.map((m) => this.client.getDetails(key).addStatusMessage({ text: m }, '!status'))
-    this.state.moderationKeys = this.state.cabal.core.adminKeys.map((k) => { return { key: k, type: 'admin' } }).concat(this.state.cabal.core.modKeys.map((k) => { return { key: k, type: 'mod' } }))
+    // this.state.moderationKeys = this.state.cabal.core.adminKeys.map((k) => { return { key: k, type: 'admin' } }).concat(this.state.cabal.core.modKeys.map((k) => { return { key: k, type: 'mod' } }))
     if (this.state.moderationKeys.length > 0) {
       const moderationMessage = [
         'you joined via a moderation key, meaning you are allowing someone else to help administer moderation on your behalf.']
@@ -371,7 +372,7 @@ NeatScreen.prototype.initializeCabalClient = function () {
   })
   this.bus.emit('render')
   this.registerUpdateHandler(details)
-  this.loadChannel('!status')
+  this.loadChannel('default')
 }
 
 // check for collisions in the first four hex chars of the users in the cabal. used in NeatScreen.prototype.formatMessage
