@@ -414,31 +414,32 @@ NeatScreen.prototype.registerUpdateHandler = function (cabal) {
   cabal.on('channel-archive', (envelope) => { processChannelArchiving('archive', envelope) })
   cabal.on('channel-unarchive', (envelope) => { processChannelArchiving('unarchive', envelope) })
 
-  cabal.on('private-message', (envelope) => {
-    // never display PMs inline from a hidden user
-    if (envelope.author.isHidden()) return
-    // don't display the notif if we're just sending something to ourselves (covered by publish-private-message event)
-    if (envelope.author.key === cabal.getLocalUser().key) return
-    // don't display the notification if we're already looking at the pm it came from
-    if (cabal.getCurrentChannel() === envelope.channel) { return }
-    const text = `PM [${envelope.author.name}]: ${envelope.message.value.content.text}`
-    this.client.addStatusMessage({ text: chalk.magentaBright(text) })
-  })
-
-  cabal.on('publish-private-message', message => {
-    // don't display the notification if we're already looking at the pm it came from
-    if (cabal.getCurrentChannel() === message.content.channel) { return }
-    const users = cabal.getUsers()
-    const pubkey = message.content.channel
-    let name = pubkey.slice(0, 8)
-    if (pubkey in users) {
-    // never display PMs inline from a hidden user
-      if (users[pubkey].isHidden()) return
-      name = users[pubkey].name
-    }
-    const text = `PM to [${name}]: ${message.content.text}`
-    this.client.addStatusMessage({ text: chalk.magentaBright(text) })
-  })
+  /* TODO (2023-08-02): re-enable PM */
+//  cabal.on('private-message', (envelope) => {
+//    // never display PMs inline from a hidden user
+//    if (envelope.author.isHidden()) return
+//    // don't display the notif if we're just sending something to ourselves (covered by publish-private-message event)
+//    if (envelope.author.key === cabal.getLocalUser().key) return
+//    // don't display the notification if we're already looking at the pm it came from
+//    if (cabal.getCurrentChannel() === envelope.channel) { return }
+//    const text = `PM [${envelope.author.name}]: ${envelope.message.value.content.text}`
+//    this.client.addStatusMessage({ text: chalk.magentaBright(text) })
+//  })
+//
+//  cabal.on('publish-private-message', message => {
+//    // don't display the notification if we're already looking at the pm it came from
+//    if (cabal.getCurrentChannel() === message.content.channel) { return }
+//    const users = cabal.getUsers()
+//    const pubkey = message.content.channel
+//    let name = pubkey.slice(0, 8)
+//    if (pubkey in users) {
+//    // never display PMs inline from a hidden user
+//      if (users[pubkey].isHidden()) return
+//      name = users[pubkey].name
+//    }
+//    const text = `PM to [${name}]: ${message.content.text}`
+//    this.client.addStatusMessage({ text: chalk.magentaBright(text) })
+//  })
 }
 
 NeatScreen.prototype._pagesize = function () {
@@ -522,103 +523,101 @@ NeatScreen.prototype.formatMessage = function (msg) {
   var highlight = false
   /* legend for `msg` below
    msg = {
-     key: ''
-     value: {
-       timestamp: ''
-       type: ''
-       content: {
-         text: ''
-       }
-     }
+     publicKey: ''
+     signature: '',
+     postType: 0 (post/text) || -1 (status) || -2 (date changed)
+     postHash: '',
+     timestamp: ''
+     text: ''
+     channel: ''
    }
    */
-  if (!msg.value.type) { msg.value.type = 'chat/text' }
+  if (!msg.postType) { msg.postType = 0 }
   // virtual message type, handled by cabal-client
-  if (msg.value.type === 'status/date-changed') {
+  if (msg.postType === -2) /*'status/date-changed' */ {
     return {
-      formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`,
+      formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.timestamp)))}`,
       raw: msg
     }
   }
-  if (msg.value.content && msg.value.timestamp) {
-    const users = this.client.getUsers()
-    const authorSource = users[msg.key] || msg
+  const users = this.client.getUsers()
+  const authorSource = users[msg.publicKey] || msg
 
-    let author = util.sanitizeString(authorSource.name || authorSource.key.slice(0, 8))
-    // add author field for later use in calculating the left-padding of multi-line messages
-    msg.author = author
-    var localNick = 'uninitialized'
-    if (this.state) { localNick = this.state.cabal.getLocalName() }
+  let author = util.sanitizeString(authorSource.name || authorSource.publicKey.slice(0, 8))
+  // add author field for later use in calculating the left-padding of multi-line messages
+  msg.author = author
+  var localNick = 'uninitialized'
+  if (this.state) { localNick = this.state.cabal.getLocalName() }
 
-    /* sanitize user inputs to prevent interface from breaking */
-    localNick = util.sanitizeString(localNick)
-    var msgtxt = msg.value.content.text
-    if (msg.value.type !== 'status') {
-      msgtxt = util.sanitizeString(msgtxt)
-    }
-    var content = markdown(msgtxt)
+  /* sanitize user inputs to prevent interface from breaking */
+  localNick = util.sanitizeString(localNick)
+  var msgtxt = msg.text
+  if (msg.postType !== -1) {
+    msgtxt = util.sanitizeString(msgtxt)
+  }
+  var content = markdown(msgtxt)
 
-    if (localNick.length > 0 && msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
+  if (localNick.length > 0 && msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
-    if (authorSource.constructor.name === 'User') {
-      if (authorSource.isAdmin()) author = chalk.green('@') + author
-      else if (authorSource.isModerator()) author = chalk.green('%') + author
-    }
+  if (authorSource.constructor.name === 'User') {
+    if (authorSource.isAdmin()) author = chalk.green('@') + author
+    else if (authorSource.isModerator()) author = chalk.green('%') + author
+  }
 
-    var color = keyToColour(msg.key) || colours[5]
+  var color = keyToColour(msg.publicKey) || colours[5]
 
-    var timestamp = `${chalk.dim(formatTime(msg.value.timestamp, this.config.messageTimeformat))}`
-    let authorText
-    if (msg.value.type === 'status' || msg.value.type === 'chat/moderation') {
-      highlight = false // never highlight from status
-      authorText = `${chalk.dim('-')}${chalk.cyan('status')}${chalk.dim('-')}`
+  var timestamp = `${chalk.dim(formatTime(msg.timestamp, this.config.messageTimeformat))}`
+  let authorText
+  if (msg.postType === -1) /* || msg.value.type === 'chat/moderation') TODO (2023-08-02): add mod types */  {
+    highlight = false // never highlight from status
+    authorText = `${chalk.dim('-')}${chalk.cyan('status')}${chalk.dim('-')}`
+  } else {
+    /* a user wrote a message, not the !status virtual message */
+
+    // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the largest length that
+    // lets us disambiguate between the two ids in the collision
+    const collision = authorSource.key && this.state.collision[authorSource.key.slice(0, 4)]
+    const pubid = collision && authorSource.key && authorSource.key.slice(0, collision.idlen)
+    if (pubid && this.state.cabal.showIds) {
+      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('.')}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
     } else {
-      /* a user wrote a message, not the !status virtual message */
-
-      // if there is a collision in the first 4 characters of a pub key in the cabal, expand it to the largest length that
-      // lets us disambiguate between the two ids in the collision
-      const collision = authorSource.key && this.state.collision[authorSource.key.slice(0, 4)]
-      const pubid = collision && authorSource.key && authorSource.key.slice(0, collision.idlen)
-      if (pubid && this.state.cabal.showIds) {
-        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('.')}${chalk.inverse(chalk.cyan(pubid))}${chalk.dim('>')}`
-      } else {
-        authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
-      }
-
-      var emote = (msg.value.type === 'chat/emote')
-      if (pubid && emote) {
-        authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim('.') + chalk.inverse(chalk.cyan(pubid)) : ''}`
-        content = `${chalk.dim(msgtxt)}`
-      }
+      authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
     }
 
-    if (msg.value.type === 'chat/topic') {
-      content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
-    } else if (msg.value.type === 'chat/moderation') {
-      const { role, type, issuerid, receiverid } = msg.value.content
-      const issuer = this.client.getUsers()[issuerid]
-      const receiver = this.client.getUsers()[receiverid]
-      let action
-      const reason = msg.value.content.reason ? `(${chalk.cyan('reason:')} ${msg.value.content.reason})` : ''
-      const issuerName = issuer && issuer.name ? issuer.name : issuerid.slice(0, 8)
-      const receiverName = receiver && receiver.name ? receiver.name : receiverid.slice(0, 8)
-      if (['admin', 'mod'].includes(role)) {
-        action = (type === 'add' ? chalk.green('added') : chalk.red('removed'))
-        content = `${issuerName} ${action} ${receiverName} as ${chalk.cyan(role)} ${reason}`
-      }
-      if (role === 'hide') {
-        action = (type === 'add' ? chalk.red('hid') : chalk.green('unhid'))
-        content = `${issuerName} ${action} ${receiverName} ${reason}`
-      }
+    var emote = (msg.text.startsWith("/emote"))
+    if (pubid && emote) {
+      authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim('.') + chalk.inverse(chalk.cyan(pubid)) : ''}`
+      content = `${chalk.dim(msgtxt.replace("/emote", ""))}`
     }
+  }
 
-    return {
-      formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
-      raw: msg
-    }
+  // TODO (2023-08-02): tweak to cable
+  // if (msg.value.type === 'chat/topic') {
+  //   content = `${chalk.dim(`* sets the topic to ${chalk.cyan(msgtxt)}`)}`
+  // } else if (msg.value.type === 'chat/moderation') {
+  //   const { role, type, issuerid, receiverid } = msg.value.content
+  //   const issuer = this.client.getUsers()[issuerid]
+  //   const receiver = this.client.getUsers()[receiverid]
+  //   let action
+  //   const reason = msg.value.content.reason ? `(${chalk.cyan('reason:')} ${msg.value.content.reason})` : ''
+  //   const issuerName = issuer && issuer.name ? issuer.name : issuerid.slice(0, 8)
+  //   const receiverName = receiver && receiver.name ? receiver.name : receiverid.slice(0, 8)
+  //   if (['admin', 'mod'].includes(role)) {
+  //     action = (type === 'add' ? chalk.green('added') : chalk.red('removed'))
+  //     content = `${issuerName} ${action} ${receiverName} as ${chalk.cyan(role)} ${reason}`
+  //   }
+  //   if (role === 'hide') {
+  //     action = (type === 'add' ? chalk.red('hid') : chalk.green('unhid'))
+  //     content = `${issuerName} ${action} ${receiverName} ${reason}`
+  //   }
+  // }
+
+  return {
+    formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
+    raw: msg
   }
   return {
-    formatted: chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg.value)),
+    formatted: chalk.cyan('unknown message type: ') + chalk.inverse(JSON.stringify(msg)),
     raw: msg
   }
 }
