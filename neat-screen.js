@@ -611,9 +611,12 @@ NeatScreen.prototype.formatMessage = function (msg) {
   //     content = `${issuerName} ${action} ${receiverName} ${reason}`
   //   }
   // }
+  
+  
+  const hash = (this.state.cabal.showHashes && msg.postHash) ? `0x${msg.postHash.slice(0,6)}` : ""
 
   return {
-    formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
+    formatted: timestamp + chalk.cyan(hash) + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
     raw: msg
   }
   return {
