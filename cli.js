@@ -152,8 +152,16 @@ const client = new Client({
   maxFeeds: maxFeeds,
   config: {
     dbdir: archivesdir,
-    temp: args.temp,
-    preferredPort: args.port || config.preferredPort
+    temp: args.temp || false,
+    serve: args.serve || false,
+    preferredPort: args.port || config.preferredPort,
+    disableDHT: !args.swarm,
+    disableTCP: !args.tcp,
+    disableLAN: !args.lan,
+    ip: args.ip || null,
+    tcpPort: args.tcpPort || null,
+    dhtPort: args.dhtPort || null,
+    lanPort: args.lanPort || null
   },
   commands: {
     // todo: custom commands
@@ -237,9 +245,9 @@ alt-l
         }
         var foundAliases = {}
         const commands = {}
-        for (const key in cabal.client.commands) {
-          if (!cabal.client.commands[key].category) { continue }
-          cabal.client.commands[key].category.forEach(cat => {
+        for (const key in cabal.commands) {
+          if (!cabal.commands[key].category) { continue }
+          cabal.commands[key].category.forEach(cat => {
             if (!commands[cat]) commands[cat] = []
             commands[cat].push(key)
             categories.add(cat)
@@ -262,12 +270,12 @@ alt-l
             if (foundAliases[key]) { return }
             const slash = chalk.gray('/')
             let command = key
-            if (cabal.client.aliases[key]) {
-              foundAliases[cabal.client.aliases[key]] = true
-              command += `, ${slash}${cabal.client.aliases[key]}`
+            if (cabal.aliases[key]) {
+              foundAliases[cabal.aliases[key]] = true
+              command += `, ${slash}${cabal.aliases[key]}`
             }
             fe.writeLine(`${slash}${command}`)
-            fe.writeLine(`  ${cabal.client.commands[key].help()}`)
+            fe.writeLine(`  ${cabal.commands[key].help()}`)
           })
         }
       }

@@ -532,18 +532,25 @@ NeatScreen.prototype.formatMessage = function (msg) {
      channel: ''
    }
    */
+  const users = this.client.getUsers()
+  const authorSource = users[msg.publicKey] || msg
+
+  let author = util.sanitizeString(authorSource.name || authorSource.publicKey.slice(0, 8))
   if (!msg.postType) { msg.postType = 0 }
   // virtual message type, handled by cabal-client
-  if (msg.postType === -2) /*'status/date-changed' */ {
+  if (msg.postType === -2) /* status/date-changed  */ {
     return {
       formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.timestamp)))}`,
       raw: msg
     }
   }
-  const users = this.client.getUsers()
-  const authorSource = users[msg.publicKey] || msg
-
-  let author = util.sanitizeString(authorSource.name || authorSource.publicKey.slice(0, 8))
+  if (msg.postType === 1) /* post/delete */ {
+    const deleteTimestamp = formatTime(msg.timestamp, this.config.messageTimeformat)
+    return {
+      formatted: chalk.dim(`${deleteTimestamp} ${author} deleted one of their posts`),
+      raw: msg
+    }
+  }
   // add author field for later use in calculating the left-padding of multi-line messages
   msg.author = author
   var localNick = 'uninitialized'
@@ -584,10 +591,10 @@ NeatScreen.prototype.formatMessage = function (msg) {
       authorText = `${chalk.dim('<')}${highlight ? chalk.whiteBright(author) : chalk[color](author)}${chalk.dim('>')}`
     }
 
-    var emote = (msg.text.startsWith("/emote"))
+    var emote = (msg.text.startsWith("/me "))
     if (pubid && emote) {
       authorText = `${chalk.white(author)}${this.state.cabal.showIds ? chalk.dim('.') + chalk.inverse(chalk.cyan(pubid)) : ''}`
-      content = `${chalk.dim(msgtxt.replace("/emote", ""))}`
+      content = `${chalk.dim(msgtxt.replace("/me ", ""))}`
     }
   }
 
@@ -612,8 +619,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
   //   }
   // }
   
-  
-  const hash = (this.state.cabal.showHashes && msg.postHash) ? `0x${msg.postHash.slice(0,6)}` : ""
+  const hash = (this.state.cabal.showHashes && msg.postHash) ? ` 0x${msg.postHash.slice(0,6)}` : ""
 
   return {
     formatted: timestamp + chalk.cyan(hash) + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
