@@ -8,6 +8,7 @@ var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
 var captureQrCode = require('node-camera-qr-reader')
+const crypto = require("cable.js/cryptography.js")
 var fe = null
 const onExit = require('signal-exit')
 const { version: packageJSONVersion } = require('./package.json')
@@ -32,6 +33,9 @@ if (args.config && fs.statSync(args.config).isDirectory()) {
 
 var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
+
+const keypair = readOrGenerateKeypair()
+console.error("kppp", keypair)
 
 const defaultMessageTimeformat = '%T'
 const defaultMessageIndent = 'nick'
@@ -151,6 +155,7 @@ try {
 const client = new Client({
   maxFeeds: maxFeeds,
   config: {
+    keypair,
     dbdir: archivesdir,
     temp: args.temp || false,
     serve: args.serve || false,
@@ -570,6 +575,26 @@ function saveKeyAsAlias (key, alias) {
   config.aliases[alias] = key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(key)} as ${chalk.blueBright(alias)}`)
+}
+
+function readOrGenerateKeypair() {
+  const keypath = path.join(rootdir, "keypair.json")
+  let key
+  try {
+    console.error("read", fs.readFileSync(keypath).toString())
+    key = crypto.deserializeKeypair(fs.readFileSync(keypath).toString())
+    console.error("keypair", key)
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      key = crypto.generateKeypair()
+      console.error("generating key and storing at " + keypath)
+      console.error("key", key)
+      fs.writeFileSync(keypath, crypto.serializeKeypair(key), "utf8")
+    } else {
+      throw e 
+    }
+  }
+  return key
 }
 
 function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
