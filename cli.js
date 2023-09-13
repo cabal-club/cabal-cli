@@ -7,7 +7,7 @@ var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
-var captureQrCode = require('node-camera-qr-reader')
+// var captureQrCode = require('node-camera-qr-reader')
 const crypto = require("cable.js/cryptography.js")
 var fe = null
 const onExit = require('signal-exit')
@@ -35,7 +35,6 @@ var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
 
 const keypair = readOrGenerateKeypair()
-console.error("kppp", keypair)
 
 const defaultMessageTimeformat = '%T'
 const defaultMessageIndent = 'nick'
@@ -432,25 +431,29 @@ if (args.save) {
   process.exit(0)
 }
 
+// re qr: old experiment that never really worked well :)
+//
 // try to initiate the frontend using either qr codes via webcam, using cabal keys passed via cli,
 // or starting an entirely new cabal per --new
-if (args.qr) {
-  console.log('Cabal is looking for a QR code...')
-  console.log('Press ctrl-c to stop.')
-  captureQrCode({ retry: true }).then((key) => {
-    if (key) {
-      console.log('\u0007') // system bell
-      start([key], config.frontend)
-    } else {
-      console.log('No QR code detected.')
-      process.exit(0)
-    }
-  }).catch((e) => {
-    console.error('Webcam capture failed. Have you installed the appropriate drivers? See the documentation for more information.')
-    console.error('Mac OSX: brew install imagesnap')
-    console.error('Linux: sudo apt-get install fswebcam')
-  })
-} else if (cabalKeys.length || args.new) {
+// if (args.qr) {
+//   console.log('Cabal is looking for a QR code...')
+//   console.log('Press ctrl-c to stop.')
+//   captureQrCode({ retry: true }).then((key) => {
+//     if (key) {
+//       console.log('\u0007') // system bell
+//       start([key], config.frontend)
+//     } else {
+//       console.log('No QR code detected.')
+//       process.exit(0)
+//     }
+//   }).catch((e) => {
+//     console.error('Webcam capture failed. Have you installed the appropriate drivers? See the documentation for more information.')
+//     console.error('Mac OSX: brew install imagesnap')
+//     console.error('Linux: sudo apt-get install fswebcam')
+//   })
+// } 
+  
+  if (cabalKeys.length || args.new) {
   start(cabalKeys, config.frontend)
 } else {
   // no keys, no qr, and not trying to start a new cabal => print help info
@@ -487,20 +490,20 @@ function start (keys, frontendConfig) {
     if (!args.seed) {
       fe = frontend({ client, frontendConfig })
     } else {
-      const seedKeys = []
-      for (const details of client.cabals.keys()) {
-        seedKeys.push(details.key)
-      }
-      seedKeys.forEach((k) => {
-        console.log('Seeding', k)
-        console.log()
-        console.log('@: new peer')
-        console.log('x: peer left')
-        console.log('^: uploaded a chunk')
-        console.log('.: downloaded a chunk')
-        console.log()
-        trackAndPrintEvents(client._getCabalByKey(k))
-      })
+      // const seedKeys = []
+      // for (const details of client.cabals.keys()) {
+      //   seedKeys.push(details.key)
+      // }
+      // seedKeys.forEach((k) => {
+      //   console.log('Seeding', k)
+      //   console.log()
+      //   console.log('@: new peer')
+      //   console.log('x: peer left')
+      //   console.log('^: uploaded a chunk')
+      //   console.log('.: downloaded a chunk')
+      //   console.log()
+      //   trackAndPrintEvents(client._getCabalByKey(k))
+      // })
     }
   }).catch((e) => {
     if (!e || e.toString() === 'Error: dns failed to resolve') {
@@ -512,30 +515,30 @@ function start (keys, frontendConfig) {
   })
 }
 
-function trackAndPrintEvents (cabal) {
-  cabal.ready(() => {
-    // Listen for feeds
-    cabal.kcore._logs.feeds().forEach(listen)
-    cabal.kcore._logs.on('feed', listen)
-
-    function listen (feed) {
-      feed.on('download', idx => {
-        process.stdout.write('.')
-      })
-      feed.on('upload', idx => {
-        process.stdout.write('^')
-      })
-    }
-
-    cabal.on('peer-added', () => {
-      process.stdout.write('@')
-    })
-
-    cabal.on('peer-dropped', () => {
-      process.stdout.write('x')
-    })
-  })
-}
+// function trackAndPrintEvents (cabal) {
+//   cabal.ready(() => {
+//     // Listen for feeds
+//     cabal.kcore._logs.feeds().forEach(listen)
+//     cabal.kcore._logs.on('feed', listen)
+//
+//     function listen (feed) {
+//       feed.on('download', idx => {
+//         process.stdout.write('.')
+//       })
+//       feed.on('upload', idx => {
+//         process.stdout.write('^')
+//       })
+//     }
+//
+//     cabal.on('peer-added', () => {
+//       process.stdout.write('@')
+//     })
+//
+//     cabal.on('peer-dropped', () => {
+//       process.stdout.write('x')
+//     })
+//   })
+// }
 
 function getKey (str) {
   // return key if what was passed in was a saved alias
@@ -578,6 +581,7 @@ function saveKeyAsAlias (key, alias) {
 }
 
 function readOrGenerateKeypair() {
+  if (args.temp) { return crypto.generateKeypair() }
   const keypath = path.join(rootdir, "keypair.json")
   let key
   try {
@@ -589,6 +593,8 @@ function readOrGenerateKeypair() {
       key = crypto.generateKeypair()
       console.error("generating key and storing at " + keypath)
       console.error("key", key)
+
+      mkdirp.sync(path.dirname(keypath))
       fs.writeFileSync(keypath, crypto.serializeKeypair(key), "utf8")
     } else {
       throw e 
