@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var Client = require('../mock.js').Client
+var Client = require('cable-client/shim.js').Client
 var minimist = require('minimist')
 var fs = require('fs')
 var path = require('path')
@@ -586,15 +586,10 @@ function readOrGenerateKeypair() {
   const keypath = path.join(rootdir, "keypair.json")
   let key
   try {
-    console.error("read", fs.readFileSync(keypath).toString())
     key = deserializeKeypair(fs.readFileSync(keypath).toString())
-    console.error("keypair", key)
   } catch (e) {
     if (e.code === "ENOENT") {
       key = crypto.generateKeypair()
-      console.error("generating key and storing at " + keypath)
-      console.error("key", key)
-
       mkdirp.sync(path.dirname(keypath))
       fs.writeFileSync(keypath, serializeKeypair(key), "utf8")
     } else {
