@@ -9,6 +9,7 @@ var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
 // var captureQrCode = require('node-camera-qr-reader')
 const crypto = require("cable.js/cryptography.js")
+const { serializeKeypair, deserializeKeypair } = require("cable.js/util.js")
 var fe = null
 const onExit = require('signal-exit')
 const { version: packageJSONVersion } = require('./package.json')
@@ -308,12 +309,12 @@ alt-l
 })
 
 // Close all cabals on exit.
-onExit(function () {
-  for (const cabal of client.cabals.values()) {
-    cabal._destroy(() => {
-    })
-  }
-})
+// onExit(function () {
+//   for (const cabal of client.cabals.values()) {
+//     cabal._destroy(() => {
+//     })
+//   }
+// })
 
 if (args.clear) {
   delete config.aliases
@@ -453,7 +454,7 @@ if (args.save) {
 //   })
 // } 
   
-  if (cabalKeys.length || args.new) {
+if (cabalKeys.length || args.new) {
   start(cabalKeys, config.frontend)
 } else {
   // no keys, no qr, and not trying to start a new cabal => print help info
@@ -586,7 +587,7 @@ function readOrGenerateKeypair() {
   let key
   try {
     console.error("read", fs.readFileSync(keypath).toString())
-    key = crypto.deserializeKeypair(fs.readFileSync(keypath).toString())
+    key = deserializeKeypair(fs.readFileSync(keypath).toString())
     console.error("keypair", key)
   } catch (e) {
     if (e.code === "ENOENT") {
@@ -595,7 +596,7 @@ function readOrGenerateKeypair() {
       console.error("key", key)
 
       mkdirp.sync(path.dirname(keypath))
-      fs.writeFileSync(keypath, crypto.serializeKeypair(key), "utf8")
+      fs.writeFileSync(keypath, serializeKeypair(key), "utf8")
     } else {
       throw e 
     }
