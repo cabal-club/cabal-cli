@@ -1,4 +1,9 @@
 #!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 the cabal-club authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
 # couldnt figure out undocumented 'output template' mode for pkg so wrote this
 # also need to include .node files until pkg supports including them in binary
 #   https://github.com/zeit/pkg/issues/329

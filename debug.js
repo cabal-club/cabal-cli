@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 the cabal-club authors
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // print and simplify are debugging utils
 function print (t, arr, printAll) {
   console.error(`${t}: ${arr.length}`)

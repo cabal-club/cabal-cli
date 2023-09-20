@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+
+// SPDX-FileCopyrightText: 2023 the cabal-club authors
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 var Client = require('cable-client/shim.js').Client
 var minimist = require('minimist')
 var fs = require('fs')

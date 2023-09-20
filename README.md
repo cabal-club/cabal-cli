@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 the cabal-club authors
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # cabal-cli
 
 > Terminal client for cabal, the p2p chat platform.

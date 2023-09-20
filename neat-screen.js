@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 the cabal-club authors
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 var chalk = require('chalk')
 var Commander = require('./commands.js')
 var neatLog = require('neat-log')

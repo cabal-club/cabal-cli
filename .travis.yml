@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 the cabal-club authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
 language: node_js
 node_js:
 - '10'
