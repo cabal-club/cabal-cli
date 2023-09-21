@@ -478,7 +478,7 @@ function start (keys, frontendConfig) {
     })
     return
   }
-  keys = Array.from(new Set(keys)) // remove duplicates
+  keys = Array.from(new Set(keys)).map(Client.scrubKey) // remove duplicates, remove cabal:// prefix
   var pendingCabals = args.new ? [client.createCabal()] : keys.map(client.addCabal.bind(client))
   Promise.all(pendingCabals).then(() => {
     if (args.new) {
