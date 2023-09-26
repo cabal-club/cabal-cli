@@ -4,67 +4,70 @@ SPDX-FileCopyrightText: 2023 the cabal-club authors
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# cabal-cli
+# cable-cli
 
 > Terminal client for cabal, the p2p chat platform.
 
-See [cabal-core](https://github.com/cabal-club/cabal-core) for the underlying
-database & api.
+**status**: Working proof of concept; not compatible with older versions of cabal (using a, cabal-specific new wire protocol called [Cable](https://github.com/cabal-club/cable)).
+
+See [cable-core](https://github.com/cabal-club/cable-core.js) and
+[cable-client](https://github.com/cabal-club/cable-client.js) for the underlying database & api.
 
 ![](cli-2019-04.png)
 
-chat with us:
-`npx cabal cabal://cabal.chat`
+<!--chat with us:
+`npx cable-cli cabal://cabal.chat`
+-->
 
 ## Installation
 
 ```
-$ npm install --global cabal
-$ cabal --new
+$ npm install --global cable-cli
+$ cable-cli --new
 ```
 If that fails the newest node is not yet supported by the stack. Try this:
 
 Install [nvm](https://github.com/nvm-sh/nvm), open a new shell and run
 ```
-$ nvm install 12
-$ npm install --global cabal
-$ cabal --new
+$ nvm install 14    # or later node versions
+$ npm install --global cable-cli
+$ cable-cli --new
 ```
 
 ## Usage
 #### Start a new instance:
 ```
-cabal --new
+cable-cli --new
 ```
 then copy the key and give it to someone else.
 
 #### Connect to an existing instance:
 ```
-cabal <key>
+cable-cli <key>
 ```
 e.g.
 ```
-cabal cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
+cable-cli cabal://0201400f1aa2e3076a3f17f4521b2cc41e258c446cdaa44742afe6e1b9fd5f82
 ```
 
 #### Remember cabals for auto-joining
 save a cabal to the config
 
 ```
-cabal --save <key>
+cable-cli --save <key>
 ```
 
 then connect to all of your saved cabals, by simply running `cabal`:
 
 ```
-cabal
+cable-cli
 ```
 
 show saved cabals with `--cabals` and remove a saved cabal with `--forget`
 
 ```
-cabal --cabals
-cabal --forget <key|alias>
+cable-cli --cabals
+cable-cli --forget <key|alias>
 ```
 
 #### Save an alias to a key
@@ -72,20 +75,14 @@ cabal --forget <key|alias>
 create a local name for a key.
 
 ```
-cabal --alias <name> --key <key>
-cabal <name>
+cable-cli --alias <name> --key <key>
+cable-cli <name>
 ```
 
-#### Scan a QR code to join a cabal:
-Cabal can use a webcam connected to your computer to read a cabal key from a QR code.
-For this to work, you'll need to install an additional system dependency:
-- Linux: `sudo apt-get install fswebcam`
-- MacOS: `brew install imagesnap`
-```
-# Hold up your QR code in front of the webcam and then run:
-cabal --qr
-```
 
+<!--
+
+TODO (2023-09-26): the following sections need updating as cable-cli exits its proof of concept stage 
 #### Headless mode
 
 This will run cabal without a UI. You can use this to seed a cabal (e.g. on a VPS) and make its data more available:
@@ -100,6 +97,7 @@ You can change this with the `--port` flag, or setting `preferredPort` in your .
 ```
 cabal <key> --seed --port 7331
 ```
+-->
 
 ## Commands
 ```py
