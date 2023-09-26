@@ -12,9 +12,9 @@ var yaml = require('js-yaml')
 var mkdirp = require('mkdirp')
 var frontend = require('./neat-screen.js')
 var chalk = require('chalk')
+var raf = require("random-access-file")
+var ram = require("random-access-memory")
 // var captureQrCode = require('node-camera-qr-reader')
-const crypto = require("cable.js/cryptography.js")
-const { serializeKeypair, deserializeKeypair } = require("cable.js/util.js")
 var fe = null
 const onExit = require('signal-exit')
 const { version: packageJSONVersion } = require('./package.json')
@@ -39,8 +39,6 @@ if (args.config && fs.statSync(args.config).isDirectory()) {
 
 var rootconfig = `${rootdir}/config.yml`
 var archivesdir = `${rootdir}/archives/`
-
-const keypair = readOrGenerateKeypair()
 
 const defaultMessageTimeformat = '%T'
 const defaultMessageIndent = 'nick'
@@ -160,7 +158,7 @@ try {
 const client = new Client({
   maxFeeds: maxFeeds,
   config: {
-    keypair,
+    keystore: args.temp ? ram : raf,
     dbdir: archivesdir,
     temp: args.temp || false,
     serve: args.serve || false,
@@ -584,24 +582,6 @@ function saveKeyAsAlias (key, alias) {
   config.aliases[alias] = key
   saveConfig(configFilePath, config)
   console.log(`${chalk.magentaBright('cabal:')} saved ${chalk.greenBright(key)} as ${chalk.blueBright(alias)}`)
-}
-
-function readOrGenerateKeypair() {
-  if (args.temp) { return crypto.generateKeypair() }
-  const keypath = path.join(rootdir, "keypair.json")
-  let key
-  try {
-    key = deserializeKeypair(fs.readFileSync(keypath).toString())
-  } catch (e) {
-    if (e.code === "ENOENT") {
-      key = crypto.generateKeypair()
-      mkdirp.sync(path.dirname(keypath))
-      fs.writeFileSync(keypath, serializeKeypair(key), "utf8")
-    } else {
-      throw e 
-    }
-  }
-  return key
 }
 
 function publishSingleMessage ({ key, channel, message, messageType, timeout }) {
