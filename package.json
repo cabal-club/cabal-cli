@@ -14,7 +14,6 @@
     "mkdirp": "^1.0.4",
     "neat-log": "^3.1.0",
     "neato-emoji-converter": "^1.1.2",
-    "node-camera-qr-reader": "^1.0.1",
     "random-access-file": "^4.0.4",
     "random-access-memory": "^6.2.0",
     "signal-exit": "^3.0.3",
@@ -39,9 +38,7 @@
     "url": "git+https://github.com/cabal-club/cabal-cli.git"
   },
   "keywords": [
-    "hyperdb",
     "decent",
-    "dat",
     "chat",
     "cabal",
     "cable",
