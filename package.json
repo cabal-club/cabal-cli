@@ -1,9 +1,9 @@
 {
-  "name": "cabal",
-  "version": "14.1.4",
+  "name": "cable-cli",
+  "version": "0.0.0",
   "description": "p2p chat",
   "bin": {
-    "cabal": "cli.js"
+    "cable-cli": "cli.js"
   },
   "dependencies": {
     "ansi-escapes": "^4.3.1",
@@ -30,7 +30,7 @@
   "scripts": {
     "test": "standard --fix ./*.js && mocha",
     "package": "rm -rf builds && npm run pkg && ./package.sh",
-    "pkg": "pkg package.json -o builds/cabal"
+    "pkg": "pkg package.json -o builds/cable-cli"
   },
   "repository": {
     "type": "git",
@@ -42,6 +42,7 @@
     "dat",
     "chat",
     "cabal",
+    "cable",
     "decentralize",
     "p2p"
   ],
