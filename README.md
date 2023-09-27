@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 > Terminal client for cabal, the p2p chat platform.
 
-**status**: Working proof of concept; not compatible with older versions of cabal (using a, cabal-specific new wire protocol called [Cable](https://github.com/cabal-club/cable)).
+**status**: Working proof of concept; not compatible with older versions of cabal (using a cabal-specific new wire protocol: [Cable](https://github.com/cabal-club/cable)).
 
 See [cable-core](https://github.com/cabal-club/cable-core.js) and
 [cable-client](https://github.com/cabal-club/cable-client.js) for the underlying database & api.
