@@ -29,8 +29,8 @@ function small (state) {
   // chat messages
   blit(screen, renderMessages(state, process.stdout.columns, process.stdout.rows - HEADER_ROWS), 0, 3)
   // horizontal dividers
-  blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 2)
-  blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, titlebarSize + 1)
+  blit(screen, renderHorizontalLine('─', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 2)
+  blit(screen, renderHorizontalLine('─', process.stdout.columns, chalk.blue), 0, titlebarSize + 1)
   // user input prompt
   blit(screen, renderPrompt(state), 0, process.stdout.rows - 1)
   return output(screen.join('\n'))
@@ -47,7 +47,7 @@ function big (state) {
   }
   // channels listing
   blit(screen, renderChannels(state, CHAN_COLS, process.stdout.rows - HEADER_ROWS), 0, 3)
-  blit(screen, renderVerticalLine('|', process.stdout.rows - 7, chalk.blue), 16, 3)
+  blit(screen, renderVerticalLine('│', process.stdout.rows - 7, chalk.blue), 16, 3)
 
   // channel topic description
   blit(screen, renderChannelTopic(state, process.stdout.columns - 16 - 17, process.stdout.rows - HEADER_ROWS), 17, 3)
@@ -55,12 +55,12 @@ function big (state) {
   blit(screen, renderMessages(state, process.stdout.columns - 17 - 17, process.stdout.rows - HEADER_ROWS), 17, 4)
 
   // nicks pane
-  blit(screen, renderVerticalLine('|', process.stdout.rows - 7, chalk.blue), process.stdout.columns - 17, 3)
+  blit(screen, renderVerticalLine('│', process.stdout.rows - 7, chalk.blue), process.stdout.columns - 17, 3)
   blit(screen, renderNicks(state, NICK_COLS, process.stdout.rows - HEADER_ROWS), process.stdout.columns - 15, 3)
 
   // horizontal dividers
-  blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 4)
-  blit(screen, renderHorizontalLine('-', process.stdout.columns, chalk.blue), 0, 2)
+  blit(screen, renderHorizontalLine('─', process.stdout.columns, chalk.blue), 0, process.stdout.rows - 4)
+  blit(screen, renderHorizontalLine('─', process.stdout.columns, chalk.blue), 0, 2)
 
   // user input prompt
   blit(screen, renderPrompt(state), 0, process.stdout.rows - 2)
