@@ -461,8 +461,9 @@ NeatScreen.prototype.processMessages = function (opts, cb) {
   // var unreadCount = this.client.getNumberUnreadMessages()
   this.client.getMessages(opts, (msgs) => {
     this.state.messages = []
+    const users = this.client.getUsers()
     msgs.forEach((msg, i) => {
-      const user = this.client.getUsers()[msg.key]
+      const user = users[msg.publicKey]
       if (user && user.isHidden(opts.channel)) return
       this.state.messages.push(this.formatMessage(msg))
     })
@@ -562,7 +563,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
 
   /* sanitize user inputs to prevent interface from breaking */
   localNick = util.sanitizeString(localNick)
-  var msgtxt = msg.text
+  var msgtxt = msg.text || ''
   if (msg.postType !== -1) {
     msgtxt = util.sanitizeString(msgtxt)
   }
