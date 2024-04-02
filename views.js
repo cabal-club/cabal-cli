@@ -207,7 +207,7 @@ function renderNicks (state, width, height) {
       // Duplicate nick count
       const duplicates = user.online ? onlineNickCount[name] : offlineNickCount[name]
       const dupecountStr = `(${duplicates})`
-      const modSigilLength = (user.isAdmin(currentChannel) || user.isModerator(currentChannel) || user.isHidden(currentChannel)) ? 1 : 0
+      const modSigilLength = (user.isAdmin(currentChannel) || user.isModerator(currentChannel) || user.isHidden(currentChannel)) || user.isBlocked() ? 1 : 0
       outputName = util.sanitizeString(name).slice(0, width - modSigilLength)
       if (duplicates > 1) outputName = outputName.slice(0, width - dupecountStr.length - 2 - modSigilLength)
 
@@ -216,6 +216,7 @@ function renderNicks (state, width, height) {
       if (user.isAdmin(currentChannel)) colorizedName = chalk.green('@') + colorizedName
       else if (user.isModerator(currentChannel)) colorizedName = chalk.green('%') + colorizedName
       else if (user.isHidden(currentChannel)) colorizedName = chalk.green('-') + colorizedName
+      else if (user.isBlocked()) colorizedName = chalk.green('!') + colorizedName
       if (user.online) {
         colorizedName = chalk.bold(colorizedName)
       }
