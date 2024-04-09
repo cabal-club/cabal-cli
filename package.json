@@ -3,17 +3,20 @@
   "version": "0.0.1",
   "description": "p2p chat",
   "bin": {
-    "cabal": "cli.js"
+    "cable-cli": "cli.js"
   },
   "dependencies": {
     "ansi-escapes": "^4.3.1",
-    "cabal-client": "^7.3.3",
+    "cable-client": "^0.1.0",
+    "cable.js": "^0.2.0",
     "chalk": "^4.0.0",
     "js-yaml": "^3.13.1",
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
     "neat-log": "^3.1.0",
     "neato-emoji-converter": "^1.1.2",
+    "random-access-file": "^4.0.4",
+    "random-access-memory": "^6.2.0",
     "signal-exit": "^3.0.3",
     "strftime": "^0.10.0",
     "strip-ansi": "^6.0.0",
@@ -29,18 +32,17 @@
   "scripts": {
     "test": "standard --fix ./*.js && mocha",
     "package": "rm -rf builds && npm run pkg && ./package.sh",
-    "pkg": "pkg package.json -o builds/cabal"
+    "pkg": "pkg package.json -o builds/cable-cli"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cabal-club/cabal-cli.git"
   },
   "keywords": [
-    "hyperdb",
     "decent",
-    "dat",
     "chat",
     "cabal",
+    "cable",
     "decentralize",
     "p2p"
   ],
