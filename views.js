@@ -118,7 +118,7 @@ function renderCabals (state, width, height) {
 }
 
 function renderChannels (state, width, height) {
-  const channels = state.cabal.getChannels({ includePM: true, onlyJoined: true })
+  const channels = state.cabal.getJoinedChannels()
   const numPrefixWidth = String(channels.length).length
 
   const users = state.cabal.getUsers()
