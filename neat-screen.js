@@ -4,7 +4,6 @@ var neatLog = require('neat-log')
 var strftime = require('strftime')
 var views = require('./views')
 var util = require('./util')
-var markdown = require('./markdown-shim')
 var fs = require('fs')
 var path = require('path')
 var welcomePath = path.join(__dirname, 'welcome.txt')
@@ -555,7 +554,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
     if (msg.value.type !== 'status') {
       msgtxt = util.sanitizeString(msgtxt)
     }
-    var content = markdown(msgtxt)
+    var content = msgtxt
 
     if (localNick.length > 0 && msgtxt.indexOf(localNick) > -1 && author !== localNick) { highlight = true }
 
