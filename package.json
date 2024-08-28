@@ -19,7 +19,7 @@
     "strftime": "^0.10.0",
     "strip-ansi": "^6.0.0",
     "supports-hyperlinks": "^2.1.0",
-    "txt-blit": "^1.0.2"
+    "txt-blit": "^2.0.1"
   },
   "devDependencies": {
     "cross-zip-cli": "^1.0.0",
