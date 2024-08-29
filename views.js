@@ -1,3 +1,5 @@
+var stripAnsi = require('strip-ansi')
+var wcwidth = require('wcwidth')
 var output = require('./output')
 var chalk = require('chalk')
 var blit = require('txt-blit')
@@ -245,16 +247,19 @@ function renderMessages (state, width, height) {
 
   // Character-wrap to area edge
   var allLines = msgs.reduce(function (accum, msg) {
-    const nickLength = msg.raw.author ? msg.raw.author.length : 0
-    var indent = 0
-    if (state.config.messageIndent === 'time' ||
-        state.config.messageIndent === 'nick') {
-      indent += state.messageTimeLength + 1 // + space
+    // Status message
+    if (!msg.timestamp) {
+      // TODO(kira): These don't wrap yet & ought to!
+      accum.push(' * ' + msg.formatted)
+      return accum
     }
-    if (state.config.messageIndent === 'nick') {
-      indent += nickLength + 3 // + space and <>
-    }
-    accum.push.apply(accum, util.wrapAnsi(msg.formatted, width, indent))
+
+    const indent = wcwidth(stripAnsi(msg.timestamp)) + wcwidth(stripAnsi(msg.author)) + wcwidth(stripAnsi(msg.emote)) + 1
+    const lines = util.wrapAnsi(msg.content, width - indent)
+    const firstLine = msg.timestamp + msg.emote + msg.author + ' ' + lines[0]
+    accum.push(firstLine)
+    const paddedLines = lines.slice(1).map(line => ' '.repeat(indent) + line.trim())
+    accum = accum.concat(paddedLines)
     return accum
   }, [])
 

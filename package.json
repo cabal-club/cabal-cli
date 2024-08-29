@@ -17,7 +17,8 @@
     "signal-exit": "^3.0.3",
     "strftime": "^0.10.0",
     "strip-ansi": "^6.0.0",
-    "txt-blit": "^2.0.1"
+    "txt-blit": "^2.0.1",
+    "wcwidth": "^1.0.1"
   },
   "devDependencies": {
     "cross-zip-cli": "^1.0.0",

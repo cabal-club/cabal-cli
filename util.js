@@ -1,4 +1,5 @@
 var stripAnsi = require('strip-ansi')
+var wcwidth = require('wcwidth')
 var EmojiConverter = require('neato-emoji-converter')
 var emojiConverter = new EmojiConverter()
 
@@ -23,21 +24,21 @@ function getModerationKey (state) {
 }
 
 function sanitizeString (str) {
-  // emojis break the cli: replace them with shortcodes
+  // some emoji break the cli: replace them with shortcodes
   str = emojiConverter.replaceUnicode(str)
   str = stripAnsi(str) // strip non-visible sequences
   /* eslint no-control-regex: "off" */
   return str.replace(/[\u0000-\u0009]|[\u000b-\u001f]/g, '') // keep newline (aka LF aka ascii character 10 aka \u000a)
 }
+
 // Character-wrap text containing ANSI escape codes.
 // String, Int -> [String]
-function wrapAnsi (text, width, padding = 11) {
+function wrapAnsi (text, width) {
   if (!text) return []
 
   var res = []
-
-  var line = []
-  var lineLen = 0
+  var line = ''
+  var lineWidth = 0
   var insideCode = false
   var insideWord = false
   for (var i = 0; i < text.length; i++) {
@@ -49,21 +50,26 @@ function wrapAnsi (text, width, padding = 11) {
     insideWord = !(chr.charCodeAt(0) === 32 || chr.charCodeAt(0) === 10) // ascii code for the SPACE character || NEWLINE character
 
     if (chr !== '\n') {
-      line.push(chr)
+      line += chr
     }
 
     if (!insideCode) {
-      lineLen++
-      if (lineLen >= width - 1 || chr === '\n') {
+      lineWidth += wcwidth(text.charAt(i))
+      if (chr === '\n') {
+        res.push(line)
+        line = ''
+        lineWidth = 0
+      } else if (lineWidth > width) {
+        line = line.slice(0, line.length-1); i--  // Don't include the char that brought us over the width; reuse it
         const breakpoint = line.lastIndexOf(' ')
-        if (insideWord && breakpoint >= 0) { // breakpoint is -1 when e.g. a superlong url is posted; there exists no space before it
-          res.push(line.slice(0, breakpoint).join('')) // grab the first part of the line and push its str as a result
-          line = [' '.repeat(padding)].concat(line.slice(breakpoint + 1)) // take the part after the breakpoint and add to new line
-          lineLen = padding + line.slice(1).length // `padding` is counted separately cause it's added as a single string (not array elements)
+        if (insideWord && breakpoint >= 0) {
+          res.push(line.slice(0, breakpoint)) // grab the first part of the line and push its str as a result
+          line = line.slice(breakpoint + 1) // take the part after the breakpoint and add to new line
+          lineWidth = line.length
         } else {
-          res.push(line.join(''))
-          line = [' '.repeat(padding)]
-          lineLen = padding
+          res.push(line)
+          line = ''
+          lineWidth = 0
         }
       }
     }
@@ -74,7 +80,7 @@ function wrapAnsi (text, width, padding = 11) {
   }
 
   if (line.length > 0) {
-    res.push(line.join(''))
+    res.push(line)
   }
 
   return res
@@ -95,16 +101,22 @@ function strlenAnsi (str) {
   return len
 }
 
+// Returns the horizontal visual extent (# of fixed-width chars) a string takes
+// up, taking ANSI escape codes into account. Assumes a UTF-8 encoded string.
+function strwidth (str) {
+  return wcwidth(stripAnsi(str))
+}
+
 function centerText (text, width) {
-  var left = Math.floor((width - strlenAnsi(text)) / 2)
-  var right = Math.ceil((width - strlenAnsi(text)) / 2)
+  var left = Math.floor((width - strwidth(text)) / 2)
+  var right = Math.ceil((width - strwidth(text)) / 2)
   var lspace = left > 0 ? new Array(left).fill(' ').join('') : ''
   var rspace = right > 0 ? new Array(right).fill(' ').join('') : ''
   return lspace + text + rspace
 }
 
 function rightAlignText (text, width) {
-  var left = width - strlenAnsi(text)
+  var left = width - strwidth(text)
   if (left < 0) return text
   var lspace = new Array(left).fill(' ').join('')
   return lspace + text

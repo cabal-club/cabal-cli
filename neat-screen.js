@@ -609,9 +609,15 @@ NeatScreen.prototype.formatMessage = function (msg) {
         content = `${issuerName} ${action} ${receiverName} ${reason}`
       }
     }
+    emote = (emote ? ' * ' : ' ')
+    authorText = (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText)
 
     return {
-      formatted: timestamp + (emote ? ' * ' : ' ') + (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText) + ' ' + content,
+      timestamp,
+      emote,
+      author: authorText,
+      content,
+      formatted: timestamp + emote + authorText + ' ' + content,
       raw: msg
     }
   }
