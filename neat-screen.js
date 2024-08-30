@@ -534,7 +534,7 @@ NeatScreen.prototype.formatMessage = function (msg) {
   // virtual message type, handled by cabal-client
   if (msg.value.type === 'status/date-changed') {
     return {
-      formatted: `${chalk.dim('Day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`,
+      formatted: `${chalk.dim('day changed to ' + strftime('%e %b %Y', new Date(msg.value.timestamp)))}`,
       raw: msg
     }
   }
