@@ -79,9 +79,7 @@ function wrapAnsi (text, width) {
     }
   }
 
-  if (line.length > 0) {
     res.push(line)
-  }
 
   return res
 }
