@@ -163,4 +163,4 @@ function cmpUser (a, b) {
   return a.key < b.key ? -1 : 1
 }
 
-module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString, unambiguous, getModerationKey }
+module.exports = { cmpUser, log, wrapAnsi, strlenAnsi, centerText, rightAlignText, wrapStatusMsg, sanitizeString, unambiguous, getModerationKey, strwidth }

@@ -1,5 +1,3 @@
-var stripAnsi = require('strip-ansi')
-var wcwidth = require('wcwidth')
 var output = require('./output')
 var chalk = require('chalk')
 var blit = require('txt-blit')
@@ -254,8 +252,10 @@ function renderMessages (state, width, height) {
       return accum
     }
 
-    const indent = wcwidth(stripAnsi(msg.timestamp)) + wcwidth(stripAnsi(msg.author)) + wcwidth(stripAnsi(msg.emote)) + 1
+    const indent = util.strwidth(msg.timestamp + msg.author + msg.emote) + 1
     const lines = util.wrapAnsi(msg.content, width - indent)
+    if (lines.length === 0) return accum
+
     const firstLine = msg.timestamp + msg.emote + msg.author + ' ' + lines[0]
     accum.push(firstLine)
     const paddedLines = lines.slice(1).map(line => ' '.repeat(indent) + line.trim())
