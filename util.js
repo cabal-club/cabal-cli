@@ -36,6 +36,8 @@ function sanitizeString (str) {
 function wrapAnsi (text, width) {
   if (!text) return []
 
+  text = sanitizeString(text)
+
   var res = []
   var line = ''
   var lineWidth = 0
