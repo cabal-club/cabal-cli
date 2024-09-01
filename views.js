@@ -252,11 +252,12 @@ function renderMessages (state, width, height) {
       return accum
     }
 
-    const indent = util.strwidth(msg.timestamp + msg.author + msg.emote) + 1
+    let indent = util.strwidth(msg.formattedPrefix)
+
     const lines = util.wrapAnsi(msg.content, width - indent)
     if (lines.length === 0) return accum
 
-    const firstLine = msg.timestamp + msg.emote + msg.author + ' ' + lines[0]
+    const firstLine = msg.formattedPrefix + lines[0]
     accum.push(firstLine)
     const paddedLines = lines.slice(1).map(line => ' '.repeat(indent) + line.trim())
     accum = accum.concat(paddedLines)

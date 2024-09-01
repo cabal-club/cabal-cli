@@ -611,13 +611,15 @@ NeatScreen.prototype.formatMessage = function (msg) {
     }
     emote = (emote ? ' * ' : ' ')
     authorText = (highlight ? chalk.bgRed(chalk.black(authorText)) : authorText)
+    const formattedPrefix = timestamp + emote + authorText + ' '
 
     return {
       timestamp,
       emote,
       author: authorText,
       content,
-      formatted: timestamp + emote + authorText + ' ' + content,
+      formattedPrefix,
+      formatted: formattedPrefix + content,
       raw: msg
     }
   }
