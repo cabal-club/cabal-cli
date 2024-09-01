@@ -252,7 +252,7 @@ function renderMessages (state, width, height) {
       return accum
     }
 
-    let indent = util.strwidth(msg.formattedPrefix)
+    const indent = util.strwidth(msg.formattedPrefix)
 
     const lines = util.wrapAnsi(msg.content, width - indent)
     if (lines.length === 0) return accum

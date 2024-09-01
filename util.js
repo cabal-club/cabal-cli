@@ -62,7 +62,7 @@ function wrapAnsi (text, width) {
         line = ''
         lineWidth = 0
       } else if (lineWidth > width) {
-        line = line.slice(0, line.length-1); i--  // Don't include the char that brought us over the width; reuse it
+        line = line.slice(0, line.length - 1); i-- // Don't include the char that brought us over the width; reuse it
         const breakpoint = line.lastIndexOf(' ')
         if (insideWord && breakpoint >= 0) {
           res.push(line.slice(0, breakpoint)) // grab the first part of the line and push its str as a result
@@ -81,7 +81,7 @@ function wrapAnsi (text, width) {
     }
   }
 
-    res.push(line)
+  res.push(line)
 
   return res
 }
